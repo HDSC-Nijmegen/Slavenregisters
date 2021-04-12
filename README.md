@@ -8,7 +8,7 @@ Matches certificates within series 4. Data is matched in five steps:
 - mother
 
 ### 2. filter incomplete records
-- UNEQUALS "begging" & "ended"
+- UNEQUALS "beginning" & "ended"
 
 ### 3. retrieval:
 - match names ego + mother on Levenshtein distance 2
@@ -36,7 +36,8 @@ Matches certificates within series 4. Data is matched in three steps:
 - mother
 
 ### 2. filter incomplete records
-- UNEQUALS "begging" & "ended"
+- Serie 3 "ended"
+- Serie 4 "begining"
 
 ### 3. retrieval:
 - match names ego + mother + owner on Levenshtein distance 2
