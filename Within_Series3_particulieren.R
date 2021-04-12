@@ -94,13 +94,13 @@
     
   
   #select serie 4
-  Serie4 <- df[df$Serieregister=="1851-1863", c("source_order", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "in_event_general", "out_event_general")]
-  Serie4_done <- Serie4[Serie4$in_event_general=="Beginning" & Serie4$out_event_general=="Ended",]
-  Serie4 <- Serie4[!(Serie4$in_event_general=="Beginning" & Serie4$out_event_general=="Ended"),]
+  Serie3 <- df[df$Serieregister=="1848-1851", c("source_order", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "in_event_general", "out_event_general")]
+  Serie3_done <- Serie3[Serie3$in_event_general=="Beginning" & Serie3$out_event_general=="Ended",]
+  Serie3 <- Serie3[!(Serie3$in_event_general=="Beginning" & Serie3$out_event_general=="Ended"),]
   
   #Match slave names
    #unique names
-    Slave_names <- Serie4[!duplicated(Serie4$Naam) & Serie4$Naam!="",]
+    Slave_names <- Serie3[!duplicated(Serie3$Naam) & Serie3$Naam!="",]
    #produce matrix with Levenshtein distance
     LV_matrix <- stringdistmatrix(Slave_names$Naam, Slave_names$Naam, method = "lv")
    #Filter Levenshtein distance == x
@@ -135,7 +135,7 @@
     
   #Match mother names
    #unique names
-    Slave_names <- Serie4[!duplicated(Serie4$Moeder) & Serie4$Moeder!="",]
+    Slave_names <- Serie3[!duplicated(Serie3$Moeder) & Serie3$Moeder!="",]
    #produce matrix with Levenshtein distance
     LV_matrix <- stringdistmatrix(Slave_names$Moeder, Slave_names$Moeder, method = "lv")
    #Filter Levenshtein distance == x
@@ -170,36 +170,36 @@
      
   #combine matches
    #find matches
-    Serie4_matched <- merge(Serie4, Slave_names_matched, by="Naam", all=F)
-    Serie4_matched <- merge(Serie4_matched, Moeder_names_matched, by="Moeder", all=F)
+    Serie3_matched <- merge(Serie3, Slave_names_matched, by="Naam", all=F)
+    Serie3_matched <- merge(Serie3_matched, Moeder_names_matched, by="Moeder", all=F)
    #add source_order, in-event, out-event, & birth year
-    Serie4_variatie <- Serie4
-    colnames(Serie4_variatie) <- c("source_order_variatie", 
+    Serie3_variatie <- Serie3
+    colnames(Serie3_variatie) <- c("source_order_variatie", 
                                    "Naam_variatie", "Naam_number_variatie", 
                                    "Moeder_variatie", "Moeder_number_variatie", 
                                    "year_birth_variatie",
                                    "in_event_variatie", "out_event_variatie")
-    Serie4_matched <- merge(Serie4_matched, Serie4_variatie, by=c("Naam_variatie", "Moeder_variatie"), all=F )
+    Serie3_matched <- merge(Serie3_matched, Serie3_variatie, by=c("Naam_variatie", "Moeder_variatie"), all=F )
    #drop identical records
-    Serie4_matched <- Serie4_matched[Serie4_matched$source_order!=Serie4_matched$source_order_variatie,]
+    Serie3_matched <- Serie3_matched[Serie3_matched$source_order!=Serie3_matched$source_order_variatie,]
    #make certain that certificates are possible
-    Serie4_matched <- Serie4_matched[Serie4_matched$out_event_general!="Ended",]
-    Serie4_matched <- Serie4_matched[Serie4_matched$in_event_variatie!="Beginning",]
+    Serie3_matched <- Serie3_matched[Serie3_matched$out_event_general!="Ended",]
+    Serie3_matched <- Serie3_matched[Serie3_matched$in_event_variatie!="Beginning",]
     
   #add out & in date
    #filter mutations
     entryexit <- df[,c("source_order", "year_entry", "year_exit")]
    #add entry + exit original
     colnames(entryexit) <- c("source_order", "year_entry", "year_exit")
-    Serie4_matched <- merge(Serie4_matched, entryexit, by="source_order", all=F)
+    Serie3_matched <- merge(Serie3_matched, entryexit, by="source_order", all=F)
    #add entry + exit variation
     colnames(entryexit) <- c("source_order_variatie", "year_entry_variatie", "year_exit_variatie")
-    Serie4_matched <- merge(Serie4_matched, entryexit, by="source_order_variatie", all=F)
+    Serie3_matched <- merge(Serie3_matched, entryexit, by="source_order_variatie", all=F)
    #clear environment
     rm(entryexit)
     
   #order columns
-    Serie4_matched <- Serie4_matched[,c("source_order", "source_order_variatie",
+    Serie3_matched <- Serie3_matched[,c("source_order", "source_order_variatie",
                                         "year_entry", "year_exit",
                                         "year_entry_variatie", "year_exit_variatie",
                                         "in_event_general", "out_event_general", "in_event_variatie", "out_event_variatie", 
@@ -211,21 +211,21 @@
     
     
    #filter identical year
-    #Serie4_matched <- Serie4_matched[Serie4_matched$year_birth==Serie4_matched$year_birth_variatie,]
-    #Serie4_matched <- Serie4_matched[substr(Serie4_matched$year_birth,2,3)==substr(Serie4_matched$year_birth_variatie,2,3) |
-    #                                   substr(Serie4_matched$year_birth,2,2)==substr(Serie4_matched$year_birth_variatie,2,2) & 
-    #                                     substr(Serie4_matched$year_birth,4,4)==substr(Serie4_matched$year_birth_variatie,4,4) |
-    #                                   substr(Serie4_matched$year_birth,3,4)==substr(Serie4_matched$year_birth_variatie,3,4),]
-
+    #Serie3_matched <- Serie3_matched[Serie3_matched$year_birth==Serie3_matched$year_birth_variatie,]
+    #Serie3_matched <- Serie3_matched[substr(Serie3_matched$year_birth,2,3)==substr(Serie3_matched$year_birth_variatie,2,3) |
+    #                                   substr(Serie3_matched$year_birth,2,2)==substr(Serie3_matched$year_birth_variatie,2,2) & 
+    #                                     substr(Serie3_matched$year_birth,4,4)==substr(Serie3_matched$year_birth_variatie,4,4) |
+    #                                   substr(Serie3_matched$year_birth,3,4)==substr(Serie3_matched$year_birth_variatie,3,4),]
+    
   #summarise results
-    results <- Serie4
-    results$matched <- ifelse(results$source_order %in% Serie4_matched$source_order, 1, 0)
-    results$multiple <- ifelse(results$source_order %in% Serie4_matched[!duplicated(Serie4_matched),"source_order"], 1, 0)
+    results <- Serie3
+    results$matched <- ifelse(results$source_order %in% Serie3_matched$source_order, 1, 0)
+    results$multiple <- ifelse(results$source_order %in% Serie3_matched[!duplicated(Serie3_matched),"source_order"], 1, 0)
     results <- results[,c("source_order", "matched", "multiple")]
     
     
-    write.xlsx(Serie4_matched, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Within/4.xlsx")
-    write.xlsx(results, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Within/4_overview.xlsx")
+    write.xlsx(Serie3_matched, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Within/3.xlsx")
+    write.xlsx(results, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Within/3_overview.xlsx")
     
     
     
