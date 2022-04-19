@@ -8,34 +8,38 @@ Cleans the names in the slave registers.
 - set starting date to 1830 for series 1
 
 ### 2. standardise names enslaved persons
-- standardise person descriptions, like numbers into roman numericals and variation on age, colour, or plantation names into one name. 
+- standardise person descriptions 
 - split names and person descriptions
+- write out abbreviated names
  
-| Variation | Standardisation	|
-| --------- | --------------- |
-| 1 | I |
-| 2 | II |
-| 3 | III |
-| 4 | IV | 
-| 5 | V |
-| no | |
-| nr | |
-| n | |
-| gr | groote |
-| groot | groote |
-| groote | groote |
-| kl | klein |
-| kleintje | klein |
-| klein |  klein |
-| little |  little |
-| jr |  junior |
-| sr |  senior |
-| senior |  senior |
-| jong | jonge |
-| oud | oude |
-| mulat | mulat |
-| sw | zwart |
-| zw | zwart |
+| Type | Variation | Standardisation	|
+| ---- | --------- | --------------- |
+| Numerical | 1 | I |
+| Numerical | 2 | II |
+| Numerical | 3 | III |
+| Numerical | 4 | IV | 
+| Numerical | 5 | V |
+| Numerical | no | |
+| Numerical | nr | |
+| Numerical | n | |
+| Stature | gr | groote |
+| Stature | groot | groote |
+| Stature | kl | klein |
+| Stature | kleintje | klein |
+| Stature | littel |  little |
+| Age | jr |  junior |
+| Age | sr |  senior |
+| Age | senior |  senior |
+| Age | jong | jonge |
+| Age | oud | oude |
+| Colour | mulatt | mulat |
+| Colour | sw | zwart |
+| Colour | zw | zwart |
+| Plantation | Res | Resolutie |
+| Plantation | Resol | Resolutie |
+| Plantation | Resolutie | Resolutie |
+| Plantation | Zeew | Zeewijk |
+
 
 
 
