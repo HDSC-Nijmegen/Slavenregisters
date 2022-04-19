@@ -4,14 +4,23 @@
 Cleans the names in the slave registers.
 
 ### 1. control entries
-- remove duplicated entries
-- ensure that each row contains 1 enslaved person only
-- ensure that each row contains 1 owner only
+- split/combine rows to ensure that each row contains 1 enslaved person
+- set starting date to 1830 for series 1
 
 ### 2. standardise names enslaved persons
-- standardise descriptions, like roman numericals, plantation names, stature, or 
+- standardise person descriptions, like numbers into roman numericals and variation on age, colour, or plantation names into one name. 
 - split names and person descriptions
-INSERT TABLES
+ 
+| Variation | Standardisation	|
+| --------- | --------------- |
+| 1 | I |
+| 2 | II |
+| 3 | III |
+| 4 | IV | 
+| 5 | V |
+| no | |
+| nr | |
+
 
 ### 3. standardise names mother enslaved persons
 - standardise descriptions, like roman numericals, plantation names, stature, or 
