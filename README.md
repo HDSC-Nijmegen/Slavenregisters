@@ -39,7 +39,26 @@ Cleans the names in the slave registers.
 | Plantation | Resol | Resolutie |
 | Plantation | Resolutie | Resolutie |
 | Plantation | Zeew | Zeewijk |
-
+| Name | Alex: | Alexander |
+| Name | Carol: | Carolina |
+| Name | Charl: | Charlotte |
+| Name | Elis: | Elisabeth |
+| Name | Els: | Elisabeth |
+| Name | Hendr: | Hendrika |
+| Name | John / Robn | Johan of Robijn |
+| Name | Wilhelmina Barth: | Wilhelmina Bartholomina |
+| Name | Mk | Mc |
+| General | . | |
+| General | bij den doop | gedoopt |
+| General | bij den doop genaamd | gedoopt |
+| General | bij den doop genmd | gedoopt |
+| General | / | of |
+| General | alias | of |
+| General | bijgenaamd | of |
+| General | genaamd | of |
+| General | ook bekend als | of |
+| General | ook genaamd | of |
+| General | ook gend | of |
 
 
 
