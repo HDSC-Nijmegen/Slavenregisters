@@ -20,6 +20,23 @@ Cleans the names in the slave registers.
 | 5 | V |
 | no | |
 | nr | |
+| n | |
+| gr | groote |
+| groot | groote |
+| groote | groote |
+| kl | klein |
+| kleintje | klein |
+| klein |  klein |
+| little |  little |
+| jr |  junior |
+| sr |  senior |
+| senior |  senior |
+| jong | jonge |
+| oud | oude |
+| mulat | mulat |
+| sw | zwart |
+| zw | zwart |
+
 
 
 ### 3. standardise names mother enslaved persons
