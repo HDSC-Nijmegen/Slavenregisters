@@ -14,51 +14,51 @@ Cleans the names in the slave registers.
  
 | Type | Variation | Standardisation	|
 | ---- | --------- | --------------- |
-| Numerical | 1 | I |
-| Numerical | 2 | II |
-| Numerical | 3 | III |
-| Numerical | 4 | IV | 
-| Numerical | 5 | V |
-| Numerical | no | |
-| Numerical | nr | |
-| Numerical | n | |
-| Stature | gr | groote |
-| Stature | groot | groote |
-| Stature | kl | klein |
-| Stature | kleintje | klein |
-| Stature | littel |  little |
-| Age | jr |  junior |
-| Age | sr |  senior |
-| Age | senior |  senior |
-| Age | jong | jonge |
-| Age | oud | oude |
-| Colour | mulatt | mulat |
-| Colour | sw | zwart |
-| Colour | zw | zwart |
-| Plantation | Res | Resolutie |
-| Plantation | Resol | Resolutie |
-| Plantation | Resolutie | Resolutie |
-| Plantation | Zeew | Zeewijk |
-| Name | Alex: | Alexander |
-| Name | Carol: | Carolina |
-| Name | Charl: | Charlotte |
-| Name | Elis: | Elisabeth |
-| Name | Els: | Elisabeth |
-| Name | Hendr: | Hendrika |
-| Name | John / Robn | Johan of Robijn |
-| Name | Wilhelmina Barth: | Wilhelmina Bartholomina |
-| Name | Mk | Mc |
-| General | . | |
-| General | bij den doop | gedoopt |
-| General | bij den doop genaamd | gedoopt |
-| General | bij den doop genmd | gedoopt |
-| General | / | of |
-| General | alias | of |
-| General | bijgenaamd | of |
-| General | genaamd | of |
-| General | ook bekend als | of |
-| General | ook genaamd | of |
-| General | ook gend | of |
+| *Numerical* | 1 | I |
+| *Numerical* | 2 | II |
+| *Numerical* | 3 | III |
+| *Numerical* | 4 | IV | 
+| *Numerical* | 5 | V |
+| *Numerical* | no | |
+| *Numerical* | nr | |
+| *Numerical* | n | |
+| *Stature* | gr | groote |
+| *Stature* | groot | groote |
+| *Stature* | kl | klein |
+| *Stature* | kleintje | klein |
+| *Stature* | littel |  little |
+| *Age* | jr |  junior |
+| *Age* | sr |  senior |
+| *Age* | senior |  senior |
+| *Age* | jong | jonge |
+| *Age* | oud | oude |
+| *Colour* | mulatt | mulat |
+| *Colour* | sw | zwart |
+| *Colour* | zw | zwart |
+| *Plantation* | Res | Resolutie |
+| *Plantation* | Resol | Resolutie |
+| *Plantation* | Resolutie | Resolutie |
+| *Plantation* | Zeew | Zeewijk |
+| *Name* | Alex: | Alexander |
+| *Name* | Carol: | Carolina |
+| *Name* | Charl: | Charlotte |
+| *Name* | Elis: | Elisabeth |
+| *Name* | Els: | Elisabeth |
+| *Name* | Hendr: | Hendrika |
+| *Name* | John / Robn | Johan of Robijn |
+| *Name* | Wilhelmina Barth: | Wilhelmina Bartholomina |
+| *Name* | Mk | Mc |
+| *General* | . | |
+| *General* | bij den doop | gedoopt |
+| *General* | bij den doop genaamd | gedoopt |
+| *General* | bij den doop genmd | gedoopt |
+| *General* | / | of |
+| *General* | alias | of |
+| *General* | bijgenaamd | of |
+| *General* | genaamd | of |
+| *General* | ook bekend als | of |
+| *General* | ook genaamd | of |
+| *General* | ook gend | of |
 
 
 
