@@ -20,18 +20,32 @@ Cleans the names in the slave registers.
 | *Numerical* | 4 | IV | 
 | *Numerical* | 5 | V |
 | *Numerical* | no, nr, n | |
-| *Stature* | gr, groot, groote, gt, qt | groote |
-| *Stature* | kl, kl:, klein, kleine, kleintje, klijn | klein |
+| *Stature* | kl, klein, kleine, kleintje, klijn | klein |
+| *Stature* | korte | korte |
 | *Stature* | littel, little |  little |
+| *Stature* | big | big |
+| *Stature* | gr, groot, groote, gt, qt | groote |
+| *Stature* | lang, lange | lange |
+| *Stature* | long | long |
 | *Age* | jr, junior |  junior |
 | *Age* | sr, senior |  senior |
 | *Age* | jong, jonge | jonge |
+| *Age* | nieuw, nw | nieuw |
 | *Age* | oud, oude, o | oude |
+| *Colour* | carboeg, karboeg | carboeger |
+| *Colour* | creo, creole, creool | creool |
 | *Colour* | mulat, mulatt | mulat |
+| *Colour* | neger | neger |
+| *Colour* | rood, roode | roode |
 | *Colour* | sw, swart, swarte, zw | zwart |
-| *Plantation* | Res | Resolutie |
-| *Plantation* | Resol | Resolutie |
-| *Plantation* | Resolutie | Resolutie |
+| *Occupation* | delver | delver |
+| *Occupation* | kuiper | kuiper |
+| *Occupation* | offikier | officier |
+| *Plantation* | Brouwerslust | Brouwerslust |
+| *Plantation* | L en R | Land en Rust |
+| *Plantation* | Res, Resol, Resolutie | Resolutie |
+| *Plantation* | Standvastigheid | Standvastigheid |
+| *Plantation* | Stolk | Stolkwijk |
 | *Plantation* | Zeew | Zeewijk |
 | *Name* | Alex: | Alexander |
 | *Name* | Carol: | Carolina |
@@ -42,9 +56,9 @@ Cleans the names in the slave registers.
 | *Name* | John / Robn | Johan of Robijn |
 | *Name* | Wilhelmina Barth: | Wilhelmina Bartholomina |
 | *Name* | Mk | Mc |
-| *General* | . | |
+| *General* | . - | |
 | *General* | bij den doop, bij den doop genaamd, bij den doop genmd | gedoopt |
-| *General* | /, alias, bijgenaamd, genaamd, ook bekend als, ook genaamd, ook genmd | of |
+| *General* | , /, alias, bijgenaamd, genaamd, ook bekend als, ook genaamd, ook genmd | of |
 
 
 
