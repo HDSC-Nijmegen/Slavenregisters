@@ -20,7 +20,7 @@ Cleans the names in the slave registers.
 | *Numerical* | 4 | IV | 
 | *Numerical* | 5 | V |
 | *Numerical* | no, nr, n | |
-| *Stature* | kl, klein, kleine, kleintje, klijn | klein |
+| *Stature* | kl, klein, kleine, kleintje, klijn, klijne, klijntje | klein |
 | *Stature* | korte | korte |
 | *Stature* | littel, little |  little |
 | *Stature* | big | big |
