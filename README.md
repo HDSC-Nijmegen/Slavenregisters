@@ -62,19 +62,26 @@ Cleans the names in the slave registers.
 
 
 
-### 3. standardise names mother enslaved persons
-- standardise descriptions, like roman numericals, plantation names, stature, or 
-- split names and person descriptions
-INSERT TABLES
-
-### 4. put owner names in uniform format
+### 3. put owner names in uniform format
 
 
-### 5. summarise in and out events
-INSERT TABLES
+### 4. summarise in and out events
+| Event | Variation | Standardisation	|
+| ----- | --------- | --------------- |
+| *In* | Start Series | Beginning |
+| *In* | Acquired (executie), Acquired (publieke veiling), Acquired (vendu), Acquired/Inherited For Freedom, Acquired/Transferred, Exchanged, Inherited, Verpand | Transferred |
+| *In* | Birth | Birth |
+| *In* | Unknown | Unknown |
+| *In* | Remove | Other |
+| *Out* | End Series, End Series/Freedom | Ended |
+| *Out* | Exchanged, Given away, Given away by inheritance, Overgeschreven, Sold, Sold (executie), Sold (publieke veiling), Sold/Given for Freedom | Transferred |
+| *Out* | Death, Drowned, Killed | Death |
+| *Out* | Unknown | Unknown |
+| *Out* | Afgeschreven, Diseased, Escaped, Freedom, Remove | Other |
 
 
-### 6. re-order dataset
+
+### 5. re-order dataset
 INSERT TABLES
 
 
