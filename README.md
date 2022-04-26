@@ -19,20 +19,16 @@ Cleans the names in the slave registers.
 | *Numerical* | 3 | III |
 | *Numerical* | 4 | IV | 
 | *Numerical* | 5 | V |
-| *Numerical* | no <br/> nr <br/> n | |
-| *Stature* | gr | groote |
-| *Stature* | groot | groote |
-| *Stature* | kl | klein |
-| *Stature* | kleintje | klein |
-| *Stature* | littel |  little |
-| *Age* | jr |  junior |
-| *Age* | sr |  senior |
-| *Age* | senior |  senior |
-| *Age* | jong | jonge |
-| *Age* | oud | oude |
-| *Colour* | mulatt | mulat |
-| *Colour* | sw | zwart |
-| *Colour* | zw | zwart |
+| *Numerical* | no, nr, n | |
+| *Stature* | gr, groot, groote, gt, qt | groote |
+| *Stature* | kl, kl:, klein, kleine, kleintje, klijn | klein |
+| *Stature* | littel, little |  little |
+| *Age* | jr, junior |  junior |
+| *Age* | sr, senior |  senior |
+| *Age* | jong, jonge | jonge |
+| *Age* | oud, oude, o | oude |
+| *Colour* | mulat, mulatt | mulat |
+| *Colour* | sw, swart, swarte, zw | zwart |
 | *Plantation* | Res | Resolutie |
 | *Plantation* | Resol | Resolutie |
 | *Plantation* | Resolutie | Resolutie |
@@ -47,16 +43,8 @@ Cleans the names in the slave registers.
 | *Name* | Wilhelmina Barth: | Wilhelmina Bartholomina |
 | *Name* | Mk | Mc |
 | *General* | . | |
-| *General* | bij den doop | gedoopt |
-| *General* | bij den doop genaamd | gedoopt |
-| *General* | bij den doop genmd | gedoopt |
-| *General* | / | of |
-| *General* | alias | of |
-| *General* | bijgenaamd | of |
-| *General* | genaamd | of |
-| *General* | ook bekend als | of |
-| *General* | ook genaamd | of |
-| *General* | ook gend | of |
+| *General* | bij den doop, bij den doop genaamd, bij den doop genmd | gedoopt |
+| *General* | /, alias, bijgenaamd, genaamd, ook bekend als, ook genaamd, ook genmd | of |
 
 
 
