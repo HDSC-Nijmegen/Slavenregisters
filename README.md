@@ -69,17 +69,11 @@ Cleans the names in the slave registers.
 | Standardisation	| In event | Out event |
 | --------------- | -------- | --------- |
 | *Beginning* | Start Series |
-| *In* | Acquired (executie), Acquired (publieke veiling), Acquired (vendu), Acquired/Inherited For Freedom, Acquired/Transferred, Exchanged, Inherited, Verpand | Transferred |
-| *In* | Birth | Birth |
-| *In* | Unknown | Unknown |
-| *In* | Remove | Other |
-| *Out* | End Series, End Series/Freedom | Ended |
-| *Out* | Exchanged, Given away, Given away by inheritance, Overgeschreven, Sold, Sold (executie), Sold (publieke veiling), Sold/Given for Freedom | Transferred |
-| *Out* | Death, Drowned, Killed | Death |
-| *Out* | Unknown | Unknown |
-| *Out* | Afgeschreven, Diseased, Escaped, Freedom, Remove | Other |
-
-
+| *Transferred* | Acquired (executie), Acquired (publieke veiling), Acquired (vendu), Acquired/Inherited For Freedom, Acquired/Transferred, Exchanged, Inherited, Verpand | Exchanged, Given away, Given away by inheritance, Overgeschreven, Sold, Sold (executie), Sold (publieke veiling), Sold/Given for Freedom |
+| *Birth* | Birth |  |
+| *Death* |  | Death, Drowned, Killed |
+| *Unknown* | Unknown | Unknown |
+| *Other* | Remove | Afgeschreven, Diseased, Escaped, Freedom, Remove |
 
 ### 5. re-order dataset
 INSERT TABLES
