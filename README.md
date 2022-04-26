@@ -32,7 +32,7 @@ Cleans the names in the slave registers.
 | *Age* | jong, jonge | jonge |
 | *Age* | nieuw, nw | nieuw |
 | *Age* | oud, oude, o | oude |
-| *Colour* | carboeg, karboeg | carboeger |
+| *Colour* | carb, carboeg, karboeg | carboeger |
 | *Colour* | creo, creole, creool | creool |
 | *Colour* | mulat, mulatt | mulat |
 | *Colour* | neger | neger |
@@ -41,24 +41,51 @@ Cleans the names in the slave registers.
 | *Occupation* | delver | delver |
 | *Occupation* | kuiper | kuiper |
 | *Occupation* | offikier | officier |
+| *Mother* | over, overl, overled, overleden, overlijden, verl | overleden |
 | *Plantation* | Brouwerslust | Brouwerslust |
-| *Plantation* | L en R | Land en Rust |
-| *Plantation* | Res, Resol, Resolutie | Resolutie |
-| *Plantation* | Standvastigheid | Standvastigheid |
-| *Plantation* | Stolk | Stolkwijk |
-| *Plantation* | Zeew | Zeewijk |
+| *Plantation* | L, L en R, L R, LsR | Land en Rust |
+| *Plantation* | Res, Resol, Resolutie, Revolutie | Resolutie |
+| *Plantation* | la Simp, la Simplicite, la Simplikite | la Simplicite |
+| *Plantation* | Standv, Standi, Standvastigheid | Standvastigheid |
+| *Plantation* | Stolk, Stokw, Stokwijk, Stolwijk, Stolkwijk, Stw | Stolkwijk |
+| *Plantation* | Zeew, Zeewijk, Zeewjk | Zeewijk |
+| *Other* | AkB | AkB |
+| *Other* | AcB, A C B, A C-B | AcB |
+| *Other* | BW | BW |
+| *Other* | DB | DB |
+| *Other* | DG, D G | DG |
+| *Other* | DP, D P | DP |
+| *Other* | E D | ED |
+| *Other* | F A | FA |
+| *Other* | FB | FB |
+| *Other* | FD | FD |
+| *Other* | IB | IB |
+| *Other* | jd | jd |
+| *Other* | NS | NS |
+| *Other* | SP | SP |
+| *Other* | NS | NS |
+| *Other* | VCIP, V C I P | VCIP |
+| *Other* | ZB, Z B | ZB |
+
+
+
+| Type | Variation | Standardisation	|
+| ---- | --------- | --------------- |
 | *Name* | Alex: | Alexander |
 | *Name* | Carol: | Carolina |
 | *Name* | Charl: | Charlotte |
-| *Name* | Elis: | Elisabeth |
-| *Name* | Els: | Elisabeth |
+| *Name* | Chris: | Christina |
+| *Name* | Elis:, Els: | Elisabeth |
 | *Name* | Hendr: | Hendrika |
+| *Name moeder* | Henr: | Henrietta |
+| *Name moeder* | H Wilh: | Henrietta Wilhelmina |
 | *Name* | John / Robn | Johan of Robijn |
+| *Name moeder* | Th:, Theod: | Theodora |
+| *Name moeder* | Wilh: | Theodora |
 | *Name* | Wilhelmina Barth: | Wilhelmina Bartholomina |
-| *Name* | Mk | Mc |
 | *General* | . - | |
 | *General* | bij den doop, bij den doop genaamd, bij den doop genmd | gedoopt |
-| *General* | , /, alias, bijgenaamd, genaamd, ook bekend als, ook genaamd, ook genmd | of |
+| *General* | , /, alias, bijgenaamd, bijgent, genaamd, ook, ook bekend als, ook genaamd, ook genmd | of |
 
 
 
