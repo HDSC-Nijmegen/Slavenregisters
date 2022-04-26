@@ -14,11 +14,11 @@ Cleans the names in the slave registers.
  
 | Type | Variation | Standardisation	|
 | ---- | --------- | --------------- |
-| *Numerical* | 1 | I |
-| *Numerical* | 2 | II |
-| *Numerical* | 3 | III |
-| *Numerical* | 4 | IV | 
-| *Numerical* | 5 | V |
+| *Numerical* | 1, 1e, I, Ie | I |
+| *Numerical* | 2, 2e, II, IIe | II |
+| *Numerical* | 3, 3e, III, IIIe | III |
+| *Numerical* | 4, 4e, IV, IVe | IV | 
+| *Numerical* | 5, 5e, V, Ve | V |
 | *Numerical* | no, nr, n | |
 | *Stature* | kl, klein, kleine, kleintje, klijn, klijne, klijntje | klein |
 | *Stature* | korte | korte |
