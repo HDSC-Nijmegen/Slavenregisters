@@ -66,9 +66,9 @@ Cleans the names in the slave registers.
 
 
 ### 4. summarise in and out events
-| Event | Variation | Standardisation	|
-| ----- | --------- | --------------- |
-| *In* | Start Series | Beginning |
+| Standardisation	| In event | Out event |
+| --------------- | -------- | --------- |
+| *Beginning* | Start Series |
 | *In* | Acquired (executie), Acquired (publieke veiling), Acquired (vendu), Acquired/Inherited For Freedom, Acquired/Transferred, Exchanged, Inherited, Verpand | Transferred |
 | *In* | Birth | Birth |
 | *In* | Unknown | Unknown |
