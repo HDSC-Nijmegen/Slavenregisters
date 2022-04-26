@@ -7,7 +7,7 @@ Cleans the names in the slave registers.
 - split/combine rows to ensure that each row contains 1 enslaved person
 - set starting date to 1830 for series 1
 
-### 2. standardise names enslaved persons
+### 2. standardise names enslaved persons & mothers
 - standardise person descriptions 
 - split names and person descriptions
 - write out abbreviated names
