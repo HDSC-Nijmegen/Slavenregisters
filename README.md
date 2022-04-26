@@ -69,6 +69,7 @@ Cleans the names in the slave registers.
 | Standardisation	| In event | Out event |
 | --------------- | -------- | --------- |
 | *Beginning* | Start Series |
+| *Ended* | End Series, End Series/Freedom |
 | *Transferred* | Acquired (executie), Acquired (publieke veiling), Acquired (vendu), Acquired/Inherited For Freedom, Acquired/Transferred, Exchanged, Inherited, Verpand | Exchanged, Given away, Given away by inheritance, Overgeschreven, Sold, Sold (executie), Sold (publieke veiling), Sold/Given for Freedom |
 | *Birth* | Birth |  |
 | *Death* |  | Death, Drowned, Killed |
