@@ -19,9 +19,7 @@ Cleans the names in the slave registers.
 | *Numerical* | 3 | III |
 | *Numerical* | 4 | IV | 
 | *Numerical* | 5 | V |
-| *Numerical* | no | |
-| *Numerical* | nr | |
-| *Numerical* | n | |
+| *Numerical* | no / nr / n | |
 | *Stature* | gr | groote |
 | *Stature* | groot | groote |
 | *Stature* | kl | klein |
