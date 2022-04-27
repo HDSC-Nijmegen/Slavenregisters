@@ -93,7 +93,7 @@ Cleans the names in the slave registers.
 Data was manually cleaned to ensure that:
 | Action | Example |
 | ------ | ------- |
-| 1. Mark straatvoogd Moron J, als straatvoogd |
+| 1. Mark straatvoogd | Moron J, als straatvoogd |
 | 2. Mark representatitives | Berner J P boedel, door S F Flu qq |
 | 3. Mark husband nom ux as representative | Betting C D nom ux, door C D Betting qq |
 | 4. Start with last name owner | Berner J P |
