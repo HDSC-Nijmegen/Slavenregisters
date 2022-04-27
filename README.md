@@ -91,18 +91,18 @@ Cleans the names in the slave registers.
 
 ### 3. put private owner names in uniform format
 Data was manually cleaned to ensure that:
-| Action | Format	| Example |
-| ------ | ------ | ------- |
-| Mark straatvoogd | OWNER, als straatvoogd | Moron J, als straatvoogd |
-| Mark representatitives | OWNER, door ... qq | Berner J P boedel, door S F Flu qq |
-| Mark husband nom ux as representative | OWNER, door ... qq | Betting C D nom ux, door C D Betting qq |
-| Start with last name owner | LAST NAME FIRST NAME PREFIX | Berner J P |
-| Prefixes are moved towards the end of the entry | Parra Josua de la |
-| Mark last names with multiple words | LAST NAME _ LASTNAME | Behm_Wendholdt J B L ten |
-| Mark last names of formerly enslaved partly as prefixes | | Beeldsnijder Charles van Anna van Betje van |
-| Remove redundant "de" and "van" from entries | | Thol geb. Hendriks *de* weduwe *van* M. C. C. van | 
-| Mark "van" in maiden names with underscore | | Krebs geboren van_Nerevalk C E |
-| Split references to new owner situation in title with a dash | | Mesquita Jh. Ab. Bo. de - thans Weduwe Jh. Ab. Bo. de Mesquita |
+| Action | Example |
+| ------ | ------- |
+| 1. Mark straatvoogd Moron J, als straatvoogd |
+| 2. Mark representatitives | Berner J P boedel, door S F Flu qq |
+| 3. Mark husband nom ux as representative | Betting C D nom ux, door C D Betting qq |
+| 4. Start with last name owner | Berner J P |
+| 5. Prefixes are moved towards the end of the entry | Parra Josua de la |
+| 6. Mark last names with multiple words | Behm_Wendholdt J B L ten |
+| 7. Mark last names of formerly enslaved partly as prefixes | Beeldsnijder Charles van Anna van Betje van |
+| 8. Remove redundant "de" and "van" from entries | Thol geb. Hendriks *de* weduwe *van* M. C. C. van | 
+| 9. Mark "van" in maiden names with underscore | Krebs geboren van_Nerevalk C E |
+| 10. Split references to new owner situation in title with a dash | Mesquita Jh. Ab. Bo. de - thans Weduwe Jh. Ab. Bo. de Mesquita |
 
 
 
