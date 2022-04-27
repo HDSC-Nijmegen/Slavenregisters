@@ -91,19 +91,18 @@ Cleans the names in the slave registers.
 
 ### 3. put private owner names in uniform format
 Data was manually cleaned to ensure that:
-| Standardisation rules	| Example |
-| --------------------- | ------- |
-| Mark straatvoogd with ", als straatvoogd" | Moron J, als straatvoogd |
-| Mark representatitive ", door ... qq" | Berner J P boedel, door S F Flu qq |
-| Mark husband nom ux as representative | Betting C D nom ux, door C D Betting qq |
-| First word is last name first owner | Berner J P |
-| Other owners are sorted by their first name | Carbin minderjarige F L W C en R |
+| Action | Format	| Example |
+| ------ | ------ | ------- |
+| Mark straatvoogd | OWNER, als straatvoogd | Moron J, als straatvoogd |
+| Mark representatitives | OWNER, door ... qq | Berner J P boedel, door S F Flu qq |
+| Mark husband nom ux as representative | OWNER, door ... qq | Betting C D nom ux, door C D Betting qq |
+| Start with last name owner | LAST NAME FIRST NAME PREFIX | Berner J P |
 | Prefixes are moved towards the end of the entry | Parra Josua de la |
-| Last names with multiple words are connected with underscore | Behm_Wendholdt J B L ten |
-| Names of formerly enslaved are seen as prefixes | Beeldsnijder Charles van Anna van Betje van |
-| Remove redundant "de" and "van" from entries | Thol geb. Hendriks *de* weduwe *van* M. C. C. van | 
-| Mark "van" in maiden names with underscore | Krebs geboren van_Nerevalk C E |
-| Split references to new owner situation in title with a dash | Mesquita Jh. Ab. Bo. de - thans Weduwe Jh. Ab. Bo. de Mesquita |
+| Mark last names with multiple words | LAST NAME _ LASTNAME | Behm_Wendholdt J B L ten |
+| Mark last names of formerly enslaved partly as prefixes | | Beeldsnijder Charles van Anna van Betje van |
+| Remove redundant "de" and "van" from entries | | Thol geb. Hendriks *de* weduwe *van* M. C. C. van | 
+| Mark "van" in maiden names with underscore | | Krebs geboren van_Nerevalk C E |
+| Split references to new owner situation in title with a dash | | Mesquita Jh. Ab. Bo. de - thans Weduwe Jh. Ab. Bo. de Mesquita |
 
 
 
