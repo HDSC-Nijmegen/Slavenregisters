@@ -102,7 +102,7 @@ Data was manually cleaned to ensure that:
 | *7. Mark last names of formerly enslaved partly as prefixes* | Beeldsnijder Charles van Anna van Betje van |
 | *8. Remove redundant "de" and "van" from entries* | Thol geboren Hendriks *de* weduwe *van* M. C. C. van | 
 | *9. Mark "van" in maiden names with underscore* | Krebs geboren van_Nerevalk C E |
-| *10. Split references to new owner situation in title with a dash* | Mesquita Jh. Ab. Bo. de - thans Weduwe Jh. Ab. Bo. de Mesquita |
+| *10. Split references to new owner with a dash* | Mesquita Jh. Ab. Bo. de - thans Weduwe Jh. Ab. Bo. de Mesquita |
 
 
 
