@@ -93,9 +93,9 @@ Cleans the names in the slave registers.
 | *Name moeder* | Th:, Theod: | Theodora |
 | *Name moeder* | Wilh: | Theodora |
 | *Name* | Wilhelmina Barth: | Wilhelmina Bartholomina |
-| *General* | . - | |
 | *General* | bij den doop, bij den doop genaamd, bij den doop genmd | gedoopt |
 | *General* | , /, alias, bijgenaamd, bijgent, genaamd, ook, ook bekend als, ook genaamd, ook genmd | of |
+| *General* | . - | |
 
 
 ### 5. manually restructure private owner names
