@@ -116,6 +116,7 @@ Cleans the names in the slave registers.
 
 ### 6. standardise names private owners
 - Make Mac and Mc part of first names
+- Standardise variations of geboren and weduwe
 
 | Action | Variation | Standardisation	|
 | ------ | --------- | --------------- |
