@@ -3,14 +3,21 @@
 ## clean Preparing_Record_Linkage_dta.R
 Cleans the names in the slave registers.
 
+
 ### 1. control entries
 - split/combine rows to ensure that each row contains 1 enslaved person
 - set starting date to 1830 for series 1
 
-### 2. standardise names enslaved persons & mothers
-- standardise person descriptions 
+
+### 2. standardise sex
+- Flagged all 571 names where occured as both male and female names
+- Manually controlled these entries
+- Recoded all 440 names where <25% had the alternative sex, except for: Cato, Jannie, Jantje, Minosabi(e), and Pietje.
+ 
+
+### 3. separate names and adjectives enslaved persons & mothers
 - split names and person descriptions
-- write out abbreviated names
+- standardise person descriptions 
  
 | Type | Variation | Standardisation	|
 | ---- | --------- | --------------- |
@@ -68,6 +75,9 @@ Cleans the names in the slave registers.
 | *Other* | ZB, Z B | ZB |
 
 
+### 4. standardise names enslaved persons & mothers
+- write out abbreviated names
+- separate 
 
 | Type | Variation | Standardisation	|
 | ---- | --------- | --------------- |
@@ -88,9 +98,8 @@ Cleans the names in the slave registers.
 | *General* | , /, alias, bijgenaamd, bijgent, genaamd, ook, ook bekend als, ook genaamd, ook genmd | of |
 
 
-
-### 3. put private owner names in uniform format
-Data was manually cleaned to ensure that:
+### 5. manually restructure private owner names
+- Data was manually cleaned to ensure that:
 | Action | Example |
 | ------ | ------- |
 | *1. Mark straatvoogd* | Moron J, als straatvoogd |
@@ -105,8 +114,35 @@ Data was manually cleaned to ensure that:
 | *10. Split references to new owner with a dash* | Mesquita Jh. Ab. Bo. de - thans Weduwe Jh. Ab. Bo. de Mesquita |
 
 
+### 6. standardise names private owners
+- Make Mac and Mc part of first names
 
-### 4. summarise in and out events
+| Action | Variation | Standardisation	|
+| ------ | --------- | --------------- |
+| *1. Remove whitespace between Mac and last name* | Mac Neal | MacNeal |
+| *2. Remove whitespace between Mac and last name* | Mc Neal | McNeal |
+| *3. Standardise variations geboren* | geb, gebr, gebs, gebn | geboren |
+| *4. Standardise variations weduwe* | wd | weduwe |
+
+
+### 7. standardise names private owners
+- Separate between firms and persons
+- Identify representatives and straatvoogden
+- Extract prefix
+- Extract last name of first owner
+- Flag widows
+
+| Retrieve | String search | 
+| -------- | ------------- |
+| *firms* | set personal name | en co, en zn, en zo, comp, bank, firma, fonds, gemeente, lands grond, maatschappij, plantage, respect |
+| *representatives* | door ... qq |
+| *straatvoogd* | als straatvoogd |
+| *prefixes* | last word(s) are: d', da, de, del, des, de la, d' la, du, l', la, le, ter, van, van van, van, van de, van du, van den, van der, van het, van 't, van la, von |
+| *last name* | first word |
+| *flag widows* | weduwe |
+
+
+### 7. summarise in and out events
 | Standardisation	| In event | Out event |
 | --------------- | -------- | --------- |
 | *Beginning* | Start Series |
@@ -117,7 +153,7 @@ Data was manually cleaned to ensure that:
 | *Unknown* | Unknown | Unknown |
 | *Other* | Remove | Afgeschreven, Diseased, Escaped, Freedom, Remove |
 
-### 5. re-order dataset
+### 8. re-order dataset
 INSERT TABLES
 
 
