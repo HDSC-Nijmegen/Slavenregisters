@@ -139,7 +139,7 @@ Cleans the names in the slave registers.
 | *firms* | set personal name | en co, en zn, en zo, comp, bank, firma, fonds, gemeente, lands grond, maatschappij, plantage, respect |
 | *representatives* | door ... qq |
 | *straatvoogd* | als straatvoogd |
-| *prefixes* | last word(s) are: d', da, de, del, des, de la, d' la, du, l', la, le, ter, van, van van, van, van de, van du, van den, van der, van het, van 't, van la, von |
+| *prefixes* | last word(s): d', da, de, del, des, de la, d' la, du, l', la, le, ter, van, van van, van, van de, van du, van den, van der, van het, van 't, van la, von |
 | *last name* | first word |
 | *flag widows* | weduwe |
 
