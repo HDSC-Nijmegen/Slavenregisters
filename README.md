@@ -100,6 +100,7 @@ Cleans the names in the slave registers.
 
 ### 5. manually restructure private owner names
 - Data was manually cleaned to ensure that:
+
 | Action | Example |
 | ------ | ------- |
 | *1. Mark straatvoogd* | Moron J, als straatvoogd |
