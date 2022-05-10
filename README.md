@@ -165,8 +165,7 @@ Contains the matching programs to match certificates between and within series. 
 | Step | Between matching | Within matching |
 | ---- | ---------------- | --------------- |
 | *1. Retrieval* | Match by name enslaved </br> - Max Levenshtein distance of 3 </br> | Match by name enslaved </br> - Max Levenshtein distance of 3 </br> |
-| *2. Rule-based filter* | Remove matches if: </br> - Sex is identical OR unknown </br> - Name mother is identical OR unknown </br> - Year of birth is identical OR unknown | Remove matches if: </br> - Sex is identical OR unknown </br> - first entry begins and second entry ends with a transfer OR unknown event </br> - name mother is identical OR unknown </br> - year of birth is identical OR unknown </br>
-year of transfer is identical|
+| *2. Rule-based filter* | Remove matches if: </br> - Sex is identical OR unknown </br> - Name mother is identical OR unknown </br> - Year of birth is identical OR unknown | Remove matches if: </br> - Sex is identical OR unknown </br> - First entry ends with a transfer OR unknown event </br> - Matched entry begins with a transfer OR unknown event </br> - Name mother is identical OR unknown </br> - Year of birth is identical OR unknown </br> - Year of transfer is identical |
 | *3. Probabilistic matching* | Compute matching score from matching indicators: </br> - name mother (2.5 pts) </br> - addendum name mother (1 pt) </br> - addendum name enslaved (1 pt) </br> - year of birth (2 pts) </br> - name enslaved preceding entry (1 pt) </br> - name enslaved proceeding entry (1 pt) </br> - out event is *end of series* (1 pt) | Compute matching score from matching indicators: </br> - name mother (2.5 pts) </br> - addendum name mother (1 pt) </br> - addendum name enslaved (1 pt) </br> - year of birth (2 pt) </br> - year of transfer (2 pts) |
 
 
