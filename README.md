@@ -165,9 +165,12 @@ Contains the matching programs to match certificates between and within series. 
 | Step | Between matching | Within matching |
 | ---- | ---------------- | --------------- |
 | *1. Retrieval* | **Match by name enslaved** </br> - Max Levenshtein distance of 3 </br> | **Match by name enslaved** </br> - Max Levenshtein distance of 3 </br> |
-| *2. Rule-based filter* | Remove matches if: </br> - Sex is identical OR unknown </br> - Name mother is identical OR unknown </br> - Year of birth is identical OR unknown | Remove matches if: </br> - Sex is identical OR unknown </br> - Out event entry 1 is a transfer OR unknown event </br> - In event entry 2 is a transfer OR unknown event </br> - Name mother is identical OR unknown </br> - Year of birth is identical OR unknown </br> - Year of transfer is identical |
+| *2. Rule-based filter* | **Remove matches if:** </br> - Sex is identical OR unknown </br> - Name mother is identical OR unknown </br> - Year of birth is identical OR unknown | **Remove matches if:** </br> - Sex is identical OR unknown </br> - Out event entry 1 is a transfer OR unknown event </br> - In event entry 2 is a transfer OR unknown event </br> - Name mother is identical OR unknown </br> - Year of birth is identical OR unknown </br> - Year of transfer is identical |
 | *3. Probabilistic matching* | **Compute matching score from matching indicators:** </br> - Name mother (2.5 pts) </br> - Addendum name mother (1 pt) </br> - Addendum name enslaved (1 pt) </br> - Year of birth (2 pts) </br> - Name enslaved in preceding entry (1 pt) </br> - Name enslaved in proceeding entry (1 pt) </br> - Out event is *end of series* (1 pt) | **Compute matching score from matching indicators:** </br> - Name mother (2.5 pts) </br> - Addendum name mother (1 pt) </br> - Addendum name enslaved (1 pt) </br> - Year of birth (2 pt) </br> - Year of transfer (2 pts) |
-
+| *4. Select best match* | **Select highest match score** | **Select highest match score** | 
+| *5. Add unmatched cases* | **Add unmatched entries** | **Add unmatched entries** |
+| *6. Add metadata* | **Show Levenshtein distance:** </br> - Name Enslaved </br> - Name Owner </br> - Name Mother </br> - Name preceding entry </br> - Name proceeding entry | **Add the following statistics:** </br> - Name Enslaved </br> Name Mother </br> |
+|  | **Flag matched information:** </br> - Entry </br> - Addendum Name Enslaved </br> - Name Mother </br> - Addendum name Mother </br> - Birth year </br> - Name preceding entry </br> - Name proceeding entry </br> - Out event | **Flag matched information:** </br> - Entry </br> - Addendum Name Enslaved </br> - Name Mother </br> - Addendum name Mother </br> - Birth year </br> - Year of transfer |
 
 ### 4. present meta-data
 - source_order
