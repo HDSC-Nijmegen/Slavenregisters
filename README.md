@@ -1,4 +1,4 @@
-# Slavernijregisters
+# Slavenregisters
 
 ## clean Preparing_Record_Linkage_dta.R
 Cleans the names in the slave registers.
