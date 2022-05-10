@@ -164,28 +164,30 @@ Contains the matching programs to match certificates between and within series. 
 
 | Step | Between matching | Within matching |
 | ---- | ---------------- | --------------- |
-| *1. Retrieval* | Match by name enslaved </br> - Max Levenshtein distance of 3 </br>- d | Match by name enslaved, max Levenshtein distance of 3 |
+| *1. Retrieval* | Match by name enslaved </br> - Max Levenshtein distance of 3 </br> | Match by name enslaved </br> - Max Levenshtein distance of 3 </br> |
+| *2. rule-based filter* | Sex is identical OR unknown </br> 
+name mother is identical OR unknown </br>
+year of birth is identical OR unknown | Sex is identical OR unknown </br> 
+first entry begins and second entry ends with a transfer OR unknown event </br> 
+name mother is identical OR unknown </br> 
+year of birth is identical OR unknown </br>
+year of transfer is identical|
+| *3. probabilistic matching* | Compute matching score from matching indicators: </br> -  
+- name mother (2.5 pts)
+- addendum name mother (1 pt)
+- addendum name enslaved (1 pt)
+- year of birth (2 pts)
+- name enslaved preceding entry (1 pt)
+- name enslaved proceeding entry (1 pt)
+- out event is *end of series* (1 pt) | 
+- name mother (2.5 pts)
+- addendum name mother (1 pt)
+- addendum name enslaved (1 pt)
+- year of birth (2 pts)
+- name enslaved preceding entry (1 pt)
+- name enslaved proceeding entry (1 pt)
+- out event is *end of series* (1 pt) | 
 
-
-
-### 1. retrieval
-- match names ego
-- use max Levenshtein distance of 3 (is per
-
-### 2. rule-based filter
-- sex is identical OR unknown
-- name mother is identical OR unknown
-- year of birth is identical OR the name of the preceding and proceeding enslaved are identical
-
-### 3. probabilistic matching
-scores are assigned, based on matching:
-- name mother (weighted 2.5)
-- addendum name mother (weighted 1)
-- addendum name enslaved (weighted 1)
-- year of birth (weighted 2)
-- name enslaved preceding entry (weighted 1)
-- name enslaved proceeding entry (weighted 1)
-- out is identical.
 
 ### 4. present meta-data
 - source_order
