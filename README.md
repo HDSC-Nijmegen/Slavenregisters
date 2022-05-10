@@ -165,28 +165,9 @@ Contains the matching programs to match certificates between and within series. 
 | Step | Between matching | Within matching |
 | ---- | ---------------- | --------------- |
 | *1. Retrieval* | Match by name enslaved </br> - Max Levenshtein distance of 3 </br> | Match by name enslaved </br> - Max Levenshtein distance of 3 </br> |
-| *2. rule-based filter* | Sex is identical OR unknown </br> 
-name mother is identical OR unknown </br>
-year of birth is identical OR unknown | Sex is identical OR unknown </br> 
-first entry begins and second entry ends with a transfer OR unknown event </br> 
-name mother is identical OR unknown </br> 
-year of birth is identical OR unknown </br>
+| *2. rule-based filter* | Sex is identical OR unknown </br> name mother is identical OR unknown </br> year of birth is identical OR unknown | Sex is identical OR unknown </br> first entry begins and second entry ends with a transfer OR unknown event </br> name mother is identical OR unknown </br> year of birth is identical OR unknown </br>
 year of transfer is identical|
-| *3. probabilistic matching* | Compute matching score from matching indicators: </br> -  
-- name mother (2.5 pts)
-- addendum name mother (1 pt)
-- addendum name enslaved (1 pt)
-- year of birth (2 pts)
-- name enslaved preceding entry (1 pt)
-- name enslaved proceeding entry (1 pt)
-- out event is *end of series* (1 pt) | 
-- name mother (2.5 pts)
-- addendum name mother (1 pt)
-- addendum name enslaved (1 pt)
-- year of birth (2 pts)
-- name enslaved preceding entry (1 pt)
-- name enslaved proceeding entry (1 pt)
-- out event is *end of series* (1 pt) | 
+| *3. probabilistic matching* | Compute matching score from matching indicators: </br> - name mother (2.5 pts) - addendum name mother (1 pt) - addendum name enslaved (1 pt) - year of birth (2 pts) - name enslaved preceding entry (1 pt) - name enslaved proceeding entry (1 pt) - out event is *end of series* (1 pt) | Compute matching score from matching indicators: </br> - name mother (2.5 pts) </br> - addendum name mother (1 pt) </br> - addendum name enslaved (1 pt) </br> - year of birth (2 pt) </br> - year of transfer (2 pts) |
 
 
 ### 4. present meta-data
