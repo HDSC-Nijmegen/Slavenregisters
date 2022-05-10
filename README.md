@@ -164,7 +164,7 @@ Contains the matching programs to match certificates between and within series. 
 
 | Step | Between matching | Within matching |
 | ---- | ---------------- | --------------- |
-| *1. Retrieval* | Match by name enslaved, max Levenshtein distance is 3 | Match by name enslaved, max Levenshtein distance of 3 |
+| *1. Retrieval* | Match by name enslaved </br> - Max Levenshtein distance of 3 </br>- d | Match by name enslaved, max Levenshtein distance of 3 |
 
 
 
