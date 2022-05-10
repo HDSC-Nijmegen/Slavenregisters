@@ -162,6 +162,12 @@ INSERT TABLES
 ## matching.R
 Contains the matching programs to match certificates between and within series. Data is matched in five steps:
 
+| Step | Between matching | Within matching |
+| ---- | ---------------- | --------------- |
+| *1. Retrieval* | Match by name enslaved \n define number enslaved | Match by name enslaved \n define number enslaved |
+
+
+
 ### 1. retrieval
 - match names ego
 - use max Levenshtein distance of 3 (is per
@@ -179,7 +185,7 @@ scores are assigned, based on matching:
 - year of birth (weighted 2)
 - name enslaved preceding entry (weighted 1)
 - name enslaved proceeding entry (weighted 1)
-- Out is identical.
+- out is identical.
 
 ### 4. present meta-data
 - source_order
