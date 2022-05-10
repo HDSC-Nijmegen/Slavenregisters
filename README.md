@@ -172,12 +172,3 @@ Contains the matching programs to match certificates between and within series. 
 | *6. Add metadata* | **Show Levenshtein distance:** </br> - Name Enslaved </br> - Name Owner </br> - Name Mother </br> - Name preceding entry </br> - Name proceeding entry | **Add the following statistics:** </br> - Name Enslaved </br> - Name Mother </br> |
 |  | **Flag matched information:** </br> - Entry </br> - Addendum Name Enslaved </br> - Name Mother </br> - Addendum name Mother </br> - Birth year </br> - Name preceding entry </br> - Name proceeding entry </br> - Out event | **Flag matched information:** </br> - Entry </br> - Addendum Name Enslaved </br> - Name Mother </br> - Addendum name Mother </br> - Birth year </br> - Year of transfer |
 
-### 4. present meta-data
-- source_order
-- year in + year out
-- event in + event out
-- Levenshtein distance names ego
-- Levenshtein distance names mother
-- name + number ego
-- name + number mother
-- year of birth
