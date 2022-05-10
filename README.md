@@ -159,17 +159,27 @@ Cleans the names in the slave registers.
 INSERT TABLES
 
 
-## Between Series.R
-Matches certificates within series 4. Data is matched in five steps:
+## matching.R
+Contains the matching programs to match certificates between and within series. Data is matched in five steps:
 
 ### 1. retrieval
-- match names ego + owner on Levenshtein distance 3
+- match names ego
+- use max Levenshtein distance of 3 (is per
 
-### 2. filter
-INSERT TABLES
+### 2. rule-based filter
+- sex is identical OR unknown
+- name mother is identical OR unknown
+- year of birth is identical OR the name of the preceding and proceeding enslaved are identical
 
 ### 3. probabilistic matching
-INSERT TABLES
+scores are assigned, based on matching:
+- name mother (weighted 2.5)
+- addendum name mother (weighted 1)
+- addendum name enslaved (weighted 1)
+- year of birth (weighted 2)
+- name enslaved preceding entry (weighted 1)
+- name enslaved proceeding entry (weighted 1)
+- Out is identical.
 
 ### 4. present meta-data
 - source_order
