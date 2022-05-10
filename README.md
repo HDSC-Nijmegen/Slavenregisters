@@ -4,20 +4,20 @@
 Cleans the names in the slave registers.
 
 
-### 1. control entries
-- split/combine rows to ensure that each row contains 1 enslaved person
-- set starting date to 1830 for series 1
+### 1. Control entries
+- Split/combine rows to ensure that each row contains 1 enslaved person
+- Set starting date to 1830 for series 1
 
 
-### 2. standardise sex
+### 2. Standardise sex
 - Flagged all 571 names where occured as both male and female names
 - Manually controlled these entries
 - Recoded all 440 names where <25% had the alternative sex, except for: Cato, Jannie, Jantje, Minosabi(e), and Pietje.
  
 
-### 3. separate names and adjectives enslaved persons & mothers
-- split names and person descriptions
-- standardise person descriptions 
+### 3. Separate names and adjectives enslaved persons & mothers
+- Split names and person descriptions
+- Standardise person descriptions 
  
 | Type | Variation | Standardisation	|
 | ---- | --------- | --------------- |
@@ -75,9 +75,9 @@ Cleans the names in the slave registers.
 | *Other* | ZB, Z B | ZB |
 
 
-### 4. standardise names enslaved persons & mothers
-- write out abbreviated names
-- separate 
+### 4. Standardise names enslaved persons & mothers
+- Write out abbreviated names
+- Separate 
 
 | Type | Variation | Standardisation	|
 | ---- | --------- | --------------- |
@@ -136,12 +136,12 @@ Cleans the names in the slave registers.
 
 | Retrieve | String search | 
 | -------- | ------------- |
-| *firms* | set personal name | en co, en zn, en zo, comp, bank, firma, fonds, gemeente, lands grond, maatschappij, plantage, respect |
-| *representatives* | door ... qq |
-| *straatvoogd* | als straatvoogd |
-| *prefixes* | last word(s): d', da, de, del, des, de la, d' la, du, l', la, le, ter, van, van van, van, van de, van du, van den, van der, van het, van 't, van la, von |
+| *Firms* | set personal name | en co, en zn, en zo, comp, bank, firma, fonds, gemeente, lands grond, maatschappij, plantage, respect |
+| *Representatives* | door ... qq |
+| *Straatvoogd* | als straatvoogd |
+| *Prefixes* | last word(s): d', da, de, del, des, de la, d' la, du, l', la, le, ter, van, van van, van, van de, van du, van den, van der, van het, van 't, van la, von |
 | *last name* | first word |
-| *flag widows* | weduwe |
+| *Flag widows* | weduwe |
 
 
 ### 7. summarise in and out events
@@ -160,7 +160,7 @@ INSERT TABLES
 
 
 ## matching.R
-Contains the matching programs to match certificates between and within series. Data is matched in five steps and 
+Contains the matching programs to match certificates between and within series. Data is matched in five steps as shown in the table underneath. We matched names of enslaved, mothers, and owners with a maximum Levenshtein distance of 3.
 
 | Step | Between matching | Within matching |
 | ---- | ---------------- | --------------- |
