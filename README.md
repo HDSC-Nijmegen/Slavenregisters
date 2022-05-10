@@ -164,7 +164,7 @@ Contains the matching programs to match certificates between and within series. 
 
 | Step | Between matching | Within matching |
 | ---- | ---------------- | --------------- |
-| *1. Retrieval* | Match by name enslaved </br> define number enslaved | Match by name enslaved /br define number enslaved |
+| *1. Retrieval* | - Match by name enslaved </br> - define number enslaved | - Match by name enslaved </br> - define number enslaved |
 
 
 
