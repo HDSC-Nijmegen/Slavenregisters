@@ -26,8 +26,15 @@
   df <- read_dta("Dataset_Standardization.dta")
   
   #import standardized entries Eigenaar
-  #write.xlsx(df[,c("source_order", "Eigenaar"),], "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Cleaned Registry/Eigenaren particulier/Eigenaren - input.xlsx")
+  write.xlsx(df[,c("source_order", "Eigenaar"),], "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Cleaned Registry/Eigenaren particulier/Eigenaren - input.xlsx", overwrite=T)
   Eigenaren_standardized <- read.xlsx("U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Cleaned Registry/Eigenaren particulier/Eigenaren - standardised.xlsx")
+  #cleaned:
+  # 1. de weduwe -> weduwe (if not part of surname OR remark)
+  # 2. kinderen van -> kinderen (if not part of surname OR remark)
+  # 2. - replaced by ,
+  # 3. changes in owners marked with separator -
+  # 4. mark vertegenwoordiger (nom ux, voor, door, qq) with ", door ... qq"
+  # 5. connect surnames with multiple names with _
   
   #check data
   as.data.frame(table(df$Typeregister))
@@ -246,7 +253,7 @@
    #Remove 05_2133
     df <- df[!(df$Inventarisnummer==5 & df$Folionummer==2133 & df$Folionummer!="052037a16279"),]
     
-   #Folio 02_1589 contains pre-1930 data for 19_3129-3130
+   #Folio 02_1589 contains pre-1830 data for 19_3129-3130
     #transfer age & birth_year_age_based
     df$year_birth_age_based[df$source_order=="193130b52314"] <- 1800
     df$age[df$source_order=="193130b52314"] <- 30
@@ -296,7 +303,8 @@
     
   #merge Jan & Cornelius on 06_137 into Jan Cornelius
     df <- df[df$source_order!="060137a11292", ]
-    df$Naam[df$source_order!="060137a11291", ] <- "Jan Cornelius"
+    df$Naam[df$source_order=="060137a11291"] <- "Jan Cornelius"
+    
     
   ###########################################
   #### section 1c: correct starting date ####
@@ -524,7 +532,7 @@
                     df$source_order=="381891140244"] <- 1851
     
     
-
+    
   ##################################
   #### section 2: cleaning Naam ####
   ##################################
@@ -771,8 +779,8 @@
     df$Naam <- gsub("/ oud", "oud", df$Naam)
     df$Naam <- gsub("/oud", "oud", df$Naam)
    #swart
-    df$Naam <- ifelse(grepl("sw[a-zA-Z]", tolower(df$Naam))==F, gsub("sw", "swart", df$Naam), df$Naam)
-    df$Naam <- ifelse(grepl("sw[a-zA-Z]", tolower(df$Naam))==F, gsub("Sw", "swart", df$Naam), df$Naam)
+    df$Naam <- ifelse(grepl("sw[a-zA-Z]", tolower(df$Naam))==F, gsub("sw", "zwart", df$Naam), df$Naam)
+    df$Naam <- ifelse(grepl("sw[a-zA-Z]", tolower(df$Naam))==F, gsub("Sw", "zwart", df$Naam), df$Naam)
    #zwart
     df$Naam <- ifelse(grepl("zw[a-zA-Z]", tolower(df$Naam))==F, gsub("zw", "zwart", df$Naam), df$Naam)
     df$Naam <- ifelse(grepl("zw[a-zA-Z]", tolower(df$Naam))==F, gsub("Zw", "zwart", df$Naam), df$Naam)
@@ -1243,9 +1251,55 @@
     rm(x)
     
     
+  
+  #################################
+  #### section 3: cleaning sex ####
+  #################################
+    
+    Sex <- df[df$Naam!="", c("Naam", "sex")]
+    Sex <- Sex %>% group_by(Naam, sex) %>% summarise(n=n()) %>% ungroup()
+    Sex <- Sex %>% group_by(Naam) %>% filter(n()>1) %>% ungroup() 
+    
+   #save look-up table
+    #filter names per sex
+    female <- Sex[Sex$sex=="female", c("Naam", "n")]; colnames(female) <- c("Naam", "n_female")
+    male <- Sex[Sex$sex=="male", c("Naam", "n")]; colnames(male) <- c("Naam", "n_male")
+    unknown <- Sex[Sex$sex=="unknown", c("Naam", "n")]; colnames(unknown) <- c("Naam", "n_unknown")
+    #set to wide format
+    Sex <- merge(female, male, by="Naam", all=T)
+    Sex <- merge(Sex, unknown, by="Naam", all=T)
+    Sex[is.na(Sex)] <- 0
+    #calculate disagreement
+    Sex$error_margin <- ifelse(Sex$n_female>=Sex$n_male, 
+                               round(1-Sex$n_female/(Sex$n_female+Sex$n_male),3), 
+                               round(1-Sex$n_male/(Sex$n_female+Sex$n_male),3) )
+    Sex$recodable <- ifelse(Sex$n_female>=Sex$n_male, 
+                            Sex$n_male+Sex$n_unknown, 
+                            Sex$n_female+Sex$n_unknown )
+    Sex <- Sex %>% arrange(-error_margin)
+    #save outfile
+    write.xlsx(Sex, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Correctie sekse - slaafgemaakten.xlsx")
+    rm(female, male, unknown)
+    
+   #standardise names if error_margin <= 0.25
+    Sex <- Sex[Sex$error_margin<=0.25,] #demarcation point determinated by CvG 12-04-2022
+    Sex$sex2 <- ifelse(Sex$n_female>Sex$n_male, "female", "male")
+    Sex <- Sex[Sex$Naam!="Cato" &
+                 Sex$Naam!="Minosabi" &
+                 Sex$Naam!="Minosabie" &
+                 Sex$Naam!="Jantje" &
+                 Sex$Naam!="Jannie" &
+                 Sex$Naam!="Toontje" &
+                 Sex$Naam!="Pietje", c("Naam", "sex2")]
+    #add info to df
+    df <- merge(df, Sex, by="Naam", all=T)
+    length(which(df$sex!=df$sex2)) #873
+    df$sex <- ifelse(is.na(df$sex2), df$sex, df$sex2)
+    
+    
     
   ####################################
-  #### section 2: cleaning Moeder ####
+  #### section 4: cleaning Moeder ####
   ####################################
     
   #remove dots
@@ -1480,8 +1534,8 @@
     df$Moeder <- gsub("Nw\\.", "nieuw", df$Moeder)
     df$Moeder <- gsub("Nw", "nieuw", df$Moeder)
    #swart
-    df$Moeder <- ifelse(grepl("sw[a-zA-Z]", tolower(df$Moeder))==F, gsub("sw", "swart", df$Moeder), df$Moeder)
-    df$Moeder <- ifelse(grepl("sw[a-zA-Z]", tolower(df$Moeder))==F, gsub("Sw", "swart", df$Moeder), df$Moeder)
+    df$Moeder <- ifelse(grepl("sw[a-zA-Z]", tolower(df$Moeder))==F, gsub("sw", "zwart", df$Moeder), df$Moeder)
+    df$Moeder <- ifelse(grepl("sw[a-zA-Z]", tolower(df$Moeder))==F, gsub("Sw", "zwart", df$Moeder), df$Moeder)
    #zwart
     df$Moeder <- ifelse(grepl("zw[a-zA-Z]", tolower(df$Moeder))==F, gsub("zw", "zwart", df$Moeder), df$Moeder)
     df$Moeder <- ifelse(grepl("zw[a-zA-Z]", tolower(df$Moeder))==F, gsub("Zw", "zwart", df$Moeder), df$Moeder)
@@ -1810,13 +1864,15 @@
     
     
   ####################################
-  #### section 3: clean Eigenaren ####
+  #### section 5: clean Eigenaren ####
   ####################################
     
     #filter privé-eigenaren
-    Index <- df[df$Typeregister=="Particulieren", c("Eigenaar", "Serieregister", "Folionummer")]
-    #deduplicate Eigenaar
-    Index <- Index[!duplicated(Index[,c("Eigenaar", "Serieregister")]), ]
+    Index <- df[df$Typeregister=="Particulieren", c("Eigenaar", "source_order")]
+    #add corrected titles
+    Index <- merge(Index, Eigenaren_standardized, by="source_order", all.x=T)
+   #deduplicate Eigenaar
+    Index <- Index[which(!duplicated(Index[,c("Eigenaar")])), ]
     
     
     #####################################################################
@@ -1824,30 +1880,31 @@
     #####################################################################
     
     #check number of unique name entries
-    length(Index$Eigenaar) #8,355
+    length(Index$Eigenaar_standardised) #7,177
     #check number of unique name entries after:
     #remove double whitespace
-    length(which(!duplicated(gsub("  ", " ", Index$Eigenaar)))) #7,498
+    length(which(!duplicated(gsub("  ", " ", Index$Eigenaar_standardised)))) #7,063
     #remove leading whitespace
-    length(which(!duplicated(trimws(Index$Eigenaar, "left")))) #7,498
+    length(which(!duplicated(trimws(Index$Eigenaar_standardised, "left")))) #7,065
     #remove trailing whitespace
-    length(which(!duplicated(trimws(Index$Eigenaar, "right")))) #7,316
+    length(which(!duplicated(trimws(Index$Eigenaar_standardised, "right")))) #7,056
     #remove dots
-    length(which(!duplicated(gsub("\\.", "", Index$Eigenaar)))) #7,202
+    length(which(!duplicated(gsub("\\.", "", Index$Eigenaar_standardised)))) #6,837
     #delete all whitespaces
-    length(which(!duplicated(gsub(" ", "", Index$Eigenaar)))) #7,245
+    length(which(!duplicated(gsub(" ", "", Index$Eigenaar_standardised)))) #6,975
     #set to lower case
-    length(which(!duplicated(tolower(Index$Eigenaar)))) #7,415
+    length(which(!duplicated(tolower(Index$Eigenaar_standardised)))) #6,973
     
     #set to lower & delete dots, double whitespace, and leading and trailing whitespace
     Index$Eigenaar_original <- Index$Eigenaar
+    Index$Eigenaar <- Index$Eigenaar_standardised
     Index$Eigenaar <- tolower(Index$Eigenaar)
+    Index$Eigenaar <- gsub("\\.,", ",", Index$Eigenaar)
     Index$Eigenaar <- gsub("\\.", " ", Index$Eigenaar)
     Index$Eigenaar <- gsub("  ", " ", Index$Eigenaar)
     Index$Eigenaar <- gsub("  ", " ", Index$Eigenaar)
-    Index$Eigenaar <- trimws(Index$Eigenaar, "both")
-    Index <- Index[which(!duplicated(Index$Eigenaar)),]
-    length(Index$Eigenaar) #6,700
+    Index$Eigenaar <- trimws(Index$Eigenaar)
+    length(which(!duplicated(Index$Eigenaar))) #6,584
     
     
     
@@ -1855,79 +1912,187 @@
   ###   Split last name   ###
   ###########################
     
-  #fix mac to name
-    Index[which(substr(Index$Eigenaar,1,4)=="mac "),"Eigenaar"]
-    Index[which(substr(Index$Eigenaar,1,3)=="mc "),"Eigenaar"]
-    Index$Eigenaar <- ifelse(substr(Index$Eigenaar,1,4)=="mac ", paste0(substr(Index$Eigenaar,1,3), substr(Index$Eigenaar,5,nchar(Index$Eigenaar))), Index$Eigenaar)
-    Index$Eigenaar <- ifelse(substr(Index$Eigenaar,1,3)=="mc ", paste0(substr(Index$Eigenaar,1,2), substr(Index$Eigenaar,4,nchar(Index$Eigenaar))), Index$Eigenaar)
+  #attach mac to name
+    Index[grepl("mac ", Index$Eigenaar),"Eigenaar"]
+    Index[grepl("mc ", Index$Eigenaar),"Eigenaar"]
+    Index$Eigenaar <- gsub("mac ", "mac", Index$Eigenaar)
+    Index$Eigenaar <- gsub("mc ", "mc", Index$Eigenaar)
     
   #separate last name
     Index$Last_name <- sub(" .*", "", Index$Eigenaar)
     Index$temp <- sub(".*? ", "", Index$Eigenaar)
     
+  #split comments
+    Index$Eigenaar_mutatie <- ifelse(grepl("-", Index$temp), sub(".*? - ", "", Index$temp), "")
+    Index$temp <- sub("-.*", "", Index$temp)
+    Index$temp <- trimws(Index$temp)
+    
+  #filter representative
+    head(Index[grepl("door ", Index$temp) & grepl("qq", Index$temp), c("source_order", "Last_name", "temp")])
+    Index$Eigenaar_qq <- ifelse(grepl(", door", Index$temp), sub(".*?, door ", "", Index$temp), "")
+    Index$Eigenaar_qq <- sub("qq.*", "", Index$Eigenaar_qq)
+    Index$temp <- sub(", door.*qq,", "", Index$temp)
+    Index$temp <- sub(", door.*qq", "", Index$temp)
+    
+  #filter straatvoogd
+    head(Index[grepl(", als", Index$temp), c("source_order", "Last_name", "temp")])
+    Index$Straatvoogd <- ifelse(grepl(", als ", Index$temp), sub(".*?, als ", "", Index$temp), "")
+    Index$temp <- gsub(", als.*", "", Index$temp)
+    
   #make variables
-    Index$Postfix <- NA
-    Index$Patroniem <- NA
     Index$Person_description <- NA
-    Index$Relation_description <- NA
-    Index$Birth_name <- NA
-    
-    
     
   #filter rechtspersonen
    #set function
-    rm_stichting <- function(combinatie){
-      Index$Last_name <<- ifelse(grepl(combinatie, Index$Eigenaar), Index$Eigenaar, Index$Last_name)
-      Index$Person_description <<- ifelse(grepl(combinatie, Index$Eigenaar), "rechtspersoon", Index$Person_description)
-      Index$temp <<- ifelse(grepl(combinatie, Index$Eigenaar), "", Index$temp)
+    rm_rp <- function(Last_name, Temp, Input1, Input2){
+      Index$Last_name <<- ifelse(Index$Last_name==Last_name & Index$temp==Temp, Input1, Index$Last_name)
+      Index$Person_description <<- ifelse(Index$Last_name==Last_name & Index$temp==Temp, "rechtspersoon", Index$Person_description)
+      Index$temp <<- ifelse(Index$Last_name==Input1 & Index$temp==Temp, Input2, Index$temp)
     }
-   #key words: en co, gemeente, grond, firma, en zonen
-    Index[grepl(" en co", Index$Eigenaar),c("Eigenaar", "temp", "Person_description")]
-    Index[grepl(" bank", Index$Eigenaar),c("Eigenaar", "temp", "Person_description")]
-    Index[grepl("firma", Index$Eigenaar),c("Eigenaar", "temp", "Person_description")]
-    Index[grepl("gemeente", Index$Eigenaar),c("Eigenaar", "temp", "Person_description")]
-    Index[grepl("lands grond", Index$Eigenaar),c("Eigenaar", "temp", "Person_description")]
-    Index[grepl("maatschappij", Index$Eigenaar),c("Eigenaar", "temp", "Person_description")]
-    Index[grepl("raad", Index$Eigenaar),c("Eigenaar", "temp", "Person_description")]
-   #firma
-    Index$temp <- gsub("de geexisteerd hebbende firma van", "", Index$temp)
+   #key words rechtspersoon
+    Index[grepl(" en co", Index$Eigenaar),c("source_order", "Last_name", "temp")] %>% arrange(Last_name)
+    Index[grepl(" en zn", Index$Eigenaar),c("source_order", "Last_name", "temp")] %>% arrange(Last_name)
+    Index[grepl(" en zo", Index$Eigenaar),c("source_order", "Last_name", "temp")] %>% arrange(Last_name)
+    Index[grepl("comp", Index$Eigenaar),c("source_order", "Last_name", "temp")] %>% arrange(Last_name)
+    Index[grepl("erven", Index$Eigenaar),c("source_order", "Last_name", "temp")] %>% arrange(Last_name)
+    Index[grepl("bank", Index$Eigenaar),c("source_order", "Last_name", "temp")] %>% arrange(Last_name)
+    Index[grepl("firma", Index$Eigenaar),c("source_order", "Last_name", "temp")] %>% arrange(Last_name)
+    Index[grepl("fonds", Index$Eigenaar),c("source_order", "Last_name", "temp")] %>% arrange(Last_name)
+    Index[grepl("gemeente", Index$Eigenaar),c("source_order", "Last_name", "temp")] %>% arrange(Last_name)
+    Index[grepl("lands grond", Index$Eigenaar),c("source_order", "Last_name", "temp")] %>% arrange(Last_name)
+    Index[grepl("maatschappij", Index$Eigenaar),c("source_order", "Last_name", "temp")] %>% arrange(Last_name)
+    Index[grepl("plantage", Index$Last_name),c("source_order", "Last_name", "temp")] %>% arrange(Last_name)
+    Index[grepl("respect", Index$Eigenaar),c("source_order", "Last_name", "temp")] %>% arrange(Last_name)
    #en co
-    Index$Last_name <- ifelse(grepl(" en co", Index$Eigenaar), paste(sub(" en co.*", "", Index$Eigenaar), "en co"), Index$Last_name)
-    Index$Person_description <- ifelse(grepl(" en co", Index$Eigenaar), "rechtspersoon", Index$Person_description)
-    Index$temp <- ifelse(grepl(" en co", Index$Eigenaar), trimws(sub(".*en co", "", Index$temp),"both"), Index$temp)
+    #box nicolaas en co
+    rm_rp("box", "nicolaas en co", "box en co", "nicolaas")
+    #box n en co
+    rm_rp("box", "n en co", "box en co", "n")
+    #carbin willem en co
+    rm_rp("carbin", "willem en co", "carbin en co", "willem")
+    #colin campbell dent en co
+    rm_rp("colin", "campbell dent en co", "colin campbell dent en co", "")
+    #de geexisteerd hebbende firma van william leckie en co
+    rm_rp("de", "geexisteerd hebbende firma van william leckie en co", "leckie en co", "geexisteerd hebbende firma william")
+    #de geexisteerd hebbende firma van ferrier parrij en co
+    rm_rp("de", "geexisteerd hebbende firma van ferrier parrij en co", "ferrier en co", "geexisteerd hebbende firma parrij")
+    #de jonge en co
+    rm_rp("de", "jonge en co", "jonge en co", "de")
+    #huidekoper en co
+    rm_rp("huidekoper", "en co", "huidekoper en co", "")
+    #insenger en co en j j van_de_poll
+    rm_rp("insenger", "en co en j j van_de_poll", "insenger en co", "en j j van_de_poll")
+    #insinger en co
+    rm_rp("insinger", "en co", "insinger en co", "")
+    #insinger en comp en j j van_de_poll
+    rm_rp("insinger", "en comp en j j van_de_poll", "insinger en co", "en j j van_de_poll")
+    #kersten c en co
+    rm_rp("kersten", "c en co", "kersten en co", "c")
+    #macintosch a en co
+    rm_rp("macintosch", "a en co", "macintosch en co", "a")
+    #macintosh a en co
+    rm_rp("macintosh", "a en co", "macintosh en co", "a")
+    #poel pieter en zoon, abraham broen en co, constatijn benelle vereul
+    rm_rp("poel", "pieter en zoon, abraham broen en co, constatijn benelle vereul", "poel en zoon", "pieter, abraham broen en co, constatijn benelle vereul")
+    #queckenberg en co en a scheuten
+    rm_rp("queckenberg", "en co en a scheuten", "queckenberg en co", "en a scheuten")
+    #richards mcintosh en co
+    rm_rp("richards", "mcintosh en co", "richards mcintosh en co", "")
+    #richards mcintosh en co
+    rm_rp("richards", "macintosh en co", "richards macintosh en co", "")
+    #rickards mcintosh en co
+    rm_rp("rickards", "macintosh en co", "richards macintosh en co", "")
+    #t fonds onder administratie van insinger en co
+    rm_rp("t", "fonds onder administratie van insinger en co", "t fonds onder administratie van insinger en co", "")
+    #thijm rothuijs en co
+    rm_rp("thijm", "rothuijs en co", "thijm rothuijs en co", "")
+    #west en co van
+    rm_rp("west", "en co van", "west en co", "van")
+   #en zn
+    #jager uitlandige jan de en zn
+    rm_rp("jager", "uitlandige jan de en zn", "jager en co", "uitlandige jan de")
+   #en zo
+    #charbon en zoon
+    rm_rp("charbon", "en zoon", "charbon en co", "")
+    #poel en zonen te amsterdam, weduwe c e van_doeveren, weduwe a b en pieter van_daalen
+    rm_rp("poel", "en zonen te amsterdam, weduwe c e van_doeveren, weduwe a b en pieter van_daalen", "poel en zoon", "te amsterdam, weduwe c e van_doeveren, weduwe a b en pieter van_daalen")
+    #poncelet j j en zoon
+    rm_rp("poncelet", "j j en zoon", "poncelet en zoon", "j j")
+    #thijm weduwe lambertus en zoon te amsterdam
+    rm_rp("thijm", "weduwe lambertus en zoon te amsterdam", "thijm en zoon", "weduwe lambertus en zoon te amsterdam")
+    #thijm weduwe lambs en zoon te amsterdam
+    rm_rp("thijm", "weduwe lambs en zoon te amsterdam", "thijm en zoon", "weduwe lambs te amsterdam")
+   #comp
+    #ferrier parrij compe
+    rm_rp("ferrier", "parrij compe", "ferrie en co", "parrij")
+   #erven
+    #de erven mr becker en spiering
+    rm_rp("de", "erven mr becker en spiering", "erven mr becker en spiering", "de")
    #bank
-    rm_stichting(" bank")
-   #gemeente, grond
-    rm_stichting("gemeente")
-    rm_stichting("lands grond")
-   #maatschappij
-    rm_stichting("maatschappij")
-   #raad
-    rm_stichting(" raad")
+    #hoofd directie der particuliere west indische bank
+    rm_rp("hoofd", "directie der particuliere west indische bank", "hoofd directie der particuliere west indische bank", "")
+   #firma
+    #firma van swijt en ries
+    rm_rp("de", "firma van swijt en ries", "swijt en ries", "firma")
+    #moore boedel john en de firma van martin en dupont
+    rm_rp("moore", "boedel john en de firma van martin en dupont", "moore", "boedel john en firma martin en dupont")
    #fonds
-    Index[grepl("fonds", Index$temp),c("Eigenaar", "temp", "Person_description")]
-   #'t fonds w g deutz
-    Index$Person_description <- ifelse(grepl("fonds", Index$temp) & grepl("deutz", Index$Eigenaar), "rechtspersoon", Index$Person_description)
-    Index$Last_name <- ifelse(grepl("fonds", Index$temp) & grepl("deutz", Index$Eigenaar), "'t fonds w g deutz", Index$Last_name)
-    Index$temp <- ifelse(grepl("fonds", Index$temp) & grepl("deutz", Index$Eigenaar), "", Index$temp)
-   #g a de graaf
-    Index$Person_description <- ifelse(grepl("fonds", Index$temp) & grepl("graaf", Index$Eigenaar), "rechtspersoon", Index$Person_description)
-    Index$Last_name <- ifelse(grepl("fonds", Index$temp) & grepl("graaf", Index$Eigenaar), "'t fonds g a de graaf", Index$Last_name)
-    Index$temp <- ifelse(grepl("fonds", Index$temp) & grepl("graaf", Index$Eigenaar), "", Index$temp)
-   #insinger en co privé en qq en j j van poll qq 't fonds onder administratie van
-    Index$Person_description <- ifelse(grepl("fonds", Index$temp) & grepl("insinger", Index$Eigenaar), "rechtspersoon", Index$Person_description)
-    Index$Last_name <- ifelse(grepl("fonds", Index$temp) & grepl("insinger", Index$Eigenaar), "'t fonds onder administratie van insinger en co", Index$Last_name)
-    Index$temp <- ifelse(grepl("fonds", Index$temp) & grepl("insinger", Index$Eigenaar), "", Index$temp)
-   #de erven mr becker en spiering
-    Index$Last_name[Index$Eigenaar=="becker en spiering de erven mr"] <- "de erven mr becker en spiering"
-    Index$temp[Index$Eigenaar=="becker en spiering de erven mr"] <- ""
-    Index$Person_description[Index$Eigenaar=="becker en spiering de erven mr"] <- "rechtspersoon"
-   #van west en co
-    Index$Last_name[Index$Eigenaar=="west en co van"] <- "van west en co"
-    Index$temp[Index$Eigenaar=="west en co van"] <- ""
-    Index$Person_description[Index$Eigenaar=="west en co van"] <- "rechtspersoon"
-    
-    
+    #de r c kerk en liefdefonds daaraan geattacheerd
+    rm_rp("de", "r c kerk en liefdefonds daaraan geattacheerd", "roomsch catholijke kerk en liefdefonds", "")
+    #de roomsch catholijke kerk en liefdefonds
+    rm_rp("de", "roomsch catholijke kerk en liefdefonds", "roomsch catholijke kerk en liefdefonds", "")
+    #t fonds g a de graaf
+    rm_rp("t", "fonds g a de graaff", "t fonds g a de graaf", "")
+    #'t fonds g a de graaf
+    rm_rp("'t", "fonds g a de graaf", "t fonds g a de graaf", "")
+    #t fonds w g deutz
+    rm_rp("t", "fonds w g deutz", "t fonds w g deutz", "")
+    #'t fonds w g deutz
+    rm_rp("'t", "fonds w g deutz", "t fonds w g deutz", "")
+    #t fonds onder administratie van insinger en co
+    rm_rp("t", "fonds onder administratie van insinger en co", "t fonds onder administratie van insinger en co", "")
+   #gemeente
+    #evangelische broeder gemeente
+    rm_rp("evangelische", "broeder gemeente", "evangelische broeder gemeente", "")
+    #gemeente roomsch catholijke
+    rm_rp("gemeente", "roomsch catholijke", "roomsch catholijke gemeente", "")
+    #kerk der hervormde gemeente
+    rm_rp("kerk", "der hervormde gemeente", "hervormde gemeente", "")
+    #n i gemeente
+    rm_rp("n", "i gemeente", "nederlands israelitische gemeente", "")
+    #nederl israelitische gemeente
+    rm_rp("nederl", "israelitische gemeente", "nederlands israelitische gemeente", "")
+    #nederlands israelitische gemeente
+    rm_rp("nederlands", "israelitische gemeente", "nederlands israelitische gemeente", "")
+    #nederlandsch israelitische gemeente
+    rm_rp("nederlandsch", "israelitische gemeente", "nederlands israelitische gemeente", "")
+   #landgrond
+    #s lands grond boniface
+    rm_rp("s", "lands grond boniface", "s lands grond boniface", "")
+   #maatschappij
+    #maatschappij tot uitbreiding van het christendom etc
+    rm_rp("maatschappij", "tot uitbreiding van het christendom etc", "maatschappij tot uitbreiding van het christendom", "")
+    #maatschappij tot uitbreiding van het christendom etc
+    rm_rp("maatschappij", "tot uitbreiding van het christendom", "maatschappij tot uitbreiding van het christendom", "")
+    #maatschappij tot uitbreiding van het christendom etc
+    rm_rp("maatschappij", "ter uitbreiding van het christendom", "maatschappij tot uitbreiding van het christendom", "")
+   #plantage
+    #plantage leliendaal
+    rm_rp("plantage", "leliendaal", "plantage leliendaal", "")
+    #plantage cromelinsgift
+    rm_rp("plantage", "cromelinsgift", "plantage cromelinsgift", "")
+    #plantage scheveningen
+    rm_rp("plantage", "scheveningen", "plantage scheveningen", "")
+   #respect
+    #respect van den raad commissaris voor de inlandsche bevolking voor slaven die geen meester hebben
+    rm_rp("t", "respect van den raad commissaris voor de inlandsche bevolking voor slaven die geen meester hebben", "t respect van den raad commissaris voor de inlandsche bevolking voor slaven die geenen meester hebben", "")
+    #respect van den raad commissaris voor de inlandsche bevolking voor slaven die geenen meester hebben
+    rm_rp("t", "respect van den raad commissaris voor de inlandsche bevolking voor slaven die geenen meester hebben", "t respect van den raad commissaris voor de inlandsche bevolking voor slaven die geenen meester hebben", "")
+   #overig
+    #van west en de hart 
+    rm_rp("van", "west en de hart", "van west en de hart", "")
+    #van west en de hart te amsterdam
+    rm_rp("van", "west en de hart te amsterdam", "van west en de hart", "te amsterdam")
     
   #separate prefixes
    #make variable
@@ -1946,6 +2111,7 @@
     Index[which(substr(Index$temp, nchar(Index$temp)-2, nchar(Index$temp))==" de"),"temp"]
     Index[which(substr(Index$temp, nchar(Index$temp)-2, nchar(Index$temp))==" du"),"temp"]
     Index[which(substr(Index$temp, nchar(Index$temp)-2, nchar(Index$temp))==" d'"),"temp"]
+    Index[which(substr(Index$temp, nchar(Index$temp)-3, nchar(Index$temp))==" del"),"temp"]
     Index[which(substr(Index$temp, nchar(Index$temp)-3, nchar(Index$temp))==" der"),"temp"]
     Index[which(substr(Index$temp, nchar(Index$temp)-3, nchar(Index$temp))==" des"),"temp"]
     Index[which(substr(Index$temp, nchar(Index$temp)-3, nchar(Index$temp))==" het"),"temp"]
@@ -1955,12 +2121,25 @@
     Index[which(substr(Index$temp, nchar(Index$temp)-2, nchar(Index$temp))==" l'"),"temp"]
     Index[which(substr(Index$temp, nchar(Index$temp)-3, nchar(Index$temp))==" ter"),"temp"]
     Index[which(substr(Index$temp, nchar(Index$temp)-3, nchar(Index$temp))==" van"),"temp"]
-   #replace
+    Index[which(substr(Index$temp, nchar(Index$temp)-3, nchar(Index$temp))==" von"),"temp"]
+    #bueno de mesquita
     Index$temp <- gsub(" bo de", " bueno de", Index$temp)
+    Index$temp <- gsub("d'abm", "d'abraham", Index$temp)
+    Index$temp <- gsub("d' abm", "d'abraham", Index$temp)
+    Index$temp <- ifelse(grepl("d'ab[a-z]", Index$temp)==F, gsub("d'ab", "d'abraham", Index$temp), Index$temp)
+    Index$temp <- gsub("de abm", "de abraham", Index$temp)
+    rm_prefix("d'abraham bueno de")
+    rm_prefix("de abraham bueno de")
     rm_prefix("bueno de")
+    Index$Last_name[grepl("abraham bueno", Index$Prefix)] <- "abraham bueno de mesquita"
+    Index$Prefix[Index$Last_name=="abraham bueno de mesquita"] <- "de"
+    Index$Last_name[Index$Prefix=="bueno de"] <- "bueno de mesquita"
+    Index$Prefix[Index$Last_name=="bueno de mesquita"] <- ""
+    #split prefixes
     rm_prefix("d'")
     rm_prefix("da")
     rm_prefix("de")
+    rm_prefix("del")
     rm_prefix("des")
     rm_prefix("de la")
     rm_prefix("d' la")
@@ -1979,256 +2158,44 @@
     rm_prefix("van het")
     rm_prefix("van 't")
     rm_prefix("van la")
+    rm_prefix("von")
     
     
+  #samengestelde namen
+    Index$Prefix <- ifelse(grepl("van ", Index$temp), paste("van", sub(".*?van ", "", Index$temp), Index$Prefix, sep=" "), Index$Prefix)
+    Index$Prefix <- trimws(gsub("NA", "", Index$Prefix))
+    Index$temp <- trimws(gsub("van .*", "", Index$temp))
+    
+    
+  #rm _
+    Index$temp <- gsub("_", " ", Index$temp)
+    Index$Last_name <- gsub("_", " ", Index$Last_name)
+   
     
   #Postfix
    #set function
-    rm_Postfix <- function(combinatie, output){
-      Index$Postfix <<- ifelse(grepl(combinatie, Index$temp), output, Index$Postfix)
-      Index$temp <<- gsub(combinatie, "", Index$temp)
-    }
    #sr
-    Index[grepl("sr", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    Index[grepl("senior", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    rm_Postfix("sr ", "senior")
-    rm_Postfix("senior ", "senior")
    #jr
-    Index[grepl("jr ", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    Index[grepl("junior", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    rm_Postfix("jr ", "junior")
-    rm_Postfix("junior ", "junior")
    #mr
-    Index[grepl("mr ", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    Index[grepl("meester ", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    rm_Postfix("mr ", "mr")
-    
-    
-    
-  #Patroniemen 
-   #set function
-    rm_Patroniem <- function(combinatie){
-      Index$Patroniem <<- ifelse(grepl(combinatie, Index$temp), trimws(combinatie), Index$Patroniem)
-      Index$temp <<- gsub(combinatie, "", Index$temp)
-    }
-   #patronen
-    Index[grepl("sz", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    Index[grepl("szoon", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    Index[grepl("zn", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    rm_Patroniem("robleszoon ")
-    rm_Patroniem("thomaszoon ")
-    rm_Patroniem("fczn ")
-    rm_Patroniem("czn ")
-    rm_Patroniem("hzn ")
-    rm_Patroniem("ezn ")
-    rm_Patroniem("azn ")
-    rm_Patroniem("szn ")
-    rm_Patroniem("csz ")
-    rm_Patroniem("jos zn ")
-    rm_Patroniem("j g zn ")
-    
+   #douariere
     
   #personal information
-   #set leading "en " to " en "
-    Index$temp <- ifelse(substr(Index$temp,1,3)=="en ", paste0(" ", Index$temp), Index$temp)
-   #set function
-    rm_person <- function(combinatie, output){
-      Index$Person_description <<- ifelse(grepl(combinatie, Index$temp), output, Index$Person_description)
-      Index$temp <<- gsub(combinatie, "", Index$temp)
-    }
-    rm_person2 <- function(combinatie1, combinatie2, output){
-      Index$Person_description <<- ifelse(grepl(combinatie1, Index$temp) & grepl(combinatie2, Index$temp)==F, output, Index$Person_description)
-      Index$temp <<- ifelse(grepl(combinatie1, Index$temp) & grepl(combinatie2, Index$temp)==F, gsub(combinatie1, "", Index$temp), Index$temp)
-    }
-   #straatvoogd
-    Index[grepl("straatvoogdes", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    Index[grepl("straatvoogd", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    rm_person(", straatvoogdesse", "straatvoogd")
-    rm_person(", straatvoogdesje", "straatvoogd")
-    rm_person(", straatvoogdes", "straatvoogd")
-    rm_person(", straatvoogd", "straatvoogd")
-    rm_person("straatvoogdesse", "straatvoogd")
-    rm_person("straatvoogdesje", "straatvoogd")
-    rm_person("straatvoogdes", "straatvoogd")
-    rm_person("straatvoogd", "straatvoogd")
-   #curator
-    Index[grepl("curator", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    rm_person(", curator ad hoc", "curator ad hoc")
-    rm_person("curator ad hoc", "curator ad hoc")
    #boedel
-    Index[grepl("boedel", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    Index$temp <- gsub("- nu boedel", "boedel", Index$temp)
-    Index$temp <- gsub("nu boedel", "boedel", Index$temp)
-    rm_person("gemeenschappelijke boedel ", "boedel")
-    rm_person("de boedel ", "boedel")
-    rm_person("den boedel ", "boedel")
-    rm_person2("boedel", " en ", "boedel")
-   #wijlen
-    Index[grepl("wijlen", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    Index$temp <- gsub("wijlen ", "", Index$temp)
    #uitlandige
-    Index[grepl("uitlandige", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    rm_person("uitlandige ", "uitlandige")
    #te
-    Index[grepl("te ", Index$temp),c("Eigenaar", "temp", "Person_description")]
-   #amsterdam
-    rm_person(", te amsterdam", "uitlandige")
-    rm_person(" te amsterdam", "uitlandige")
-    rm_person("te amsterdam ", "uitlandige")
-   #rotterdam
-    rm_person(" te rotterdam", "uitlandige")
-   #curaçao
-    rm_person("te curaçao", "uitlandige")
    #de vrije
-    Index[grepl("de vrije", Index$temp),c("Eigenaar", "temp", "Person_description")]
-    Index$temp <- gsub("de vrije ", "", Index$temp)
     
-    
-  #relation information
-   #set function
-    rm_relation <- function(combinatie, output){
-      Index$Relation_description <<- ifelse(grepl(combinatie, Index$temp), output, Index$Relation_description)
-      Index$temp <<- gsub(combinatie, "", Index$temp)
-    }
-    rm_relation2 <- function(combinatie1, combinatie2, output){
-      Index$Relation_description <<- ifelse(grepl(combinatie1, Index$temp) & grepl(combinatie2, Index$temp)==F, output, Index$Relation_description)
-      Index$temp <<- ifelse(grepl(combinatie1, Index$temp) & grepl(combinatie2, Index$temp)==F, gsub(combinatie1, "", Index$temp), Index$temp)
-    }
-   #multiple persons
-    Index$Relation_description <- ifelse(grepl("/", Index$temp), "multiple persons", Index$Relation_description)
+  #relaties standaardiseren
    #de erven
-    Index[grepl("erven", Index$temp),c("Eigenaar", "temp", "Relation_description")]
-    rm_relation2("de erven ", " en ", "erven")
-    rm_relation2("erven ", " en ", "erven")
    #erfgenamen
-    Index[grepl("erfgenamen", Index$temp),c("Eigenaar", "temp", "Relation_description")]
-    rm_relation("de gezamenlijke erfgenamen van", "erven")
-   #qq
-    Index$temp <- gsub("q q ", "qq ", Index$temp)
-    Index[grepl("qq", Index$temp),c("Eigenaar", "temp", "Relation_description")]
    #prive & nom ux
-    Index[grepl("privé", Index$temp),c("Eigenaar", "temp", "Relation_description")]
-    rm_relation(", privé en nom ux", "privé en nom ux")
-    rm_relation(", privé en n ux", "privé en nom ux")
-    rm_relation2("privé en nom ux ", "erven", "privé en nom ux")
-    rm_relation2("privé en nom uxoris ", "erven", "privé en nom ux")
-    rm_relation2(" privé en nom ux", "erven", "privé en nom ux")
-    rm_relation("privé nom ux ", "privé en nom ux")
-    rm_relation("privé et nom ux ", "privé en nom ux")
-    rm_relation(" privé et nom ux", "privé en nom ux")
-    rm_relation("privé en noms ux ", "privé en nom ux")
-    rm_relation("privé en n ux ", "privé en nom ux")
-    rm_relation("pr en nom ux ", "privé en nom ux")
-    rm_relation("nom ux en privé ", "privé en nom ux")
    #prive & minderjarige 
-    rm_relation("privé en hare minderjarige dochter ", "privé en minderjarige")
-    rm_relation("privé en qq minderjarige zoon", "privé en minderjarige")
-    rm_relation("privé en minderjarige zoon ", "privé en minderjarige")
    #prive, nom ux & kinderen
-    rm_relation("privé, nom ux en kinderen ", "privé, nom ux en kinderen")
-    rm_relation("privé, nom ux en voor zijne minderjarige dochter ", "privé, nom ux en minderjarige")
    #prive
-    Index$temp <- gsub(", prive", "", Index$temp)
    #nom ux
-    Index[grepl("ux", Index$temp),c("Eigenaar", "temp", "Relation_description")]
-    Index$temp <- gsub("nux", "nom ux", Index$temp)
-    Index$temp <- gsub("n ux", "nom ux", Index$temp)
-    Index$temp <- gsub("n u x", "nom ux", Index$temp)
-    Index$temp <- gsub("num ux", "nom ux", Index$temp)
-    rm_relation(", en nom ux", "privé en nom ux")
-    rm_relation(" en nom ux , ", "privé en nom ux")
-    rm_relation2(" en nom ux ", "erven", "privé en nom ux")
-    rm_relation2(" en nom ux", "erven", "privé en nom ux")
-    Index$Relation_description <- ifelse(grepl("nom ux", Index$temp) & grepl(" en ", Index$temp), "multiple persons", Index$Relation_description)
-    rm_relation(", nom ux", "nom ux")
-    rm_relation("nom uxs ", "nom ux")
-    rm_relation("nom ur ", "nom ux")
-    rm_relation("nom uxoris ", "nom ux")
-    rm_relation2("nom ux ", " en ", "nom ux")
-    rm_relation2(" nom ux", " en ", "nom ux")
    #minderjarige / kinderen van
-    Index[grepl("mind", Index$temp),c("Eigenaar", "temp", "Relation_description")]
-    rm_relation("de minderjarige kinderen van ", "kinderen van")
-    rm_relation("minderjarige kinderen van ", "kinderen van")
-    rm_relation(", voor hare minderjarige kinderen", "kinderen van")
-    rm_relation(" voor hare minderjarige kinderen", "kinderen van")
-    rm_relation("voor hare minderjarige kinderen ", "kinderen van")
-    rm_relation(", voor zijne minderjarige kinderen", "kinderen van")
-    rm_relation(" voor zijne minderjarige kinderen", "kinderen van")
-    rm_relation("voor zijne minderjarige kinderen ", "kinderen van")
-    Index$Relation_description <- ifelse(grepl("en de minderjarige", Index$temp), "multiple persons", Index$Relation_description)
-    rm_relation("voor de minderjarigen ", "kinderen van")
-    rm_relation("voor den minderjarige ", "kinderen van")
-    rm_relation(" en minderjarige dochter", "privé en minderjarige dochter")
-    rm_relation(", voor hare minderjarige dochters", "kinderen van")
-    rm_relation("zijne minderjarige dochter", "kinderen van")
-    rm_relation(" voor hare minderjarige dochter", "kinderen van")
-    rm_relation(", voor haren minderjarige zoon", "kinderen van")
-    rm_relation(" voor zijnen minderjarige zoon", "kinderen van")
-    rm_relation(" voor de minderjarige kinderen", "kinderen van")
-    rm_relation("en de door p e goede nog te verwekken kinderen, de minderjarigen ", "kinderen van")
-    rm_relation("en de minderjarigen ", "privé en minderjarige")
-    rm_person("de minderjarigen ", "minderjarige")
-    rm_relation(" voor zijnen minderjarige zoon", "kinderen van")
-    rm_relation(" voor haren minderjarigen zoon", "kinderen van")
-    rm_relation(" voor zijn minderjarige kind const alex en verder door hem in huwelijk te verwekkene kinderen", "kinderen van")
-    rm_relation(" privé en qq minderjarige zoon", "privé en minderjarige")
-    rm_relation(", en hare minderjarige kinderen", "privé en minderjarige")
-    rm_relation("voor deszelfs minderjarige kinderen", "kinderen van")
-    Index$Relation_description <- ifelse(grepl("en de minderjarige", Index$temp), "privé en minderjarige", Index$Relation_description)
-    Index$Person_description <- ifelse(grepl("de minderjarige", Index$temp) & grepl("en de minderjarige", Index$temp)==F, "minderjarige", Index$Person_description)
-    Index$temp <- gsub("de minderjarige", "", Index$temp)
-    rm_person("monderjarige ", "minderjarige")
-    rm_relation("en minderjarigen ", "privé en minderjarige")
-    rm_relation("qq minderjarigen ", "kinderen van")
-    rm_relation("qq minderjarige ", "kinderen van")
-    rm_person("minderjarigen ", "minderjarige")
-    rm_person("minderj ", "minderjarige")
-    rm_person("minderjrige ", "minderjarige")
-    rm_person("minderjarige ", "minderjarige")
    #weduwe
-    Index[grepl("wed", Index$temp),"temp"]
-    Index$Relation_description <- ifelse(grepl("de weduwe", Index$temp) & is.na(Index$Relation_description), "weduwe", Index$Relation_description)
-    Index$temp <- ifelse(grepl("de weduwe ", Index$temp) & Index$Relation_description!="multiple persons", gsub("de weduwe ", "", Index$temp), Index$temp)
-    Index$temp <- ifelse(grepl(" de weduwe", Index$temp) & Index$Relation_description!="multiple persons", gsub(" de weduwe", "", Index$temp), Index$temp)
-    Index$temp <- gsub("ezn", "", Index$temp)
-    rm_relation(" weduwe", "weduwe")
-    Index$Relation_description <- ifelse(grepl("weduwe", Index$temp) & Index$Relation_description=="minderjarige kinderen", "weduwe voor haar minderjarige kinderen", Index$Relation_description)
-    Index$Relation_description <- ifelse(grepl("weduwe", Index$temp) & Index$Relation_description=="nom ux", "weduwe & nom ux", Index$Relation_description)
-    Index$temp <- ifelse(is.na(Index$Relation_description), Index$temp, gsub("weduwe ", "", Index$temp))
-    rm_relation("weduwe ", "weduwe")
-    rm_relation("weduew ", "weduwe")
-    rm_relation("wed ", "weduwe")
-   #douariere van
-    Index[grepl("doua", Index$temp),"temp"]
-    rm_relation(", douariere", "weduwe")
-    rm_relation(" douariere", "weduwe")
    #kinderen
-    Index[grepl("kind", Index$temp),"temp"]
-    rm_relation(" voor hare reeds verwekte en nog te verwekken kinderen", "kinderen van")
-    rm_relation("zijn kind ", "kinderen van")
-    rm_relation(" en verder door hem in huwelijk te verwekkene kinderen", "kinderen van")
-    rm_relation(" voor zijn reeds hebbende en nog te verwekkene kinderen bij zijne huisvrouw i f thijm", "kinderen van")
-    rm_relation(" hare reeds hebbende en nog te verwekken kinderen met name", "kinderen van")
-    rm_relation(" en voor hare reeds hebbende en nog te verwekken kinderen", "kinderen van")
-    rm_relation(" voor hare reeds hebbende en nog te verwekken kinderen", "kinderen van")
-    rm_relation(" , voor zijne reeds hebbende en nog te verwekkene kinderen bij jula frederika straub geboren steinbach", "kinderen van")
-    rm_relation(", en hare kinderen", "kinderen van")
-    rm_relation(" , en de door j m a salomons bij zijne huisvrouw a j salomons geboren lionarons nader te verwekkene kinderen", "kinderen van")
-    rm_relation(" , voor zijne reeds hebbende en nog te verwekken kinderen", "kinderen van")
-    rm_relation(", voor hare reeds hebbende en nog te verwekkene kinderen", "kinderen van")
-    rm_relation(" voor deszelfs kinderen", "kinderen van")
-    rm_relation(" en nog te verwekken kinderen, bij zijne echtgenote s sarqui daniel jessurun", "kinderen van")
-    rm_relation("en de door p e goede nog te verwekken kinderen, ", "kinderen van")
-    rm_relation(" voor hare reeds hebbende en nog te verwekkene kinderen", "kinderen van")
-    rm_relation("voor haar reeds hebbende en nog te verwekkene kinderen ", "kinderen van")
-    rm_relation("voor zijne reeds hebbende en nog te verwekkene kinderen ", "kinderen van")
-    rm_relation("voor hare hebbende kinderen ", "kinderen van")
-    rm_relation(" en nog te verwekken kinderen", "kinderen van")
-    rm_relation(" en kinderen", "privé en minderjarige")
-    rm_relation("kinderen van ", "kinderen")
-    rm_relation(" voor kinderen", "kinderen")
-    Index$Relation_description <- ifelse(grepl("nom ux", Index$temp) & grepl("kind", Index$temp), "nom ux en kinderen", Index$Relation_description)
     
     
   #voormalige naam
@@ -2237,93 +2204,51 @@
     Index$temp <- gsub("gebr ", "geboren ", Index$temp)
     Index$temp <- gsub("gebs ", "geboren ", Index$temp)
     Index$temp <- gsub("gebn ", "geboren ", Index$temp)
-   #set function
-    rm_geb <- function(combinatie){
-      Index$Birth_name <<- ifelse(grepl(combinatie, Index$temp), sub(" .*", "", sub(paste0(".*?",combinatie), "", Index$temp)), Index$Birth_name)
-      Index$temp <<- ifelse(grepl(combinatie, Index$temp)==F, Index$temp,
-                            paste0( sub(paste0(combinatie,".*"), "", Index$temp), #plak voor combinatie
-                                    sub(".*? ", "", sub(paste0(".*?",combinatie), "", Index$temp)) ) #na combinatie + 1 woord)
-      ) 
-    }
-    rm_geb_prefix <- function(combinatie, prefix){
-      Index$Birth_name <<- ifelse(grepl(combinatie, Index$temp), sub(" .*", "", sub(paste0(".*?",combinatie), "", Index$temp)), Index$Birth_name)
-      Index$Birth_name <<- ifelse(grepl(combinatie, Index$temp), paste0(prefix, Index$Birth_name), Index$Birth_name)
-      Index$temp <<- ifelse(grepl(combinatie, Index$temp)==F, Index$temp,
-                            paste0( sub(paste0(combinatie,".*"), "", Index$temp), #plak voor combinatie
-                                    sub(".*? ", "", sub(paste0(".*?",combinatie), "", Index$temp)) ) #na combinatie + 1 woord)
-      ) 
-    }
-   #geboren de
-    Index[grepl("geboren le ", Index$temp),"temp"]
-    rm_geb_prefix("geboren del ", "del ")
-    rm_geb_prefix("geboren de la ", "de la ")
-    rm_geb_prefix("geboren de ", "de ")
-   #geboren van
-    Index[grepl("geboren van ", Index$temp),"temp"]
-    rm_geb_prefix("geboren van der ", "van der ")
-    rm_geb_prefix("geboren van de ", "van de ")
-    rm_geb_prefix("geboren van ", "van ")
-   #geboren
-    Index[grepl("geboren ", Index$temp),"temp"]
-    rm_geb_prefix("geboren ", "van ")
     
-    
-   #en
-    Index[which(grepl(" en ", Index$First_name) & is.na(Index$Relation_description)),"temp"]
-    Index$Relation_description[grepl(" en ", Index$First_name) & is.na(Index$Relation_description)] <- "multiple persons"
-    
-    
-   #clean remaining prefixes
-    Index$temp <- trimws(Index$temp)
-   #replace
-    rm_prefix("bueno de")
-    rm_prefix("d'")
-    rm_prefix("da")
-    rm_prefix("de")
-    rm_prefix("des")
-    rm_prefix("de la")
-    rm_prefix("d' la")
-    rm_prefix("de l'")
-    rm_prefix("du")
-    rm_prefix("l'")
-    rm_prefix("la")
-    rm_prefix("le")
-    rm_prefix("ter")
-    rm_prefix("van van")
-    rm_prefix("van")
-    rm_prefix("van de")
-    rm_prefix("van du")
-    rm_prefix("van den")
-    rm_prefix("van der")
-    rm_prefix("van het")
-    rm_prefix("van 't")
-    rm_prefix("van la")
-    
-    
-   #fix composite names
-    Index$Last_name <- ifelse(is.na(Index$Prefix), Index$Last_name,
-                              ifelse(Index$Prefix=="bueno de", paste(Index$Prefix, Index$Last_name), Index$Last_name))
-    Index$Prefix <- ifelse(Index$Prefix=="bueno de", NA, Index$Prefix)
+   #
     
    #add to df
     Index$First_name <- Index$temp
-    Index <- Index[,c("Eigenaar_original", "Last_name", "First_name", "Prefix", "Birth_name", "Postfix", "Patroniem", "Person_description", "Relation_description")]
+    Index <- Index[,c("source_order", "Eigenaar_original", "Prefix", "Last_name", "First_name", "Straatvoogd", "Eigenaar_qq")]
+    colnames(Index) <- c("source_order", 
+                         "Eigenaar", 
+                         "Eigenaar_Prefix", "Eigenaar_Last_name", "Eigenaar_First_name",
+                         "Eigenaar_Straatvoogd",
+                         "Eigenaar_qq")
    #save look-up table
-    write.xlsx(Index %>% arrange(trimws(Eigenaar_original)), "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Eigenaren - particulieren.xlsx")
-    write.xlsx(df[!duplicated(df$Eigenaar) & df$Typeregister=="Plantages",], "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Eigenaren - plantages.xlsx")
-   #rename and add
-    colnames(Index) <- c("Eigenaar", 
-                         "Eigenaar_Last_name", "Eigenaar_First_name", 
-                         "Eigenaar_Prefix", "Eigenaar_Birth_name", "Eigenaar_Postfix", "Eigenaar_Patroniem", 
-                         "Eigenaar_Person_description", "Eigenaar_Relation_description")
-    df <- merge(df, Index, by="Eigenaar", all=T)
+    write.xlsx(Index %>% arrange(trimws(Eigenaar)), "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Eigenaren - particulieren.xlsx")
+    write.xlsx(df[!duplicated(df$Eigenaar) & df$Typeregister=="Plantages", c("Eigenaar", "plantation_name", "plantation_district")], "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Eigenaren - plantages.xlsx")
+   #add to df
+    df <- merge(df, Index[,c("Eigenaar", "Eigenaar_Prefix", "Eigenaar_Last_name", "Eigenaar_First_name", "Eigenaar_Straatvoogd", "Eigenaar_qq")], by="Eigenaar", all=T)
     
     
+    
+  #####################################
+  #### section 6: clean rare names ####
+  #####################################
+    
+    #Naam
+    x <- df %>% arrange(Naam) %>% group_by(Naam) %>% filter(n()<=5) %>% ungroup()
+    x$Eigenaar <- ifelse(x$Typeregister=="Plantages", x$plantation_name, x$Eigenaar_Last_name)
+    x <- x[,c("Naam", "sex", "Naam_number", "Eigenaar", "year_birth", "source_order")]
+    x$role <- "Naam"
+    #Moeder
+    y <- df %>% arrange(Moeder) %>% group_by(Moeder) %>% filter(n()<=5) %>% ungroup()
+    y$Eigenaar <- ifelse(y$Typeregister=="Plantages", y$plantation_name, y$Eigenaar_Last_name)
+    y <- y[,c("Moeder", "sex", "Moeder_number", "Eigenaar", "year_birth", "source_order")]
+    colnames(y) <- c("Naam", "sex", "Naam_number", "Eigenaar", "year_birth", "source_order")
+    y$role <- "Moeder"
+    #combine
+    x <- rbind(x,y)
+    x <- x[,c("role", "sex", "Naam", "Naam_number", "Eigenaar", "year_birth", "source_order")] %>% arrange(Naam)
+    #export
+    write.xlsx(x, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Overzicht niet-courante namen.xlsx")
+    rm(x,y)
     
     
     
   ################################################
-  #### section 4: Recode In_event & Out_event ####
+  #### section 7: Recode In_event & Out_event ####
   ################################################
     
   #recode events
@@ -2357,11 +2282,11 @@
     
     
   #############################################################
-  #### section 5: save cleaned outfile, ready for matching ####
+  #### section 8: save cleaned outfile, ready for matching ####
   #############################################################
     
     colnames(df)
-    df <- df[, c("source_order", "primary_key", 
+    x <- df[, c("source_order", "primary_key", 
                  "Inventarisnummer", "Folionummer", "Serieregister", "Serieregister_nr", "Anno", "Typeregister", "Scan",
                  "Geslacht", "sex",
                  "Naam", "Naam_number", "Extrainformatiebijnaam", "Naam_original",
@@ -2370,7 +2295,7 @@
                  "age",
                  "Moeder", "Moeder_number", "Moeder_birthyear", "Moeder_reference", "Moeder_overleden", "Moeder_1_Entry", "Moeder_2_Naam", "Moeder_incongruence", "Moeder_original",
                  "Eigenaar", "plantation_name", "plantation_district", "plantation_remarks",
-                 "Eigenaar_Last_name", "Eigenaar_First_name", "Eigenaar_Person_description", "Eigenaar_Relation_description",
+                 "Eigenaar_Prefix", "Eigenaar_Last_name", "Eigenaar_First_name", "Eigenaar_Straatvoogd", "Eigenaar_qq",
                  "day_entry", "month_entry", "year_entry", 
                  "in_event", "in_event_general", "in_event2", "Aanvullendeinformatieinschrijv",
                  "out_event", "out_event_general", "out_event2", "day_exit", "month_exit", "year_exit", "Aanvullendeinformatieuitschrij")]

@@ -1,0 +1,22 @@
+Updates:
+
+24-5-2022
+- Automatically makes folders to store matches
+- Fixed bug in date matching
+- Fixed bug in exporting WITHIN series
+- Fixed bug in CLEANING of eigenaren
+- Added adaptive matching indicators for moeder and eigenaar
+- Added flags for month + day to WITHIN
+- Added month + day to matching score in WITHIN
+- 2 mothers without a name now also receive a match score of 2.5, as it is unlikely that mothers are only named in 1 entry
+- addendums to names in BETWEEN
+- Previous and next enslaved are now also scored in WITHIN for group transfers
+- BETWEEN now matches end/begin combinations or events that occured in overlapping years (1838, 1848, 1851-3), rather than all entries. As a result,
+	- We now only check the previous entry - rather than the previous next entry - for the last-listed entry on a folio
+	- Only look for duplicates that occured in in overlapping years (1 year in series 1-2, 2-3), (3 years in series 3-4).
+
+18-5-2022
+- Added adaptive Levenshtein
+- Introduced within matching
+- Cleaned sex based on name
+- Matching sex is no longer optional for matching
