@@ -9,7 +9,7 @@ Updates:
 - Added flags for month + day to WITHIN
 - Added month + day to matching score in WITHIN
 - 2 mothers without a name now also receive a match score of 2.5, as it is unlikely that mothers are only named in 1 entry
-- addendums to names in BETWEEN
+- addendums to names can now receive a -1 if they don't overlap, 0 for twice nothing, and +1 for identical addendums
 - Previous and next enslaved are now also scored in WITHIN for group transfers
 - BETWEEN now matches end/begin combinations or events that occured in overlapping years (1838, 1848, 1851-3), rather than all entries. As a result,
 	- We now only check the previous entry - rather than the previous next entry - for the last-listed entry on a folio
