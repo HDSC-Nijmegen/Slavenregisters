@@ -20,7 +20,7 @@ Cleans the names in the slave registers.
 - Standardise person descriptions 
  
 | Type | Variation | Standardisation	|
-| ---- | --------- | --------------- |
+| - | - | - |
 | *Numerical* | 1, 1e, I, Ie | I |
 | *Numerical* | 2, 2e, II, IIe | II |
 | *Numerical* | 3, 3e, III, IIIe | III |
