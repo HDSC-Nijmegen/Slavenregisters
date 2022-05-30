@@ -50,7 +50,7 @@ Cleans the names in the slave registers.
 | *Occupation* | offikier | officier |
 | *Mother* | over, overl, overled, overleden, overlijden, verl | overleden |
 | *Plantation* | Brouwerslust | Brouwerslust |
-| *Plantation* | L, L en R, L R, LsR | Land en Rust |
+| *Plantation* | LR, L R, L en R, L R, LsR | Land en Rust |
 | *Plantation* | Res, Resol, Resolutie, Revolutie | Resolutie |
 | *Plantation* | la Simp, la Simplicite, la Simplikite | la Simplicite |
 | *Plantation* | Standv, Standi, Standvastigheid | Standvastigheid |
@@ -68,11 +68,13 @@ Cleans the names in the slave registers.
 | *Other* | FD | FD |
 | *Other* | IB | IB |
 | *Other* | jd | jd |
-| *Other* | NS | NS |
+| *Other* | Ns, NS | NS |
+| *Other* | p w, P W | SP |
 | *Other* | SP | SP |
+| *Other* | vz, VZ | VZ |
 | *Other* | NS | NS |
 | *Other* | VCIP, V C I P | VCIP |
-| *Other* | ZB, Z B | ZB |
+| *Other* | ZB, z b, Z B | ZB |
 
 
 ### 4. Standardise names enslaved persons & mothers
@@ -160,7 +162,19 @@ INSERT TABLES
 
 
 ## matching.R
-Contains the matching programs to match certificates between and within series. Data is matched in five steps as shown in the table underneath. We matched names of enslaved, mothers, and owners with a maximum Levenshtein distance of 3.
+Contains the matching programs to match certificates between and within series. We matched names of enslaved, mothers, and owners with a maximum Levenshtein distance, based on the length of the name.
+
+| Characters | Max Lev dist betweeen Series | Max Lev dist within Series |
+| ---------- | ---------------------------- | -------------------------- |
+| 3 | 1 | 1 |
+| 4 | 2 | 2 |
+| 5 | 2 | 2 |
+| 6 | 2 | 2 |
+| 7 | 2 | 2 |
+| 8 | 2 | 2 |
+| 9+ | 3 | 2 |
+
+Data is matched in five steps as shown in the table underneath. 
 
 | Step | Between matching | Within matching |
 | ---- | ---------------- | --------------- |
