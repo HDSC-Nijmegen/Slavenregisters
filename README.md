@@ -164,14 +164,10 @@ INSERT TABLES
 ## matching.R
 Contains the matching programs to match certificates between and within series. We matched names of enslaved, mothers, and owners with a maximum Levenshtein distance, based on the length of the name.
 
-| Characters | Max Lev dist betweeen Series | Max Lev dist within Series |
+| Characters | Max Lev dist between series | Max Lev dist within series |
 | ---------- | ---------------------------- | -------------------------- |
 | 3 | 1 | 1 |
-| 4 | 2 | 2 |
-| 5 | 2 | 2 |
-| 6 | 2 | 2 |
-| 7 | 2 | 2 |
-| 8 | 2 | 2 |
+| 4-8 | 2 | 2 |
 | 9+ | 3 | 2 |
 
 Data is matched in five steps as shown in the table underneath. 
