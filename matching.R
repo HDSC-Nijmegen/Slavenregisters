@@ -36,7 +36,7 @@
   #### section 0a: load program for matching BETWEEN series ####
   ##############################################################
     
-  match_between <- function(df1, df2, lev_dist_naam, lev_dist_moeder, lev_dist_eigenaar, lev_dist_laglead, NUMMER1, NUMMER2){
+  match_between <- function(df1, df2, lev_dist_naam, lev_dist_moeder, lev_dist_eigenaar, lev_dist_laglead, NUMMER1, NUMMER2, lv_dynamic="yes"){
     
    #### step 1: determine Levenshtein distance for all NAAM combinations ####
 
@@ -89,6 +89,7 @@
     
    #rename variables df1
     colnames(df1) <- paste(c("source_order", 
+                              "Typeregister",
                               "Out_event", 
                               "Naam", "Naam_number", 
                               "Moeder", "Moeder_number", 
@@ -99,6 +100,7 @@
                             1, sep="_")
    #rename variables df2
     colnames(df2) <- paste(c("source_order", 
+                              "Typeregister",
                               "In_event", 
                               "Naam", "Naam_number", 
                               "Moeder", "Moeder_number", 
@@ -120,7 +122,8 @@
     df_matched <- df_matched[which(df_matched$sex_1==df_matched$sex_2 | 
                                      df_matched$sex_1=="u" | df_matched$sex_2=="u"), ]
    #same owner: Levenshtein distance <= LEV_DIST_EIGENAAR
-    df_matched <- df_matched[which(stringdist(df_matched$Eigenaar_1, df_matched$Eigenaar_2) <= lev_dist_eigenaar), ]
+    df_matched <- df_matched[which(df_matched$Typeregister_1=="Plantages" & df_matched$Eigenaar_1==df_matched$Eigenaar_2 |
+                                     df_matched$Typeregister_1=="Particulieren" & stringdist(df_matched$Eigenaar_1, df_matched$Eigenaar_2) <= lev_dist_eigenaar), ]
    #Moeder with: 
      # 1 unknown entry OR 
      # Levenshtein distance <= LEV_DIST_MOEDER
@@ -160,8 +163,8 @@
    #match adaptive Levenshtein
     df_matched$Match_adaptive <- ifelse(is.na(df_matched$Naam_1) | is.na(df_matched$Naam_2) | df_matched$Naam_1=="" | df_matched$Naam_2=="" |
                                           nchar(df_matched$Naam_1)>=2 & nchar(df_matched$Naam_1)<=3 & stringdist(df_matched$Naam_1, df_matched$Naam_2)>1 |
-                                          nchar(df_matched$Naam_1)>=4 & nchar(df_matched$Naam_1)<=7 & stringdist(df_matched$Naam_1, df_matched$Naam_2)>2 |
-                                          nchar(df_matched$Naam_1)>=8 & stringdist(df_matched$Naam_1, df_matched$Naam_2)>3, 0, 1)
+                                          nchar(df_matched$Naam_1)>=4 & nchar(df_matched$Naam_1)<=8 & stringdist(df_matched$Naam_1, df_matched$Naam_2)>2 |
+                                          nchar(df_matched$Naam_1)>=9 & stringdist(df_matched$Naam_1, df_matched$Naam_2)>3, 0, 1)
    #naam_number
     df_matched$Match_naam_number <- ifelse(is.na(df_matched$Naam_number_1) | is.na(df_matched$Naam_number_2) |
                                              df_matched$Naam_number_1=="" & df_matched$Naam_number_2=="", 0,
@@ -172,17 +175,17 @@
    #mother adaptive Levenshtein
     df_matched$Match_moeder_adaptive <- ifelse(is.na(df_matched$Moeder_1) | is.na(df_matched$Moeder_2) | df_matched$Moeder_1=="" | df_matched$Moeder_2=="" |
                                                  nchar(df_matched$Moeder_1)>=2 & nchar(df_matched$Moeder_1)<=3 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>1 |
-                                                 nchar(df_matched$Moeder_1)>=4 & nchar(df_matched$Moeder_1)<=7 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>2 |
-                                                 nchar(df_matched$Moeder_1)>=8 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>3, 0, 1)
+                                                 nchar(df_matched$Moeder_1)>=4 & nchar(df_matched$Moeder_1)<=8 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>2 |
+                                                 nchar(df_matched$Moeder_1)>=9 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>3, 0, 1)
    #moeder_number
     df_matched$Match_moeder_number <- ifelse(is.na(df_matched$Moeder_number_1) | is.na(df_matched$Moeder_number_2) |
                                                df_matched$Moeder_number_1=="" & df_matched$Moeder_number_2=="", 0,
                                              ifelse(df_matched$Moeder_number_1!=df_matched$Moeder_number_2, -1, 1))
    #eigenaar adaptive Levenshtein
     df_matched$Match_eigenaar_adaptive <- ifelse(is.na(df_matched$Eigenaar_1) | is.na(df_matched$Eigenaar_2) | df_matched$Eigenaar_1=="" | df_matched$Eigenaar_2=="" |
-                                                   nchar(df_matched$Eigenaar_1)>=2 & nchar(df_matched$Eigenaar_1)<=3 & stringdist(df_matched$Eigenaar_1, df_matched$Eigenaar_2)>1 |
-                                                   nchar(df_matched$Eigenaar_1)>=4 & nchar(df_matched$Eigenaar_1)<=7 & stringdist(df_matched$Eigenaar_1, df_matched$Eigenaar_2)>2 |
-                                                   nchar(df_matched$Eigenaar_1)>=8 & stringdist(df_matched$Eigenaar_1, df_matched$Eigenaar_2)>3, 0, 1)
+                                                   nchar(df_matched$Eigenaar_1)>=2 & nchar(df_matched$Eigenaar_1)<=5 & stringdist(df_matched$Eigenaar_1, df_matched$Eigenaar_2)>1 |
+                                                   nchar(df_matched$Eigenaar_1)>=6 & nchar(df_matched$Eigenaar_1)<=8 & stringdist(df_matched$Eigenaar_1, df_matched$Eigenaar_2)>2 |
+                                                   nchar(df_matched$Eigenaar_1)>=9 & stringdist(df_matched$Eigenaar_1, df_matched$Eigenaar_2)>3, 0, 1)
    #year
     df_matched$Match_year <- ifelse(is.na(df_matched$year_birth_1) | is.na(df_matched$year_birth_2) | 
                                       df_matched$year_birth_1=="-1" | df_matched$year_birth_2=="-1" | 
@@ -193,7 +196,7 @@
     df_matched$Match_volgende <- ifelse(df_matched$Naam_volgende_lv<=lev_dist_naam, 1, 0)
    #out_event
     df_matched$Out_unended <- ifelse(df_matched$Out_event_1!="Ended", 1, 0)
-    
+   
   #compute match score
     df_matched$Match_score <- 2.5*df_matched$Match_moeder + #twice as important + tie-breaker
                                 df_matched$Match_naam_number + df_matched$Match_moeder_number + 
@@ -203,7 +206,13 @@
     
     
    #### step 5: filter best match ####
-
+    
+    if(lv_dynamic=="yes" | lv_dynamic=="y"){
+      df_matched <- df_matched[which(df_matched$Match_adaptive==1 & df_matched$Match_moeder_adaptive==1 & df_matched$Match_eigenaar_adaptive==1 |
+                                       df_matched$Match_adaptive==1 & df_matched$Moeder_1=="" & df_matched$Match_eigenaar_adaptive==1),]
+    }
+    
+    
   #selections
    #if match score <4, only accept if Naam == almost identical
     df_matched <- df_matched[which(df_matched$Match_score>=4 |
@@ -221,13 +230,13 @@
 
   #add unmatched cases
    #df1
-    colnames(df1)[2] <- "Out_event_x"
-    df_full <- merge(df1[,1:9], df_matched, by=paste(c("source_order", "Naam", "Naam_number", "Moeder", "Moeder_number", "Eigenaar", "year_birth", "sex"), 1, sep="_"), all=T)
+    colnames(df1)[3] <- "Out_event_x"
+    df_full <- merge(df1[,1:10], df_matched, by=paste(c("source_order", "Typeregister", "Naam", "Naam_number", "Moeder", "Moeder_number", "Eigenaar", "year_birth", "sex"), 1, sep="_"), all=T)
     df_full$Out_event_1 <- ifelse(is.na(df_full$Out_event_1), df_full$Out_event_x, df_full$Out_event_1)
     df_full$Out_event_x <- NULL
    #Series 4
-    colnames(df2)[2] <- "In_event_x"
-    df_full <- merge(df2[,1:9], df_full, by=paste(c("source_order", "Naam", "Naam_number", "Moeder", "Moeder_number", "Eigenaar", "year_birth", "sex"), 2, sep="_"), all=T)
+    colnames(df2)[3] <- "In_event_x"
+    df_full <- merge(df2[,1:10], df_full, by=paste(c("source_order", "Typeregister", "Naam", "Naam_number", "Moeder", "Moeder_number", "Eigenaar", "year_birth", "sex"), 2, sep="_"), all=T)
     df_full$In_event_2 <- ifelse(is.na(df_full$In_event_2), df_full$In_event_x, df_full$In_event_2)
     df_full$In_event_x <- NULL
     
@@ -240,8 +249,8 @@
    #match adaptive Levenshtein
     df_full$Match_adaptive <- ifelse(is.na(df_full$Naam_1) | is.na(df_full$Naam_2) | df_full$Naam_1=="" | df_full$Naam_2=="" |
                                        nchar(df_full$Naam_1)>=2 & nchar(df_full$Naam_1)<=3 & stringdist(df_full$Naam_1, df_full$Naam_2)>1 |
-                                       nchar(df_full$Naam_1)>=4 & nchar(df_full$Naam_1)<=7 & stringdist(df_full$Naam_1, df_full$Naam_2)>2 |
-                                       nchar(df_full$Naam_1)>=8 & stringdist(df_full$Naam_1, df_full$Naam_2)>3, 0, 1)
+                                       nchar(df_full$Naam_1)>=4 & nchar(df_full$Naam_1)<=8 & stringdist(df_full$Naam_1, df_full$Naam_2)>2 |
+                                       nchar(df_full$Naam_1)>=9 & stringdist(df_full$Naam_1, df_full$Naam_2)>3, 0, 1)
    #naam_number
     df_full$Match_naam_number <- ifelse(is.na(df_full$Naam_number_1) | is.na(df_full$Naam_number_2) |
                                           df_full$Naam_number_1=="" & df_full$Naam_number_2=="", 0, 
@@ -252,17 +261,17 @@
    #mother adaptive Levenshtein
     df_full$Match_moeder_adaptive <- ifelse(is.na(df_full$Moeder_1) | is.na(df_full$Moeder_2) | df_full$Moeder_1=="" | df_full$Moeder_2=="" |
                                               nchar(df_full$Moeder_1)>=2 & nchar(df_full$Moeder_1)<=3 & stringdist(df_full$Moeder_1, df_full$Moeder_2)>1 |
-                                              nchar(df_full$Moeder_1)>=4 & nchar(df_full$Moeder_1)<=7 & stringdist(df_full$Moeder_1, df_full$Moeder_2)>2 |
-                                              nchar(df_full$Moeder_1)>=8 & stringdist(df_full$Moeder_1, df_full$Moeder_2)>3, 0, 1)
+                                              nchar(df_full$Moeder_1)>=4 & nchar(df_full$Moeder_1)<=8 & stringdist(df_full$Moeder_1, df_full$Moeder_2)>2 |
+                                              nchar(df_full$Moeder_1)>=9 & stringdist(df_full$Moeder_1, df_full$Moeder_2)>3, 0, 1)
    #moeder_number
     df_full$Match_moeder_number <- ifelse(is.na(df_full$Moeder_number_1) | is.na(df_full$Moeder_number_2) | 
                                             df_full$Moeder_number_1=="" & df_full$Moeder_number_2=="", 0, 
                                           ifelse(df_full$Moeder_number_1!=df_full$Moeder_number_2, -1, 1))
    #eigenaar adaptive Levenshtein
     df_full$Match_eigenaar_adaptive <- ifelse(is.na(df_full$Eigenaar_1) | is.na(df_full$Eigenaar_2) | df_full$Eigenaar_1=="" | df_full$Eigenaar_2=="" |
-                                                nchar(df_full$Eigenaar_1)>=2 & nchar(df_full$Eigenaar_1)<=3 & stringdist(df_full$Eigenaar_1, df_full$Eigenaar_2)>1 |
-                                                nchar(df_full$Eigenaar_1)>=4 & nchar(df_full$Eigenaar_1)<=7 & stringdist(df_full$Eigenaar_1, df_full$Eigenaar_2)>2 |
-                                                nchar(df_full$Eigenaar_1)>=8 & stringdist(df_full$Eigenaar_1, df_full$Eigenaar_2)>3, 0, 1)
+                                                nchar(df_full$Eigenaar_1)>=2 & nchar(df_full$Eigenaar_1)<=4 & stringdist(df_full$Eigenaar_1, df_full$Eigenaar_2)>1 |
+                                                nchar(df_full$Eigenaar_1)>=6 & nchar(df_full$Eigenaar_1)<=8 & stringdist(df_full$Eigenaar_1, df_full$Eigenaar_2)>2 |
+                                                nchar(df_full$Eigenaar_1)>=9 & stringdist(df_full$Eigenaar_1, df_full$Eigenaar_2)>3, 0, 1)
    #year
     df_full$Match_year <- ifelse(is.na(df_full$year_birth_1) | is.na(df_full$year_birth_2) | 
                                    df_full$year_birth_1=="-1" | df_full$year_birth_2=="-1" | 
@@ -276,20 +285,11 @@
    
     
    #### step 7: structure and store data frame ####
-
-   #add type register
-    #source_order_1
-    x <- df[,c("source_order", "Typeregister")]
-    colnames(x) <- c("source_order_1", "Typeregister_1")
-    df_full <- merge(df_full, x, by="source_order_1", all.x=T)
-    #source_order_1
-    colnames(x) <- c("source_order_2", "Typeregister_2")
-    df_full <- merge(df_full, x, by="source_order_2", all.x=T)
-   
+    
    #order
     df_full <- df_full[,c("Typeregister_1", "Typeregister_2",
                           "Match", "Match_adaptive", "Match_naam_number", "Match_moeder", "Match_moeder_adaptive", "Match_moeder_number", "Match_year", "Match_vorige", "Match_volgende", "Match_score",
-                          "Naam_lv", "Moeder_lv", "Eigenaar_lv", "Naam_vorige_lv", "Naam_volgende_lv", "Match_lv",
+                          "Naam_lv", "Moeder_lv", "Eigenaar_lv", "Naam_vorige_lv", "Naam_volgende_lv", 
                           paste(c("Out_event", "In_event"), 1:2, sep="_"), 
                           paste(c("source_order", "source_order"), 1:2, sep="_"), 
                           paste(c("sex", "sex"), 1:2, sep="_"), 
@@ -304,7 +304,7 @@
    #rename
     colnames(df_full) <- c(paste("Typeregister", NUMMER1, sep="_"), paste("Typeregister", NUMMER2, sep="_"),
                            "Match", "Match_adaptive", "Match_naam_number", "Match_moeder", "Match_moeder_adaptive", "Match_moeder_number", "Match_year", "Match_vorige", "Match_volgende", "Match_score",
-                           "Naam_lv", "Moeder_lv", "Eigenaar_lv", "Naam_vorige_lv", "Naam_volgende_lv", "Match_lv",
+                           "Naam_lv", "Moeder_lv", "Eigenaar_lv", "Naam_vorige_lv", "Naam_volgende_lv", 
                            paste("Out_event", NUMMER1, sep="_"), paste("In_event", NUMMER2, sep="_"),
                            paste("Source_order", NUMMER1, sep="_"), paste("Source_order", NUMMER2, sep="_"),
                            paste("Sex", NUMMER1, sep="_"), paste("Sex", NUMMER2, sep="_"),
@@ -323,7 +323,7 @@
   #### section 0b: load program for matching WITHIN series ####
   #############################################################
   
-  match_within <- function(df1, lev_dist_naam, lev_dist_moeder, NUMMER1){
+  match_within <- function(df1, lev_dist_naam, lev_dist_moeder, lv_dynamic="yes"){
     
    #### step 1: determine Levenshtein distance for all NAAM combinations ####
     
@@ -442,8 +442,7 @@
    #match adaptive Levenshtein
     df_matched$Match_adaptive <- ifelse(is.na(df_matched$Naam_1) | is.na(df_matched$Naam_2) | df_matched$Naam_1=="" | df_matched$Naam_2=="" |
                                           nchar(df_matched$Naam_1)>=2 & nchar(df_matched$Naam_1)<=3 & stringdist(df_matched$Naam_1, df_matched$Naam_2)>1 |
-                                          nchar(df_matched$Naam_1)>=4 & nchar(df_matched$Naam_1)<=7 & stringdist(df_matched$Naam_1, df_matched$Naam_2)>2 |
-                                          nchar(df_matched$Naam_1)>=8 & stringdist(df_matched$Naam_1, df_matched$Naam_2)>3, 0, 1)
+                                          nchar(df_matched$Naam_1)>=4 & stringdist(df_matched$Naam_1, df_matched$Naam_2)>2, 0, 1)
    #naam_number
     df_matched$Match_naam_number <- ifelse(is.na(df_matched$Naam_number_1) | is.na(df_matched$Naam_number_2), 0,
                                            ifelse(df_matched$Naam_number_1!=df_matched$Naam_number_2, -1, 1))
@@ -455,8 +454,7 @@
    #mother adaptive Levenshtein
     df_matched$Match_moeder_adaptive <- ifelse(is.na(df_matched$Moeder_1) | is.na(df_matched$Moeder_2) | df_matched$Moeder_1=="" | df_matched$Moeder_2=="" |
                                                  nchar(df_matched$Moeder_1)>=2 & nchar(df_matched$Moeder_1)<=3 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>1 |
-                                                 nchar(df_matched$Moeder_1)>=4 & nchar(df_matched$Moeder_1)<=7 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>2 |
-                                                 nchar(df_matched$Moeder_1)>=8 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>3, 0, 1)
+                                                 nchar(df_matched$Moeder_1)>=4 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>2, 0, 1)
    #moeder_number
     df_matched$Match_moeder_number <- ifelse(is.na(df_matched$Moeder_number_1) | is.na(df_matched$Moeder_number_2), 0,
                                              ifelse(df_matched$Moeder_number_1!=df_matched$Moeder_number_2, -1, 1))
@@ -494,6 +492,11 @@
     
     
   #### step 5: filter best match ####
+    
+    if(lv_dynamic=="yes" | lv_dynamic=="y"){
+      df_matched <- df_matched[which(df_matched$Match_adaptive==1 & df_matched$Match_moeder_adaptive==1 |
+                                       df_matched$Match_adaptive==1 & df_matched$Moeder_1==""),]
+    }
     
   #selections
    #if match score <4, only accept if Naam == almost identical
@@ -565,8 +568,7 @@
    #match adaptive Levenshtein
     df_full$Match_adaptive <- ifelse(is.na(df_full$Naam_1) | is.na(df_full$Naam_2) | df_full$Naam_1=="" | df_full$Naam_2=="" |
                                        nchar(df_full$Naam_1)>=2 & nchar(df_full$Naam_1)<=3 & stringdist(df_full$Naam_1, df_full$Naam_2)>1 |
-                                       nchar(df_full$Naam_1)>=4 & nchar(df_full$Naam_1)<=7 & stringdist(df_full$Naam_1, df_full$Naam_2)>2 |
-                                       nchar(df_full$Naam_1)>=8 & stringdist(df_full$Naam_1, df_full$Naam_2)>3, 0, 1)
+                                       nchar(df_full$Naam_1)>=4 & stringdist(df_full$Naam_1, df_full$Naam_2)>2, 0, 1)
    #naam_number
     df_full$Match_naam_number <- ifelse(is.na(df_full$Naam_number_1) | is.na(df_full$Naam_number_2) | 
                                           df_full$Naam_number_1!=df_full$Naam_number_2, 0, 1)
@@ -576,6 +578,10 @@
                                      df_full$Moeder_1=="" & df_full$Moeder_2!="" | 
                                      df_full$Moeder_1!="" & df_full$Moeder_2=="" | 
                                      df_full$Moeder_lv>lev_dist_moeder, 0, 1)
+   #match mother adaptive
+    df_full$Match_moeder_adaptive <- ifelse(is.na(df_full$Moeder_1) | is.na(df_full$Moeder_2) | df_full$Moeder_1=="" | df_full$Moeder_2=="" |
+                                              nchar(df_full$Moeder_1)>=2 & nchar(df_full$Moeder_1)<=3 & stringdist(df_full$Moeder_1, df_full$Moeder_2)>1 |
+                                              nchar(df_full$Moeder_1)>=4 & stringdist(df_full$Moeder_1, df_full$Moeder_2)>2, 0, 1)
    #moeder_number
     df_full$Match_moeder_number <- ifelse(is.na(df_full$Moeder_number_1) | 
                                             is.na(df_full$Moeder_number_2) | 
@@ -618,9 +624,9 @@
     df_full <- merge(df_full, x, by="source_order_2", all.x=T)
     
    #order
-    a <- df_full[,c("Typeregister_1", "Typeregister_2",
+    df_full <- df_full[,c("Typeregister_1", "Typeregister_2",
                           "Match", "Match_adaptive", "Match_naam_number", "Match_moeder", "Match_moeder_adaptive", "Match_moeder_number", "Match_year", "Match_year_event", "Match_score",
-                          "Naam_lv", "Moeder_lv", "Match_lv",
+                          "Naam_lv", "Moeder_lv", 
                           paste(c("source_order", "source_order"), 1:2, sep="_"),
                           paste(c("out_event", "in_event"), 1:2, sep="_"),
                           paste(c("year_exit", "year_entry"), 1:2, sep="_"), 
@@ -637,7 +643,7 @@
    #rename
     colnames(df_full) <- c("Typeregister_1", "Typeregister_2",
                            "Match", "Match_adaptive", "Match_naam_number", "Match_moeder", "Match_moeder_adaptive", "Match_moeder_number", "Match_year_birth", "Match_year_transfer", "Match_score",
-                           "Naam_lv", "Moeder_lv", "Match_lv",
+                           "Naam_lv", "Moeder_lv", 
                            paste(c("source_order", "source_order"), 1:2, sep="_"),
                            paste(c("out_event", "in_event"), 1:2, sep="_"),
                            paste(c("year_exit", "year_entry"), 1:2, sep="_"), 
@@ -662,46 +668,45 @@
   
   #match serie 3 & 4
    #select series
-    Serie3 <- df[which(df$Serieregister_nr==3 & df$out_event2=="Ended" |
-                         df$Serieregister_nr==3 & df$year_entry>=1851), c("source_order", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
-    Serie4 <- df[df$Serieregister_nr==4 & df$in_event2=="Beginning", c("source_order", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie3 <- df[which(df$Serieregister_nr==3), c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie4 <- df[df$Serieregister_nr==4, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
    #match series
     Serie34 <- match_between(Serie3, Serie4, lev_dist_naam=3, lev_dist_moeder=3, lev_dist_eigenaar=3, lev_dist_laglead=3, NUMMER1=3, NUMMER2=4)
     
   #match serie 2 & 3
    #select series
     Serie2 <- df[which(df$Serieregister_nr==2 & df$out_event2=="Ended" |
-                         df$Serieregister_nr==2 & df$year_entry>=1848) , c("source_order", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
-    Serie3 <- df[df$Serieregister_nr==3 & df$in_event2=="Beginning", c("source_order", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+                         df$Serieregister_nr==2 & df$year_entry>=1848) , c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie3 <- df[df$Serieregister_nr==3 & df$in_event2=="Beginning", c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
    #match series
     Serie23 <- match_between(Serie2, Serie3, lev_dist_naam=3, lev_dist_moeder=3, lev_dist_eigenaar=3, lev_dist_laglead=3, NUMMER1=2, NUMMER2=3)
     
   #match serie 1 & 2
    #select series
     Serie1 <- df[which(df$Serieregister_nr==1 & df$out_event2=="Ended" |
-                         df$Serieregister_nr==1 & df$year_entry>=1838), c("source_order", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
-    Serie2 <- df[df$Serieregister_nr==2 & df$in_event2=="Beginning", c("source_order", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+                         df$Serieregister_nr==1 & df$year_entry>=1838), c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie2 <- df[df$Serieregister_nr==2 & df$in_event2=="Beginning", c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
    #match series
     Serie12 <- match_between(Serie1, Serie2, lev_dist_naam=3, lev_dist_moeder=3, lev_dist_eigenaar=3, lev_dist_laglead=3, NUMMER1=1, NUMMER2=2)
     
   #match serie 2 & 4
    #select series
-    Serie2 <- df[df$Serieregister_nr==2 & df$out_event2=="Ended", c("source_order", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
-    Serie4 <- df[df$Serieregister_nr==4 & df$in_event2=="Beginning", c("source_order", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie2 <- df[df$Serieregister_nr==2 & df$out_event2=="Ended", c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie4 <- df[df$Serieregister_nr==4 & df$in_event2=="Beginning", c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
    #match series
     Serie24 <- match_between(Serie2, Serie4, lev_dist_naam=3, lev_dist_moeder=3, lev_dist_eigenaar=3, lev_dist_laglead=3, NUMMER1=2, NUMMER2=4)
     
   #match serie 1 & 4
    #select series
-    Serie1 <- df[df$Serieregister_nr==1 & df$out_event2=="Ended", c("source_order", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
-    Serie4 <- df[df$Serieregister_nr==4 & df$in_event2=="Beginning", c("source_order", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie1 <- df[df$Serieregister_nr==1 & df$out_event2=="Ended", c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie4 <- df[df$Serieregister_nr==4 & df$in_event2=="Beginning", c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
    #match series
     Serie14 <- match_between(Serie1, Serie4, lev_dist_naam=3, lev_dist_moeder=3, lev_dist_eigenaar=3, lev_dist_laglead=3, NUMMER1=1, NUMMER2=4)
     
   #match serie 1 & 3
    #select series
-    Serie1 <- df[df$Serieregister_nr==1 & df$out_event2=="Ended", c("source_order", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
-    Serie3 <- df[df$Serieregister_nr==3 & df$in_event2=="Beginning", c("source_order", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie1 <- df[df$Serieregister_nr==1 & df$out_event2=="Ended", c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie3 <- df[df$Serieregister_nr==3 & df$in_event2=="Beginning", c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
    #match series
     Serie13 <- match_between(Serie1, Serie3, lev_dist_naam=3, lev_dist_moeder=3, lev_dist_eigenaar=3, lev_dist_laglead=3, NUMMER1=1, NUMMER2=3)
     
@@ -760,10 +765,10 @@
                                            "sex")]
     Serie1 <- Serie1[which(Serie1$out_event2=="Transferred" | Serie1$in_event2=="Transferred"),]
     
-    Serie44 <- match_within(Serie4, lev_dist_naam=3, lev_dist_moeder=3, NUMMER1=4)
-    Serie33 <- match_within(Serie3, lev_dist_naam=3, lev_dist_moeder=3, NUMMER1=3)
-    Serie22 <- match_within(Serie2, lev_dist_naam=3, lev_dist_moeder=3, NUMMER1=2)
-    Serie11 <- match_within(Serie1, lev_dist_naam=3, lev_dist_moeder=3, NUMMER1=1)
+    Serie44 <- match_within(Serie4, lev_dist_naam=3, lev_dist_moeder=3)
+    Serie33 <- match_within(Serie3, lev_dist_naam=3, lev_dist_moeder=3)
+    Serie22 <- match_within(Serie2, lev_dist_naam=3, lev_dist_moeder=3)
+    Serie11 <- match_within(Serie1, lev_dist_naam=3, lev_dist_moeder=3)
     
     
   ###############################
@@ -792,8 +797,8 @@
     write.table(Serie34, paste0("Between/", Sys.Date(), "/3-4 matches.txt"), quote=F, sep ="\t", col.names=T, row.names=F)
     write.table(Serie23, paste0("Between/", Sys.Date(), "/2-3 matches.txt"), quote=F, sep ="\t", col.names=T, row.names=F)
     write.table(Serie12, paste0("Between/", Sys.Date(), "/1-2 matches.txt"), quote=F, sep ="\t", col.names=T, row.names=F)
-    write.table(Serie24, paste0("Between/", Sys.Date(), "/1-4 matches.txt"), quote=F, sep ="\t", col.names=T, row.names=F)
-    write.table(Serie14, paste0("Between/", Sys.Date(), "/2-4 matches.txt"), quote=F, sep ="\t", col.names=T, row.names=F)
+    write.table(Serie24, paste0("Between/", Sys.Date(), "/2-4 matches.txt"), quote=F, sep ="\t", col.names=T, row.names=F)
+    write.table(Serie14, paste0("Between/", Sys.Date(), "/1-4 matches.txt"), quote=F, sep ="\t", col.names=T, row.names=F)
     write.table(Serie13, paste0("Between/", Sys.Date(), "/1-3 matches.txt"), quote=F, sep ="\t", col.names=T, row.names=F)
    #excel plantages
     Plantages34 <- Serie34[which(Serie34$Typeregister_3=="Plantages" | Serie34$Typeregister_4=="Plantages"),]
