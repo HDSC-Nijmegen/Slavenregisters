@@ -1,5 +1,25 @@
 Updates:
 
+2-6-2022
+- Fixed bug in WITHIN that dropped NAAM_VORIGE_2 and NAAM_VOLGENDE_1 from output
+- Implemented new year_birth variable that combines information from year_birth, year_event (of births), and year_birth_age_based
+- Added eigenaar, inschrijving to metadata WITHIN matching
+- Added alternative match score that considers levenshtein distance of name matching
+- Particulieren and plantages cannot match between series
+- 2 mothers without a name now only receive a match score of 2.5 WITHIN and BETWEEN series 3 and 4
+- When matching BETWEEN non-consecutive series now requires individuals to be alive at the end of the previous series
+- Output from WITHIN matching is now stored in 1 xlsx table
+- Output from BETWEEN matching now includes words plantages and particulieren.
+
+30-5-2022
+- Implemented adaptive Levenshtein
+	- Made maximum Levenshtein distance of naam dependent on the length of the enslaved person's name
+	- Made maximum Levenshtein distance of moeder names dependent on the length of the mother's name
+	- Made maximum Levenshtein distance of PARTICULIERE eigenaren dependent on the length of the PRIVATE owners's name
+	- Set maximum Levenshtein matching of PLANTAGE eigenaren to 0
+- BETWEEN matches for series 3 and 4 again contain all entries
+- removed match_lv from output files
+
 24-5-2022
 - Automatically makes folders to store matches
 - Fixed bug in date matching
@@ -13,7 +33,7 @@ Updates:
 - Previous and next enslaved are now also scored in WITHIN for group transfers
 - BETWEEN now matches end/begin combinations or events that occured in overlapping years (1838, 1848, 1851-3), rather than all entries. As a result,
 	- We now only check the previous entry - rather than the previous next entry - for the last-listed entry on a folio
-	- Only look for duplicates that occured in in overlapping years (1 year in series 1-2, 2-3), (3 years in series 3-4).
+	- Only look for duplicates that occured in in overlapping years (1 year in series 1-2, 2-3), (3 years in series 3-4)
 
 18-5-2022
 - Added adaptive Levenshtein

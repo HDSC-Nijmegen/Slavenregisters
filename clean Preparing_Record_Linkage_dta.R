@@ -906,7 +906,9 @@
     df$Naam_number <- ifelse(grepl("FB", df$Naam), "FB", df$Naam_number)
     df$Naam_number <- ifelse(grepl("FD", df$Naam), "FD", df$Naam_number)
     df$Naam_number <- ifelse(grepl("IB", df$Naam), "IB", df$Naam_number)
-    df$Naam_number <- ifelse(grepl("LR", df$Naam), "LR", df$Naam_number)
+    df$Naam_number <- ifelse(grepl("Ns", df$Naam), "NS", df$Naam_number)
+    df$Naam_number <- ifelse(grepl(" p w", df$Naam), "PW", df$Naam_number)
+    df$Naam_number <- ifelse(grepl(" P W", df$Naam), "PW", df$Naam_number)
     df$Naam_number <- ifelse(grepl("NS", df$Naam), "NS", df$Naam_number)
     df$Naam_number <- ifelse(grepl("S P", df$Naam), "SP", df$Naam_number)
     df$Naam_number <- ifelse(grepl("SP", df$Naam), "SP", df$Naam_number)
@@ -954,13 +956,16 @@
     df$Naam <- gsub(" FB", "", df$Naam)
     df$Naam <- gsub(" FD", "", df$Naam)
     df$Naam <- gsub(" IB", "", df$Naam)
-    df$Naam <- gsub(" LR", "", df$Naam)
     df$Naam[df$source_order=="22300287896"] <- "Christiaan NS"
+    df$Naam <- gsub(" Ns", "", df$Naam)
     df$Naam <- gsub(" NS", "", df$Naam)
+    df$Naam <- gsub(" p w", "", df$Naam)
+    df$Naam <- gsub(" P W", "", df$Naam)
     df$Naam <- gsub(" S P", "", df$Naam)
     df$Naam <- gsub(" SP", "", df$Naam)
     df$Naam <- gsub(" VCIP", "", df$Naam)
     df$Naam <- gsub(" V C I P", "", df$Naam)
+    df$Naam <- gsub(" vz", "", df$Naam)
     df$Naam <- gsub(" VZ", "", df$Naam)
     df$Naam <- gsub(" z b", "", df$Naam)
     df$Naam <- gsub(" \\(zne )", "", df$Naam)
@@ -1582,6 +1587,7 @@
     df$Moeder <- gsub("Zeewijk", " Zeewijk", df$Moeder)
     #L en R
     df$Moeder <- ifelse(grepl("[a-z]L", df$Moeder), gsub("L ", " L ", df$Moeder), df$Moeder)
+    df$Moeder <- gsub("LR", " Land en Rust", df$Moeder)
     df$Moeder <- gsub("L R", " Land en Rust", df$Moeder)
     df$Moeder <- gsub("L en R", " Land en Rust", df$Moeder)
     df$Moeder <- gsub("LsR", " Land en Rust", df$Moeder)
@@ -1867,9 +1873,12 @@
   #### section 5: clean Eigenaren ####
   ####################################
     
-    #filter privé-eigenaren
+   #change Avondrust into Arendrust
+    df$Eigenaar <- gsub("Avondrust", "Arendrust", df$Eigenaar)
+    
+   #filter privé-eigenaren
     Index <- df[df$Typeregister=="Particulieren", c("Eigenaar", "source_order")]
-    #add corrected titles
+   #add corrected titles
     Index <- merge(Index, Eigenaren_standardized, by="source_order", all.x=T)
    #deduplicate Eigenaar
     Index <- Index[which(!duplicated(Index[,c("Eigenaar")])), ]
@@ -2281,16 +2290,28 @@
     
     
     
+  ######################################
+  #### section 8: Impute birth year ####
+  ######################################
+    
+    df$year_birth2 <- ifelse(df$year_birth!=-1, df$year_birth,
+                             ifelse(df$in_event2=="Birth" & df$year_entry!=-1, df$year_entry, df$year_birth_age_based))
+    df$year_birth_flag <- ifelse(df$year_birth!=-1, "year_birth",
+                                 ifelse(df$in_event2=="Birth" & df$year_entry!=-1, "in_event", 
+                                        ifelse(df$year_birth_age_based!=-1, "year_birth_age_based", "")))
+    
+    
+    
   #############################################################
-  #### section 8: save cleaned outfile, ready for matching ####
+  #### section 9: save cleaned outfile, ready for matching ####
   #############################################################
     
     colnames(df)
-    x <- df[, c("source_order", "primary_key", 
+    df <- df[, c("source_order", "primary_key", 
                  "Inventarisnummer", "Folionummer", "Serieregister", "Serieregister_nr", "Anno", "Typeregister", "Scan",
                  "Geslacht", "sex",
                  "Naam", "Naam_number", "Extrainformatiebijnaam", "Naam_original",
-                 "day_birth", "month_birth", "year_birth", "year_birth_age_based",
+                 "day_birth", "month_birth", "year_birth", "year_birth_age_based", "year_birth2", "year_birth_flag",
                  "day_death", "month_death", "year_death",
                  "age",
                  "Moeder", "Moeder_number", "Moeder_birthyear", "Moeder_reference", "Moeder_overleden", "Moeder_1_Entry", "Moeder_2_Naam", "Moeder_incongruence", "Moeder_original",

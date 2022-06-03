@@ -25,7 +25,7 @@
   
   #open dataset
   setwd("U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching")
-  df <- fread("Cleaned Registry/cleaned slave register 2022-05-23.txt", encoding="UTF-8")
+  df <- fread("Cleaned Registry/cleaned slave register 2022-06-02.txt", encoding="UTF-8")
   
   #check data
   as.data.frame(table(df$Typeregister))
@@ -142,6 +142,9 @@
                                      stringdist(df_matched$Naam_volgende_1, df_matched$Naam_volgende_2)<=lev_dist_laglead |
                                      stringdist(df_matched$Naam_vorige_1, df_matched$Naam_vorige_2)<=lev_dist_laglead & 
                                      df_matched$Naam_volgende_1==""), ]
+   #Type register is identical
+    df_matched <- df_matched[df_matched$Typeregister_1==df_matched$Typeregister_2, ]
+    
     
     
   #### step 4: add metadata ####
@@ -171,12 +174,14 @@
                                            ifelse(df_matched$Naam_number_1!=df_matched$Naam_number_2, -1, 1))
    #mother
     df_matched$Match_moeder <- ifelse(is.na(df_matched$Moeder_1) | is.na(df_matched$Moeder_2) | 
-                                        df_matched$Moeder_lv>lev_dist_moeder, 0, 1)
+                                        df_matched$Moeder_lv>lev_dist_moeder |
+                                        df_matched$Moeder_1==df_matched$Moeder_2 & df_matched$Moeder_1=="" & NUMMER1!=3 & NUMMER2!=4, 0, 1)
    #mother adaptive Levenshtein
     df_matched$Match_moeder_adaptive <- ifelse(is.na(df_matched$Moeder_1) | is.na(df_matched$Moeder_2) | df_matched$Moeder_1=="" | df_matched$Moeder_2=="" |
                                                  nchar(df_matched$Moeder_1)>=2 & nchar(df_matched$Moeder_1)<=3 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>1 |
                                                  nchar(df_matched$Moeder_1)>=4 & nchar(df_matched$Moeder_1)<=8 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>2 |
-                                                 nchar(df_matched$Moeder_1)>=9 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>3, 0, 1)
+                                                 nchar(df_matched$Moeder_1)>=9 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>3 |
+                                                 df_matched$Moeder_1==df_matched$Moeder_2 & df_matched$Moeder_1=="" & NUMMER1!=3 & NUMMER2!=4, 0, 1)
    #moeder_number
     df_matched$Match_moeder_number <- ifelse(is.na(df_matched$Moeder_number_1) | is.na(df_matched$Moeder_number_2) |
                                                df_matched$Moeder_number_1=="" & df_matched$Moeder_number_2=="", 0,
@@ -203,6 +208,8 @@
                                 2*df_matched$Match_year + 
                                 df_matched$Match_vorige + df_matched$Match_volgende -
                                 df_matched$Out_unended
+    df_matched$Match_score_plus_naam <- ifelse(df_matched$Naam_lv==0, df_matched$Match_score+2,
+                                               ifelse(df_matched$Naam_lv==1, df_matched$Match_score+1, df_matched$Match_score))
     
     
    #### step 5: filter best match ####
@@ -257,12 +264,14 @@
                                         ifelse(df_full$Naam_number_1!=df_full$Naam_number_2, -1, 1))
    #mother
     df_full$Match_moeder <- ifelse(is.na(df_full$Moeder_1) | is.na(df_full$Moeder_2) | 
-                                     df_full$Moeder_lv>lev_dist_moeder, 0, 1)
+                                     df_full$Moeder_lv>lev_dist_moeder |
+                                     df_full$Moeder_1==df_full$Moeder_2 & df_full$Moeder_1=="" & NUMMER1!=3 & NUMMER2!=4, 0, 1)
    #mother adaptive Levenshtein
     df_full$Match_moeder_adaptive <- ifelse(is.na(df_full$Moeder_1) | is.na(df_full$Moeder_2) | df_full$Moeder_1=="" | df_full$Moeder_2=="" |
                                               nchar(df_full$Moeder_1)>=2 & nchar(df_full$Moeder_1)<=3 & stringdist(df_full$Moeder_1, df_full$Moeder_2)>1 |
                                               nchar(df_full$Moeder_1)>=4 & nchar(df_full$Moeder_1)<=8 & stringdist(df_full$Moeder_1, df_full$Moeder_2)>2 |
-                                              nchar(df_full$Moeder_1)>=9 & stringdist(df_full$Moeder_1, df_full$Moeder_2)>3, 0, 1)
+                                              nchar(df_full$Moeder_1)>=9 & stringdist(df_full$Moeder_1, df_full$Moeder_2)>3 |
+                                              df_full$Moeder_1==df_full$Moeder_2 & df_full$Moeder_1=="" & NUMMER1!=3 & NUMMER2!=4, 0, 1)
    #moeder_number
     df_full$Match_moeder_number <- ifelse(is.na(df_full$Moeder_number_1) | is.na(df_full$Moeder_number_2) | 
                                             df_full$Moeder_number_1=="" & df_full$Moeder_number_2=="", 0, 
@@ -323,7 +332,7 @@
   #### section 0b: load program for matching WITHIN series ####
   #############################################################
   
-  match_within <- function(df1, lev_dist_naam, lev_dist_moeder, lv_dynamic="yes"){
+  match_within <- function(df1, lev_dist_naam, lev_dist_moeder, NUMMER1, lv_dynamic="yes"){
     
    #### step 1: determine Levenshtein distance for all NAAM combinations ####
     
@@ -450,11 +459,15 @@
     df_matched$Match_moeder <- ifelse(is.na(df_matched$Moeder_1) | is.na(df_matched$Moeder_2) | 
                                         df_matched$Moeder_1=="" & df_matched$Moeder_2!="" | 
                                         df_matched$Moeder_1!="" & df_matched$Moeder_2=="" | 
-                                        df_matched$Moeder_lv>lev_dist_moeder, 0, 1)
+                                        df_matched$Moeder_lv>lev_dist_moeder |
+                                        df_matched$Moeder_1==df_matched$Moeder_2 & df_matched$Moeder_1=="" & NUMMER1==1 |
+                                        df_matched$Moeder_1==df_matched$Moeder_2 & df_matched$Moeder_1=="" & NUMMER1==2, 0, 1)
    #mother adaptive Levenshtein
     df_matched$Match_moeder_adaptive <- ifelse(is.na(df_matched$Moeder_1) | is.na(df_matched$Moeder_2) | df_matched$Moeder_1=="" | df_matched$Moeder_2=="" |
                                                  nchar(df_matched$Moeder_1)>=2 & nchar(df_matched$Moeder_1)<=3 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>1 |
-                                                 nchar(df_matched$Moeder_1)>=4 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>2, 0, 1)
+                                                 nchar(df_matched$Moeder_1)>=4 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>2 |
+                                                 df_matched$Moeder_1==df_matched$Moeder_2 & df_matched$Moeder_1=="" & NUMMER1==1 |
+                                                 df_matched$Moeder_1==df_matched$Moeder_2 & df_matched$Moeder_1=="" & NUMMER1==2, 0, 1)
    #moeder_number
     df_matched$Match_moeder_number <- ifelse(is.na(df_matched$Moeder_number_1) | is.na(df_matched$Moeder_number_2), 0,
                                              ifelse(df_matched$Moeder_number_1!=df_matched$Moeder_number_2, -1, 1))
@@ -489,6 +502,8 @@
       1*df_matched$Match_day_event +
       1*df_matched$Match_vorige +
       1*df_matched$Match_volgende
+    df_matched$Match_score_plus_naam <- ifelse(df_matched$Naam_lv==0, df_matched$Match_score+2,
+                                               ifelse(df_matched$Naam_lv==1, df_matched$Match_score+1, df_matched$Match_score))
     
     
   #### step 5: filter best match ####
@@ -616,11 +631,11 @@
     
   #add type register
    #source_order_1
-    x <- df[,c("source_order", "Typeregister")]
-    colnames(x) <- c("source_order_1", "Typeregister_1")
+    x <- df[,c("source_order", "Typeregister", "Eigenaar", "Aanvullendeinformatieuitschrij")]
+    colnames(x) <- c("source_order_1", "Typeregister_1", "Eigenaar_1", "Aanvullendeinformatieuitschrijving_1")
     df_full <- merge(df_full, x, by="source_order_1", all.x=T)
    #source_order_1
-    colnames(x) <- c("source_order_2", "Typeregister_2")
+    colnames(x) <- c("source_order_2", "Typeregister_2", "Eigenaar_2", "Aanvullendeinformatieinschrijving_2")
     df_full <- merge(df_full, x, by="source_order_2", all.x=T)
     
    #order
@@ -636,7 +651,10 @@
                           paste(c("year_birth", "year_birth"), 1:2, sep="_"),
                           paste(c("month_exit", "month_entry"), 1:2, sep="_"),
                           paste(c("day_exit", "day_entry"), 1:2, sep="_"),
-                          paste(c("Naam_vorige", "Naam_volgende"), 1:2, sep="_"))] %>% arrange(source_order_1, source_order_2)
+                          paste(c("Naam_vorige", "Naam_vorige"), 1:2, sep="_"),
+                          paste(c("Naam_volgende", "Naam_volgende"), 1:2, sep="_"),
+                          paste(c("Eigenaar", "Eigenaar"), 1:2, sep="_"),
+                          paste(c("Aanvullendeinformatieuitschrijving", "Aanvullendeinformatieinschrijving"), 1:2, sep="_"))] %>% arrange(source_order_1, source_order_2)
     df_full <- df_full %>% arrange(source_order_1, -Match_score)
     
     
@@ -653,7 +671,10 @@
                            paste(c("year_birth", "year_birth"), 1:2, sep="_"),
                            paste(c("month_exit", "month_entry"), 1:2, sep="_"),
                            paste(c("day_exit", "day_entry"), 1:2, sep="_"),
-                           paste(c("Naam_vorige", "Naam_volgende"), 1:2, sep="_"))
+                           paste(c("Naam_vorige", "Naam_vorige"), 1:2, sep="_"),
+                           paste(c("Naam_volgende", "Naam_volgende"), 1:2, sep="_"),
+                           paste(c("Eigenaar", "Eigenaar"), 1:2, sep="_"),
+                           paste(c("Aanvullendeinformatieuitschrijving", "Aanvullendeinformatieinschrijving"), 1:2, sep="_"))
     df_full
     
   }
@@ -665,6 +686,7 @@
   
     df$Eigenaar_original <- df$Eigenaar
     df$Eigenaar <- ifelse(df$Typeregister=="Plantages", df$plantation_name, df$Eigenaar_Last_name)
+    df$year_birth <- df$year_birth2
   
   #match serie 3 & 4
    #select series
@@ -692,21 +714,24 @@
   #match serie 2 & 4
    #select series
     Serie2 <- df[df$Serieregister_nr==2 & df$out_event2=="Ended", c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
-    Serie4 <- df[df$Serieregister_nr==4 & df$in_event2=="Beginning", c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie4 <- df[df$Serieregister_nr==4 & df$in_event2=="Beginning" & df$year_birth<=1848 |
+                   df$Serieregister_nr==4 & df$in_event2=="Beginning" & df$year_birth==-1, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
    #match series
     Serie24 <- match_between(Serie2, Serie4, lev_dist_naam=3, lev_dist_moeder=3, lev_dist_eigenaar=3, lev_dist_laglead=3, NUMMER1=2, NUMMER2=4)
     
   #match serie 1 & 4
    #select series
     Serie1 <- df[df$Serieregister_nr==1 & df$out_event2=="Ended", c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
-    Serie4 <- df[df$Serieregister_nr==4 & df$in_event2=="Beginning", c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie4 <- df[df$Serieregister_nr==4 & df$in_event2=="Beginning" & df$year_birth<=1838 |
+                   df$Serieregister_nr==4 & df$in_event2=="Beginning" & df$year_birth<=-1, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
    #match series
     Serie14 <- match_between(Serie1, Serie4, lev_dist_naam=3, lev_dist_moeder=3, lev_dist_eigenaar=3, lev_dist_laglead=3, NUMMER1=1, NUMMER2=4)
     
   #match serie 1 & 3
    #select series
     Serie1 <- df[df$Serieregister_nr==1 & df$out_event2=="Ended", c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
-    Serie3 <- df[df$Serieregister_nr==3 & df$in_event2=="Beginning", c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie3 <- df[df$Serieregister_nr==3 & df$in_event2=="Beginning" & df$year_birth<=1838 |
+                   df$Serieregister_nr==3 & df$in_event2=="Beginning" & df$year_birth<=-1, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
    #match series
     Serie13 <- match_between(Serie1, Serie3, lev_dist_naam=3, lev_dist_moeder=3, lev_dist_eigenaar=3, lev_dist_laglead=3, NUMMER1=1, NUMMER2=3)
     
@@ -765,10 +790,10 @@
                                            "sex")]
     Serie1 <- Serie1[which(Serie1$out_event2=="Transferred" | Serie1$in_event2=="Transferred"),]
     
-    Serie44 <- match_within(Serie4, lev_dist_naam=3, lev_dist_moeder=3)
-    Serie33 <- match_within(Serie3, lev_dist_naam=3, lev_dist_moeder=3)
-    Serie22 <- match_within(Serie2, lev_dist_naam=3, lev_dist_moeder=3)
-    Serie11 <- match_within(Serie1, lev_dist_naam=3, lev_dist_moeder=3)
+    Serie44 <- match_within(Serie4, lev_dist_naam=3, lev_dist_moeder=3, NUMMER1=4)
+    Serie33 <- match_within(Serie3, lev_dist_naam=3, lev_dist_moeder=3, NUMMER1=3)
+    Serie22 <- match_within(Serie2, lev_dist_naam=3, lev_dist_moeder=3, NUMMER1=2)
+    Serie11 <- match_within(Serie1, lev_dist_naam=3, lev_dist_moeder=3, NUMMER1=1)
     
     
   ###############################
@@ -787,8 +812,6 @@
       dir.create(paste0(getwd(), "/Between/", Sys.Date(), "/Particulieren"))
       dir.create(paste0(getwd(), "/Between/", Sys.Date(), "/Plantages"))
       dir.create(paste0(getwd(), "/Within/", Sys.Date()))
-      dir.create(paste0(getwd(), "/Within/", Sys.Date(), "/Particulieren"))
-      dir.create(paste0(getwd(), "/Within/", Sys.Date(), "/Plantages"))
     }
     
     
@@ -807,12 +830,12 @@
     Plantages24 <- Serie24[which(Serie24$Typeregister_2=="Plantages" | Serie24$Typeregister_4=="Plantages"),]
     Plantages14 <- Serie14[which(Serie14$Typeregister_1=="Plantages" | Serie14$Typeregister_4=="Plantages"),]
     Plantages13 <- Serie13[which(Serie13$Typeregister_1=="Plantages" | Serie13$Typeregister_3=="Plantages"),]
-    write.xlsx(Plantages34, paste0("Between/", Sys.Date(), "/Plantages/3-4 matches.xlsx"), overwrite=T)
-    write.xlsx(Plantages23, paste0("Between/", Sys.Date(), "/Plantages/2-3 matches.xlsx"), overwrite=T)
-    write.xlsx(Plantages12, paste0("Between/", Sys.Date(), "/Plantages/1-2 matches.xlsx"), overwrite=T)
-    write.xlsx(Plantages24, paste0("Between/", Sys.Date(), "/Plantages/2-4 matches.xlsx"), overwrite=T)
-    write.xlsx(Plantages14, paste0("Between/", Sys.Date(), "/Plantages/1-4 matches.xlsx"), overwrite=T)
-    write.xlsx(Plantages13, paste0("Between/", Sys.Date(), "/Plantages/1-3 matches.xlsx"), overwrite=T)
+    write.xlsx(Plantages34, paste0("Between/", Sys.Date(), "/Plantages/3-4 matches plantages.xlsx"), overwrite=T)
+    write.xlsx(Plantages23, paste0("Between/", Sys.Date(), "/Plantages/2-3 matches plantages.xlsx"), overwrite=T)
+    write.xlsx(Plantages12, paste0("Between/", Sys.Date(), "/Plantages/1-2 matches plantages.xlsx"), overwrite=T)
+    write.xlsx(Plantages24, paste0("Between/", Sys.Date(), "/Plantages/2-4 matches plantages.xlsx"), overwrite=T)
+    write.xlsx(Plantages14, paste0("Between/", Sys.Date(), "/Plantages/1-4 matches plantages.xlsx"), overwrite=T)
+    write.xlsx(Plantages13, paste0("Between/", Sys.Date(), "/Plantages/1-3 matches plantages.xlsx"), overwrite=T)
    #excel particulieren
     Particulieren34 <- Serie34[which(Serie34$Typeregister_3=="Particulieren" | Serie34$Typeregister_4=="Particulieren"),]
     Particulieren23 <- Serie23[which(Serie23$Typeregister_2=="Particulieren" | Serie23$Typeregister_3=="Particulieren"),]
@@ -820,12 +843,12 @@
     Particulieren24 <- Serie24[which(Serie24$Typeregister_2=="Particulieren" | Serie24$Typeregister_4=="Particulieren"),]
     Particulieren14 <- Serie14[which(Serie14$Typeregister_1=="Particulieren" | Serie14$Typeregister_4=="Particulieren"),]
     Particulieren13 <- Serie13[which(Serie13$Typeregister_1=="Particulieren" | Serie13$Typeregister_3=="Particulieren"),]
-    write.xlsx(Particulieren34, paste0("Between/", Sys.Date(), "/Particulieren/3-4 matches.xlsx"), overwrite=T)
-    write.xlsx(Particulieren23, paste0("Between/", Sys.Date(), "/Particulieren/2-3 matches.xlsx"), overwrite=T)
-    write.xlsx(Particulieren12, paste0("Between/", Sys.Date(), "/Particulieren/1-2 matches.xlsx"), overwrite=T)
-    write.xlsx(Particulieren24, paste0("Between/", Sys.Date(), "/Particulieren/2-4 matches.xlsx"), overwrite=T)
-    write.xlsx(Particulieren14, paste0("Between/", Sys.Date(), "/Particulieren/1-4 matches.xlsx"), overwrite=T)
-    write.xlsx(Particulieren13, paste0("Between/", Sys.Date(), "/Particulieren/1-3 matches.xlsx"), overwrite=T)
+    write.xlsx(Particulieren34, paste0("Between/", Sys.Date(), "/Particulieren/3-4 matches particulieren.xlsx"), overwrite=T)
+    write.xlsx(Particulieren23, paste0("Between/", Sys.Date(), "/Particulieren/2-3 matches particulieren.xlsx"), overwrite=T)
+    write.xlsx(Particulieren12, paste0("Between/", Sys.Date(), "/Particulieren/1-2 matches particulieren.xlsx"), overwrite=T)
+    write.xlsx(Particulieren24, paste0("Between/", Sys.Date(), "/Particulieren/2-4 matches particulieren.xlsx"), overwrite=T)
+    write.xlsx(Particulieren14, paste0("Between/", Sys.Date(), "/Particulieren/1-4 matches particulieren.xlsx"), overwrite=T)
+    write.xlsx(Particulieren13, paste0("Between/", Sys.Date(), "/Particulieren/1-3 matches particulieren.xlsx"), overwrite=T)
     
     
   #write outfiles WITHIN
@@ -834,24 +857,11 @@
     write.table(Serie33, paste0("Within/", Sys.Date(), "/3-3 matches.txt"), quote=F, sep ="\t", col.names=T, row.names=F)
     write.table(Serie22, paste0("Within/", Sys.Date(), "/2-2 matches.txt"), quote=F, sep ="\t", col.names=T, row.names=F)
     write.table(Serie11, paste0("Within/", Sys.Date(), "/1-1 matches.txt"), quote=F, sep ="\t", col.names=T, row.names=F)
-   #excel plantages
-    Plantages44 <- Serie44[which(Serie44$Typeregister_1=="Plantages" | Serie44$Typeregister_2=="Plantages"),]
-    Plantages33 <- Serie33[which(Serie33$Typeregister_1=="Plantages" | Serie33$Typeregister_2=="Plantages"),]
-    Plantages22 <- Serie22[which(Serie22$Typeregister_1=="Plantages" | Serie22$Typeregister_2=="Plantages"),]
-    Plantages11 <- Serie11[which(Serie11$Typeregister_1=="Plantages" | Serie11$Typeregister_2=="Plantages"),]
-    write.xlsx(Plantages44, paste0("Within/", Sys.Date(), "/Plantages/4-4 matches.xlsx"), overwrite=T)
-    write.xlsx(Plantages33, paste0("Within/", Sys.Date(), "/Plantages/3-3 matches.xlsx"), overwrite=T)
-    write.xlsx(Plantages22, paste0("Within/", Sys.Date(), "/Plantages/2-2 matches.xlsx"), overwrite=T)
-    write.xlsx(Plantages11, paste0("Within/", Sys.Date(), "/Plantages/1-1 matches.xlsx"), overwrite=T)
-   #excel particulieren
-    Particulieren44 <- Serie44[which(Serie44$Typeregister_1=="Particulieren" | Serie44$Typeregister_2=="Particulieren"),]
-    Particulieren33 <- Serie33[which(Serie33$Typeregister_1=="Particulieren" | Serie33$Typeregister_2=="Particulieren"),]
-    Particulieren22 <- Serie22[which(Serie22$Typeregister_1=="Particulieren" | Serie22$Typeregister_2=="Particulieren"),]
-    Particulieren11 <- Serie11[which(Serie11$Typeregister_1=="Particulieren" | Serie11$Typeregister_2=="Particulieren"),]
-    write.xlsx(Particulieren44, paste0("Within/", Sys.Date(), "/Particulieren/4-4 matches.xlsx"), overwrite=T)
-    write.xlsx(Particulieren33, paste0("Within/", Sys.Date(), "/Particulieren/3-3 matches.xlsx"), overwrite=T)
-    write.xlsx(Particulieren22, paste0("Within/", Sys.Date(), "/Particulieren/2-2 matches.xlsx"), overwrite=T)
-    write.xlsx(Particulieren11, paste0("Within/", Sys.Date(), "/Particulieren/1-1 matches.xlsx"), overwrite=T)
+   #excel
+    write.xlsx(Serie44, paste0("Within/", Sys.Date(), "/4-4 matches.xlsx"), overwrite=T)
+    write.xlsx(Serie33, paste0("Within/", Sys.Date(), "/3-3 matches.xlsx"), overwrite=T)
+    write.xlsx(Serie22, paste0("Within/", Sys.Date(), "/2-2 matches.xlsx"), overwrite=T)
+    write.xlsx(Serie11, paste0("Within/", Sys.Date(), "/1-1 matches.xlsx"), overwrite=T)
     
     
     
