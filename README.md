@@ -146,7 +146,7 @@ Cleans the names in the slave registers.
 | *Flag widows* | weduwe |
 
 
-### 7. summarise in and out events
+### 8. summarise in and out events
 | Standardisation	| In event | Out event |
 | --------------- | -------- | --------- |
 | *Beginning* | Start Series |
@@ -157,7 +157,15 @@ Cleans the names in the slave registers.
 | *Unknown* | Unknown | Unknown |
 | *Other* | Remove | Afgeschreven, Diseased, Escaped, Freedom, Remove |
 
-### 8. re-order dataset
+### 9. combine birth information in one variable
+    df$year_birth2 <- ifelse(df$year_birth!=-1, df$year_birth,
+                             ifelse(df$in_event2=="Birth" & df$year_entry!=-1, df$year_entry, df$year_birth_age_based))
+    df$year_birth_flag <- ifelse(df$year_birth!=-1, "year_birth",
+                                 ifelse(df$in_event2=="Birth" & df$year_entry!=-1, "in_event", 
+                                        ifelse(df$year_birth_age_based!=-1, "year_birth_age_based", "")))
+
+
+### 10. re-order dataset
 INSERT TABLES
 
 
