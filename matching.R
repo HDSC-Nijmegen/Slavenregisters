@@ -468,15 +468,15 @@
     df_matched$Match_moeder <- ifelse(is.na(df_matched$Moeder_1) | is.na(df_matched$Moeder_2) | 
                                         df_matched$Moeder_1=="" & df_matched$Moeder_2!="" | 
                                         df_matched$Moeder_1!="" & df_matched$Moeder_2=="" | 
-                                        df_matched$Moeder_lv>lev_dist_moeder)
-    if(NUMMER1!=3 | NUMMER2!=4){
+                                        df_matched$Moeder_lv>lev_dist_moeder, 0, 1)
+    if(NUMMER1!=3 & NUMMER1!=4){
       df_matched$Match_moeder <- ifelse(df_matched$Moeder_1==df_matched$Moeder_2 & df_matched$Moeder_1=="", 0, df_matched$Match_moeder)
     }
    #mother adaptive Levenshtein
     df_matched$Match_moeder_adaptive <- ifelse(is.na(df_matched$Moeder_1) | is.na(df_matched$Moeder_2) | df_matched$Moeder_1=="" | df_matched$Moeder_2=="" |
                                                  nchar(df_matched$Moeder_1)>=2 & nchar(df_matched$Moeder_1)<=3 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>1 |
                                                  nchar(df_matched$Moeder_1)>=4 & stringdist(df_matched$Moeder_1, df_matched$Moeder_2)>2, 0, 1)
-    if(NUMMER1!=3 | NUMMER2!=4){
+    if(NUMMER1!=3 & NUMMER1!=4){
       df_matched$Match_moeder_adaptive <- ifelse(df_matched$Moeder_1==df_matched$Moeder_2 & df_matched$Moeder_1=="", 0, df_matched$Match_moeder_adaptive)
     }
    #moeder_number
@@ -606,14 +606,14 @@
                                      df_full$Moeder_1=="" & df_full$Moeder_2!="" | 
                                      df_full$Moeder_1!="" & df_full$Moeder_2=="" | 
                                      df_full$Moeder_lv>lev_dist_moeder, 0, 1)
-    if(NUMMER1!=3 | NUMMER2!=4){
+    if(NUMMER1!=3 & NUMMER1!=4){
       df_full$Match_moeder <- ifelse(df_full$Moeder_1==df_full$Moeder_2 & df_full$Moeder_1=="", 0, df_full$Match_moeder)
     }
    #match mother adaptive
     df_full$Match_moeder_adaptive <- ifelse(is.na(df_full$Moeder_1) | is.na(df_full$Moeder_2) | df_full$Moeder_1=="" | df_full$Moeder_2=="" |
                                               nchar(df_full$Moeder_1)>=2 & nchar(df_full$Moeder_1)<=3 & stringdist(df_full$Moeder_1, df_full$Moeder_2)>1 |
                                               nchar(df_full$Moeder_1)>=4 & stringdist(df_full$Moeder_1, df_full$Moeder_2)>2, 0, 1)
-    if(NUMMER1!=3 | NUMMER2!=4){
+    if(NUMMER1!=3 & NUMMER1!=4){
       df_full$Match_moeder_adaptive <- ifelse(df_full$Moeder_1==df_full$Moeder_2 & df_full$Moeder_1=="", 0, df_full$Match_moeder_adaptive)
     }
    #moeder_number
@@ -650,7 +650,7 @@
     
   #add type register
    #source_order_1
-    x <- df[,c("source_order", "Typeregister", "Eigenaar", "Aanvullendeinformatieuitschrij")]
+    x <- df[,c("source_order", "Typeregister", "Eigenaar", "Aanvullendeinformatieinschrijv", "Aanvullendeinformatieuitschrij")]
     colnames(x) <- c("source_order_1", "Typeregister_1", "Eigenaar_1", "Aanvullendeinformatieinschrijving_1", "Aanvullendeinformatieuitschrijving_1")
     df_full <- merge(df_full, x, by="source_order_1", all.x=T)
    #source_order_1
