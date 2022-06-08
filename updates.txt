@@ -1,11 +1,15 @@
 Updates:
 
+8-6-2022
+- Fixed bug that attached match score to unmatched mother names in series 1 and 2
+- Added match scores that take Levenshtein distance on name into account
+
 2-6-2022
-- Fixed bug in WITHIN that dropped NAAM_VORIGE_2 and NAAM_VOLGENDE_1 from output
+- Fixed bug in WITHIN that dropped naam_vorige_2 and naam_volgende_1 from output
 - Implemented new year_birth variable that combines information from year_birth, year_event (of births), and year_birth_age_based
 - Added eigenaar, inschrijving to metadata WITHIN matching
-- Added alternative match score that considers levenshtein distance of name matching
-- Particulieren and plantages cannot match between series
+- Added alternative match score that considers Levenshtein distance of name matching
+- Particulieren and plantages cannot match BETWEEN series
 - 2 mothers without a name now only receive a match score of 2.5 WITHIN and BETWEEN series 3 and 4
 - When matching BETWEEN non-consecutive series now requires individuals to be alive at the end of the previous series
 - Output from WITHIN matching is now stored in 1 xlsx table
