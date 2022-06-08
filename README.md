@@ -162,11 +162,11 @@ Cleans the names in the slave registers.
 - Determine year of birth
 - Flag origin of birth information
 
-| Priority	| Variable | Flag |
+| Priority	| Type of information | Flag |
 | -------- | -------- | ---- |
-| *1.* | year_birth | |  
-| *2.* | in_event | |
-| *3.* | age | |
+| *1.* | year of birth mentioned | year_birth |  
+| *2.* | birth registered | in_event |
+| *3.* | age mentioned | year_birth_age_based |
 | *4.* | NA | NA |
 
 
