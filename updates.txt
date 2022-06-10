@@ -1,4 +1,10 @@
 Updates:
+10-6-2022
+ - Fixed bug naam_vorige and naam_volgende: Missing entries incorrectly received points
+ - Fixed bug in match score that used Naam_moeder instead of Naam_moeder_adaptive
+ - Added filter in WITHIN that prevents that entries match themselves
+ 
+
 
 8-6-2022
 - Fixed bug that attached match score to unmatched mother names in series 1 and 2
