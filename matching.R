@@ -36,7 +36,7 @@
   #### section 0a: load program for matching BETWEEN series ####
   ##############################################################
     
-  match_between <- function(df1, df2, lev_dist_naam, lev_dist_moeder, lev_dist_eigenaar, lev_dist_laglead, NUMMER1, NUMMER2, lv_dynamic="yes"){
+  match_between <- function(df1, df2, lev_dist_naam, lev_dist_moeder, lev_dist_eigenaar, lev_dist_laglead, NUMMER1, NUMMER2){
     
    #### step 1: determine Levenshtein distance for all NAAM combinations ####
 
@@ -200,17 +200,31 @@
                                       df_matched$year_birth_1=="-1" | df_matched$year_birth_2=="-1" | 
                                       df_matched$year_birth_1!=df_matched$year_birth_2, 0, 1) 
    #previous entry
-    df_matched$Match_vorige <- ifelse(df_matched$Naam_vorige_lv<=lev_dist_naam, 1, 0)
+    df_matched$Match_vorige <- ifelse(df_matched$Naam_vorige_1 == "" |
+                                      df_matched$Naam_vorige_2 == "" |
+                                      df_matched$Naam_vorige_lv > lev_dist_laglead, 0, 1)
+   #previous entry adaptive Levensthein
+    df_matched$Match_vorige_adaptive <- ifelse(is.na(df_matched$Naam_vorige_1) | is.na(df_matched$Naam_vorige_2) | df_matched$Naam_vorige_1=="" | df_matched$Naam_vorige_2=="" |
+                                          nchar(df_matched$Naam_vorige_1)>=2 & nchar(df_matched$Naam_vorige_1)<=3 & stringdist(df_matched$Naam_vorige_1, df_matched$Naam_vorige_2)>1 |
+                                          nchar(df_matched$Naam_vorige_1)>=4 & nchar(df_matched$Naam_vorige_1)<=8 & stringdist(df_matched$Naam_vorige_1, df_matched$Naam_vorige_2)>2 |
+                                          nchar(df_matched$Naam_vorige_1)>=9 & stringdist(df_matched$Naam_vorige_1, df_matched$Naam_vorige_2)>3, 0, 1)
    #next entry
-    df_matched$Match_volgende <- ifelse(df_matched$Naam_volgende_lv<=lev_dist_naam, 1, 0)
+    df_matched$Match_volgende <- ifelse(df_matched$Naam_volgende_1 == "" |
+                                      df_matched$Naam_volgende_2 == "" |
+                                      df_matched$Naam_volgende_lv > lev_dist_laglead, 0, 1)
+   #next entry adaptive Levensthein
+    df_matched$Match_volgende_adaptive <- ifelse(is.na(df_matched$Naam_volgende_1) | is.na(df_matched$Naam_volgende_2) | df_matched$Naam_volgende_1=="" | df_matched$Naam_volgende_2=="" |
+                                          nchar(df_matched$Naam_volgende_1)>=2 & nchar(df_matched$Naam_volgende_1)<=3 & stringdist(df_matched$Naam_volgende_1, df_matched$Naam_volgende_2)>1 |
+                                          nchar(df_matched$Naam_volgende_1)>=4 & nchar(df_matched$Naam_volgende_1)<=8 & stringdist(df_matched$Naam_volgende_1, df_matched$Naam_volgende_2)>2 |
+                                          nchar(df_matched$Naam_volgende_1)>=9 & stringdist(df_matched$Naam_volgende_1, df_matched$Naam_volgende_2)>3, 0, 1)
    #out_event
     df_matched$Out_unended <- ifelse(df_matched$Out_event_1!="Ended", 1, 0)
    
   #compute match score
-    df_matched$Match_score <- 2.5*df_matched$Match_moeder + #twice as important + tie-breaker
+    df_matched$Match_score <- 2.5*df_matched$Match_moeder_adaptive + #twice as important + tie-breaker
                                 df_matched$Match_naam_number + df_matched$Match_moeder_number + 
                                 2*df_matched$Match_year + 
-                                df_matched$Match_vorige + df_matched$Match_volgende -
+                                df_matched$Match_vorige_adaptive + df_matched$Match_volgende_adaptive -
                                 df_matched$Out_unended
     df_matched$Match_score_plus_naam210 <- ifelse(df_matched$Naam_lv==0, df_matched$Match_score+2,
                                                   ifelse(df_matched$Naam_lv==1, df_matched$Match_score+1, df_matched$Match_score))
@@ -219,10 +233,8 @@
     
    #### step 5: filter best match ####
     
-    if(lv_dynamic=="yes" | lv_dynamic=="y"){
       df_matched <- df_matched[which(df_matched$Match_adaptive==1 & df_matched$Match_moeder_adaptive==1 & df_matched$Match_eigenaar_adaptive==1 |
                                        df_matched$Match_adaptive==1 & df_matched$Moeder_1=="" & df_matched$Match_eigenaar_adaptive==1),]
-    }
     
     
   #selections
@@ -295,18 +307,21 @@
                                    df_full$year_birth_1=="-1" | df_full$year_birth_2=="-1" | 
                                    df_full$year_birth_1!=df_full$year_birth_2, 0, 1) 
    #previous entry
-    df_full$Match_vorige <- ifelse(is.na(df_full$Naam_vorige_1) | is.na(df_full$Naam_vorige_2) | 
-                                     df_full$Naam_vorige_lv>lev_dist_naam, 0, 1)
+    df_full$Match_vorige <- ifelse(is.na(df_full$Naam_vorige_1) | is.na(df_full$Naam_vorige_2) , 0, df_full$Match_vorige)
+   #previous entry adaptive Levensthein 
+    df_full$Match_vorige_adaptive <- ifelse(is.na(df_full$Naam_vorige_1) | is.na(df_full$Naam_vorige_2) , 0, df_full$Match_vorige_adaptive)
    #next entry
-    df_full$Match_volgende <- ifelse(is.na(df_full$Naam_volgende_1) | is.na(df_full$Naam_volgende_2) | 
-                                       df_full$Naam_volgende_lv>lev_dist_naam, 0, 1)
+    df_full$Match_volgende <- ifelse(is.na(df_full$Naam_volgende_1) | is.na(df_full$Naam_volgende_2), 0, df_full$Match_volgende)
+   #next entry adaptive Levensthein 
+    df_full$Match_volgende_adaptive <- ifelse(is.na(df_full$Naam_volgende_1) | is.na(df_full$Naam_volgende_2), 0, df_full$Match_volgende_adaptive)
+
    
     
    #### step 7: structure and store data frame ####
     
    #order
     df_full <- df_full[,c("Typeregister_1", "Typeregister_2",
-                          "Match", "Match_adaptive", "Match_naam_number", "Match_moeder", "Match_moeder_adaptive", "Match_moeder_number", "Match_year", "Match_vorige", "Match_volgende", "Match_score", "Match_score_plus_naam210", "Match_score_plus_naam100",
+                          "Match", "Match_adaptive", "Match_naam_number", "Match_moeder_adaptive", "Match_moeder_number", "Match_year", "Match_vorige_adaptive", "Match_volgende_adaptive", "Match_score", "Match_score_plus_naam210", "Match_score_plus_naam100",
                           "Naam_lv", "Moeder_lv", "Eigenaar_lv", "Naam_vorige_lv", "Naam_volgende_lv", 
                           paste(c("Out_event", "In_event"), 1:2, sep="_"), 
                           paste(c("source_order", "source_order"), 1:2, sep="_"), 
@@ -321,7 +336,7 @@
     
    #rename
     colnames(df_full) <- c(paste("Typeregister", NUMMER1, sep="_"), paste("Typeregister", NUMMER2, sep="_"),
-                           "Match", "Match_adaptive", "Match_naam_number", "Match_moeder", "Match_moeder_adaptive", "Match_moeder_number", "Match_year", "Match_vorige", "Match_volgende", "Match_score", "Match_score_plus_naam210", "Match_score_plus_naam100",
+                           "Match", "Match_adaptive", "Match_naam_number", "Match_moeder_adaptive", "Match_moeder_number", "Match_year", "Match_vorige_adaptive", "Match_volgende_adaptive", "Match_score", "Match_score_plus_naam210", "Match_score_plus_naam100",
                            "Naam_lv", "Moeder_lv", "Eigenaar_lv", "Naam_vorige_lv", "Naam_volgende_lv", 
                            paste("Out_event", NUMMER1, sep="_"), paste("In_event", NUMMER2, sep="_"),
                            paste("Source_order", NUMMER1, sep="_"), paste("Source_order", NUMMER2, sep="_"),
@@ -341,7 +356,7 @@
   #### section 0b: load program for matching WITHIN series ####
   #############################################################
   
-  match_within <- function(df1, lev_dist_naam, lev_dist_moeder, NUMMER1, lv_dynamic="yes"){
+  match_within <- function(df1, lev_dist_naam, lev_dist_moeder, lev_dist_laglead, NUMMER1){
     
    #### step 1: determine Levenshtein distance for all NAAM combinations ####
     
@@ -421,9 +436,13 @@
    #### step 3: rule-based filtering of matches ####
     
    #filter rows
+    #prevent that entries match themselves
+    df_matched <- df_matched[which(df_matched$source_order_1 != df_matched$source_order_2), ]
+    
     #same sex OR sex = "u"
     df_matched <- df_matched[which(df_matched$sex_1==df_matched$sex_2 | 
                                      df_matched$sex_1=="u" | df_matched$sex_2=="u"), ]
+    
    #select Moeder with: 
      # 1 unknown entry OR 
      # Levenshtein distance <= LEV_DIST_MOEDER
@@ -499,13 +518,17 @@
                                              df_matched$day_exit_1=="-1" | df_matched$day_entry_2=="-1" | 
                                              df_matched$day_exit_1!=df_matched$day_entry_2, 0, 1)
    #previous entry
-    df_matched$Match_vorige <- ifelse(df_matched$Naam_vorige_1!="" & stringdist(df_matched$Naam_vorige_1, df_matched$Naam_vorige_2)>lev_dist_naam, 0, 1)
+    df_matched$Match_vorige <- ifelse(df_matched$Naam_vorige_1=="" |
+                                      df_matched$Naam_vorige_2=="" |
+                                      stringdist(df_matched$Naam_vorige_1, df_matched$Naam_vorige_2)>lev_dist_laglead, 0, 1)
    #next entry
-    df_matched$Match_volgende <- ifelse(df_matched$Naam_volgende_1!="" & stringdist(df_matched$Naam_volgende_1, df_matched$Naam_volgende_2)>lev_dist_naam, 0, 1)
+    df_matched$Match_volgende <- ifelse(df_matched$Naam_volgende_1=="" |
+                                      df_matched$Naam_volgende_2=="" |
+                                      stringdist(df_matched$Naam_volgende_1, df_matched$Naam_volgende_2)>lev_dist_laglead, 0, 1)
     
-    
+ 
   #compute match score
-    df_matched$Match_score <- 2.5*df_matched$Match_moeder + #twice as important + tie-breaker
+    df_matched$Match_score <- 2.5*df_matched$Match_moeder_adaptive + #twice as important + tie-breaker
       df_matched$Match_naam_number + df_matched$Match_moeder_number + 
       2*df_matched$Match_year + 
       2*df_matched$Match_year_event +
@@ -521,10 +544,9 @@
     
   #### step 5: filter best match ####
     
-    if(lv_dynamic=="yes" | lv_dynamic=="y"){
-      df_matched <- df_matched[which(df_matched$Match_adaptive==1 & df_matched$Match_moeder_adaptive==1 |
-                                       df_matched$Match_adaptive==1 & df_matched$Moeder_1==""),]
-    }
+    df_matched <- df_matched[which(df_matched$Match_adaptive==1 & df_matched$Match_moeder_adaptive==1 |
+                                   df_matched$Match_adaptive==1 & df_matched$Moeder_1==""),]
+  
     
   #selections
    #if match score <4, only accept if Naam == almost identical
@@ -813,10 +835,10 @@
                                            "sex")]
     Serie1 <- Serie1[which(Serie1$out_event2=="Transferred" | Serie1$in_event2=="Transferred"),]
     
-    Serie44 <- match_within(Serie4, lev_dist_naam=3, lev_dist_moeder=3, NUMMER1=4)
-    Serie33 <- match_within(Serie3, lev_dist_naam=3, lev_dist_moeder=3, NUMMER1=3)
-    Serie22 <- match_within(Serie2, lev_dist_naam=3, lev_dist_moeder=3, NUMMER1=2)
-    Serie11 <- match_within(Serie1, lev_dist_naam=3, lev_dist_moeder=3, NUMMER1=1)
+    Serie44 <- match_within(Serie4, lev_dist_naam=3, lev_dist_moeder=3, lev_dist_laglead = 3, NUMMER1=4)
+    Serie33 <- match_within(Serie3, lev_dist_naam=3, lev_dist_moeder=3, lev_dist_laglead = 3, NUMMER1=3)
+    Serie22 <- match_within(Serie2, lev_dist_naam=3, lev_dist_moeder=3, lev_dist_laglead = 3, NUMMER1=2)
+    Serie11 <- match_within(Serie1, lev_dist_naam=3, lev_dist_moeder=3, lev_dist_laglead = 3, NUMMER1=1)
     
     
   ###############################
