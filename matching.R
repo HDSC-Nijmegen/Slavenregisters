@@ -521,12 +521,19 @@
     df_matched$Match_vorige <- ifelse(df_matched$Naam_vorige_1=="" |
                                       df_matched$Naam_vorige_2=="" |
                                       stringdist(df_matched$Naam_vorige_1, df_matched$Naam_vorige_2)>lev_dist_laglead, 0, 1)
+   #previous entry adaptive Levensthein
+    df_matched$Match_vorige_adaptive <- ifelse(is.na(df_matched$Naam_vorige_1) | is.na(df_matched$Naam_vorige_2) | df_matched$Naam_vorige_1=="" | df_matched$Naam_vorige_2=="" |
+                                          nchar(df_matched$Naam_vorige_1)>=2 & nchar(df_matched$Naam_vorige_1)<=3 & stringdist(df_matched$Naam_vorige_1, df_matched$Naam_vorige_2)>1 |
+                                          nchar(df_matched$Naam_vorige_1)>=4 & stringdist(df_matched$Naam_vorige_1, df_matched$Naam_vorige_2)>2, 0, 1)
    #next entry
     df_matched$Match_volgende <- ifelse(df_matched$Naam_volgende_1=="" |
                                       df_matched$Naam_volgende_2=="" |
                                       stringdist(df_matched$Naam_volgende_1, df_matched$Naam_volgende_2)>lev_dist_laglead, 0, 1)
+   #next entry adpative Levensthein
+    df_matched$Match_volgende_adaptive <- ifelse(is.na(df_matched$Naam_volgende_1) | is.na(df_matched$Naam_volgende_2) | df_matched$Naam_volgende_1=="" | df_matched$Naam_volgende_2=="" |
+                                          nchar(df_matched$Naam_volgende_1)>=2 & nchar(df_matched$Naam_volgende_1)<=3 & stringdist(df_matched$Naam_volgende_1, df_matched$Naam_volgende_2)>1 |
+                                          nchar(df_matched$Naam_volgende_1)>=4 & stringdist(df_matched$Naam_volgende_1, df_matched$Naam_volgende_2)>2, 0, 1)
     
- 
   #compute match score
     df_matched$Match_score <- 2.5*df_matched$Match_moeder_adaptive + #twice as important + tie-breaker
       df_matched$Match_naam_number + df_matched$Match_moeder_number + 
@@ -534,8 +541,8 @@
       2*df_matched$Match_year_event +
       1*df_matched$Match_month_event +
       1*df_matched$Match_day_event +
-      1*df_matched$Match_vorige +
-      1*df_matched$Match_volgende
+      1*df_matched$Match_vorige_adaptive +
+      1*df_matched$Match_volgende_adaptive
     df_matched$Match_score <- ifelse(df_matched$Match_month_event==1 & df_matched$Match_day_event==1, df_matched$Match_score+2, df_matched$Match_score)
     df_matched$Match_score_plus_naam210 <- ifelse(df_matched$Naam_lv==0, df_matched$Match_score+2,
                                                   ifelse(df_matched$Naam_lv==1, df_matched$Match_score+1, df_matched$Match_score))
@@ -681,7 +688,7 @@
     
    #order
     df_full <- df_full[,c("Typeregister_1", "Typeregister_2",
-                          "Match", "Match_adaptive", "Match_naam_number", "Match_moeder", "Match_moeder_adaptive", "Match_moeder_number", "Match_year", "Match_year_event", "Match_score", "Match_score_plus_naam210", "Match_score_plus_naam100",
+                          "Match", "Match_adaptive", "Match_naam_number", "Match_moeder_adaptive", "Match_moeder_number", "Match_year", "Match_year_event", "Match_score", "Match_vorige_adaptive", "Match_volgende_adaptive", "Match_score_plus_naam210", "Match_score_plus_naam100",
                           "Naam_lv", "Moeder_lv", 
                           paste(c("source_order", "source_order"), 1:2, sep="_"),
                           paste(c("out_event", "in_event"), 1:2, sep="_"),
@@ -702,7 +709,7 @@
     
    #rename
     colnames(df_full) <- c("Typeregister_1", "Typeregister_2",
-                           "Match", "Match_adaptive", "Match_naam_number", "Match_moeder", "Match_moeder_adaptive", "Match_moeder_number", "Match_year_birth", "Match_year_transfer", "Match_score", "Match_score_plus_naam210", "Match_score_plus_naam100",
+                           "Match", "Match_adaptive", "Match_naam_number", "Match_moeder_adaptive", "Match_moeder_number", "Match_year_birth", "Match_year_transfer", "Match_score", "Match_vorige_adaptive", "Match_volgende_adaptive", "Match_score_plus_naam210", "Match_score_plus_naam100",
                            "Naam_lv", "Moeder_lv", 
                            paste(c("source_order", "source_order"), 1:2, sep="_"),
                            paste(c("out_event", "in_event"), 1:2, sep="_"),
