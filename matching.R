@@ -24,8 +24,8 @@
   rm(list=ls())
   
   #open dataset
-  setwd("U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching")
-  df <- fread("Cleaned Registry/cleaned slave register 2022-06-02.txt", encoding="UTF-8")
+  setwd("//CNAS.RU.NL/U709207/Documents/HDS and Curacao/Matching")
+  df <- fread("cleaned slave register 2022-06-02.txt", encoding="UTF-8")
   
   #check data
   as.data.frame(table(df$Typeregister))
@@ -113,7 +113,7 @@
    #add df1 and df2 to SLAVE_NAMES_MATCHED
     df_matched <- merge(df1, Slave_names_matched, by="Naam_1", all=F)
     df_matched <- merge(df_matched, df2, by="Naam_2", all=F )
-    
+
     
    #### step 3: rule-based filtering of matches ####
 
@@ -238,9 +238,6 @@
     
     
   #selections
-   #if match score <4, only accept if Naam == almost identical
-    df_matched <- df_matched[which(df_matched$Match_score>=4 |
-                                     df_matched$Match_score<4 & df_matched$Naam_lv<=1),]
    #mark best match source_order_1
     x <- df_matched %>% group_by(source_order_1) %>% filter(Match_score==max(Match_score)) %>% ungroup()
     x <- x %>% group_by(source_order_1) %>% filter(Moeder_lv==min(Moeder_lv)) %>% ungroup()
@@ -556,9 +553,6 @@
   
     
   #selections
-   #if match score <4, only accept if Naam == almost identical
-    df_matched <- df_matched[which(df_matched$Match_score>=4 |
-                                     df_matched$Match_score<4 & df_matched$Naam_lv<=1),]
    #mark best match source_order_1
     x <- df_matched %>% group_by(source_order_1) %>% filter(Match_score==max(Match_score)) %>% ungroup()
     x <- x %>% group_by(source_order_1) %>% filter(Moeder_lv==min(Moeder_lv)) %>% ungroup()
