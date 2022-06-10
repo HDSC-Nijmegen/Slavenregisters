@@ -877,7 +877,7 @@
    #/m/
     as.data.frame(table(df[grepl("/m/", tolower(df$Naam)), "Naam"]))
    #/ vr
-    df$Naam <- gsub("/ vr", "privé", df$Naam)
+    df$Naam <- gsub("/ vr", "privÃ©", df$Naam)
     
     
   #split naam & number into separate variables
@@ -1146,7 +1146,7 @@
     df$Naam_number <- ifelse(grepl("/S", df$Naam) & grepl("/S[a-z]", df$Naam)==F, "S", df$Naam_number)
     df$Naam_number <- ifelse(grepl("/ S", df$Naam) & grepl("/ S[a-z]", df$Naam)==F, "S", df$Naam_number)
     df$Naam_number[df$Naam=="Dorinde (S"] <- "S"
-    df$Naam_number <- ifelse(grepl("/ Vr M", df$Naam), "privé M", df$Naam_number)
+    df$Naam_number <- ifelse(grepl("/ Vr M", df$Naam), "privÃ© M", df$Naam_number)
    #remove plantagenaam
     df$Naam <- ifelse(grepl("/Bn/", df$Naam), gsub(" .*", "", df$Naam), df$Naam)
     df$Naam <- ifelse(grepl("/Br/", df$Naam), gsub(" .*", "", df$Naam), df$Naam)
@@ -1165,10 +1165,10 @@
     df$Naam_number <- ifelse(grepl("/ m /", df$Naam), "M", df$Naam_number)
     df$Naam <- gsub("/M/", "", df$Naam)
     df$Naam <- gsub("/ m /", "", df$Naam)
-   #transfer privé
-    df$Naam_number <- ifelse(grepl("privé", df$Naam), "privé", df$Naam_number)
-   #remove privé
-    df$Naam <- gsub(" privé", "", df$Naam)
+   #transfer privÃ©
+    df$Naam_number <- ifelse(grepl("privÃ©", df$Naam), "privÃ©", df$Naam_number)
+   #remove privÃ©
+    df$Naam <- gsub(" privÃ©", "", df$Naam)
    #transfer beroepen
     df$Naam_number <- ifelse(grepl("/offikier", df$Naam), "officier", df$Naam_number)
     df$Naam_number <- ifelse(grepl("/delver", df$Naam), "delver", df$Naam_number)
@@ -1310,6 +1310,10 @@
   #remove dots
     df$Moeder[df$Moeder=="."] <- ""
     df$Moeder_2[df$Moeder_2=="."] <- ""
+    df$Moeder[df$Moeder=="Onbekend"] <- ""
+    df$Moeder_2[df$Moeder_2=="Onbekend"] <- ""
+    df$Moeder[df$Moeder=="Obekend"] <- ""
+    df$Moeder_2[df$Moeder_2=="Obekend"] <- ""
     
   #combine information on Moeder from Moeder, Naam & Events
    #Moeder, entered
@@ -1876,7 +1880,7 @@
    #change Avondrust into Arendrust
     df$Eigenaar <- gsub("Avondrust", "Arendrust", df$Eigenaar)
     
-   #filter privé-eigenaren
+   #filter privÃ©-eigenaren
     Index <- df[df$Typeregister=="Particulieren", c("Eigenaar", "source_order")]
    #add corrected titles
     Index <- merge(Index, Eigenaren_standardized, by="source_order", all.x=T)
