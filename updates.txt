@@ -3,6 +3,7 @@ Updates:
  - Fixed bug naam_vorige and naam_volgende: Missing entries incorrectly received points
  - Fixed bug in match score that used Naam_moeder instead of Naam_moeder_adaptive
  - Added filter in WITHIN that prevents that entries match themselves
+ - Updated match score to use adaptive Levensthein for naam_vorige and naam_volgende
  
 
 
