@@ -206,4 +206,4 @@ Names of plantations are matched exactly, private owners with a maximum Levensht
 | 6-8 | 2 |
 | 9+ | 3 | 
 
-### Reconsitution
+### Reconstitution
