@@ -188,7 +188,7 @@ Contains the matching programs to match certificates between and within series. 
 | | | **Add variables** </br> - Remarks entry </br> - Remarks exit |
 | | **Flag matched information:** </br> - Entry </br> - Addendum name enslaved </br> - Name mother </br> - Addendum name mother </br> - Birth year </br> - Name preceding entry </br> - Name proceeding entry </br> - Out event | **Flag matched information:** </br> - Entry </br> - Addendum name enslaved </br> - Name mother </br> - Addendum name mother </br> - Birth year </br> - Name preceding entry </br> - Name proceeding entry </br> - Year of transfer </br> - Month of transfer </br> - Day of transfer |
 
-## Levenshtein distance
+### Levenshtein distance
 
 Names of enslaved and mothers are matched with a maximum Levenshtein distance based on the length of the name.
 
@@ -206,3 +206,4 @@ Names of plantations are matched exactly, private owners with a maximum Levensht
 | 6-8 | 2 |
 | 9+ | 3 | 
 
+### Reconsitution
