@@ -1310,10 +1310,11 @@
   #remove dots
     df$Moeder[df$Moeder=="."] <- ""
     df$Moeder_2[df$Moeder_2=="."] <- ""
-    df$Moeder[df$Moeder=="Onbekend"] <- ""
-    df$Moeder_2[df$Moeder_2=="Onbekend"] <- ""
-    df$Moeder[df$Moeder=="Obekend"] <- ""
-    df$Moeder_2[df$Moeder_2=="Obekend"] <- ""
+    df$Moeder[df$Moeder=="Rose of Ross [onbekend]"] <- "Rose of Ross"
+    df$Moeder[grepl("Onb", df$Moeder)] <- ""
+    df$Moeder_2[grepl("Onb", df$Moeder_2)] <- ""
+    df$Moeder[grepl("kend", df$Moeder)] <- ""
+    df$Moeder_2[grepl("kend", df$Moeder_2)] <- ""
     
   #combine information on Moeder from Moeder, Naam & Events
    #Moeder, entered

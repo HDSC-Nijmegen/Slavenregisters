@@ -1,11 +1,23 @@
 Updates:
+
+30-6-2022
+ - Fixed headers WITHIN variables, first character is now always in upper case
+ - Added function to filter best unique matches using the highest max match_score, ties are seen as ambiguous and dropped
+ - Matched cases in series 1-4 are assigned the same person identifier
+ - Matches are grouped by Id_person and exported with standardised variable names
+
+21-6-2022
+ - Fixed bug in out_unended
+ - Give 1 point in out_unended if Out_event_1 ENDED and In_event_2 BEGINNING, rather than just looking at Out_event_1
+
+20-6-2022
+ - Updated cleaning script
+
 10-6-2022
  - Fixed bug naam_vorige and naam_volgende: Missing entries incorrectly received points
  - Fixed bug in match score that used Naam_moeder instead of Naam_moeder_adaptive
  - Added filter in WITHIN that prevents that entries match themselves
  - Updated match score to use adaptive Levensthein for naam_vorige and naam_volgende
- 
-
 
 8-6-2022
 - Fixed bug that attached match score to unmatched mother names in series 1 and 2
