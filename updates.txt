@@ -1,5 +1,17 @@
 Updates:
 
+25-7-2022
+ - Finished reconstitution 
+
+16-7-2022
+ - Added functions to reconstitution / transitive closure to make the script easier to read
+
+12-7-2022
+ - Parameters to change script now moved to top of the script
+ - Integrated benchmarks R
+ - Added export to wide format
+ - Updated description
+
 30-6-2022
  - Fixed headers WITHIN variables, first character is now always in upper case
  - Added function to filter best unique matches using the highest max match_score, ties are seen as ambiguous and dropped
