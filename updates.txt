@@ -1,9 +1,14 @@
 Updates:
 
-25-7-2022
- - Finished reconstitution 
+???
+ - deal with 27,180 duplicated id_sources. They most likely occur due to different matches in between and within.
 
-16-7-2022
+1-8-2022
+ - Fixed bug that caused duplicates in filter_unique
+ - Sort long table by series + ymd rather than series + y
+ - All matched cases in series 1-4 are assigned the same person identifier
+
+26-7-2022
  - Added functions to reconstitution / transitive closure to make the script easier to read
 
 12-7-2022
@@ -16,6 +21,10 @@ Updates:
  - Fixed headers WITHIN variables, first character is now always in upper case
  - Added function to filter best unique matches using the highest max match_score, ties are seen as ambiguous and dropped
  - Matched cases in series 1-4 are assigned the same person identifier
+     - all between matches
+	 - within to next series
+	 - within 4 to start series 4
+	 - NOT within to start series
  - Matches are grouped by Id_person and exported with standardised variable names
 
 21-6-2022

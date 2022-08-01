@@ -1301,6 +1301,13 @@
     length(which(df$sex!=df$sex2)) #873
     df$sex <- ifelse(is.na(df$sex2), df$sex, df$sex2)
     
+    #save outfile
+    Sex <- df %>% group_by(Naam, sex) %>% summarise(n=n()) %>% ungroup()
+    Sex <- Sex %>% group_by(Naam) %>% mutate(n=n()) %>% ungroup()
+    Sex$sex <- ifelse(Sex$n>1,"unknown", Sex$sex)
+    Sex <- Sex[!duplicated(Sex$Naam), c("Naam", "sex")]
+    write.xlsx(Sex, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Sekse naar naam - slaafgemaakten.xlsx")
+    
     
     
   ####################################

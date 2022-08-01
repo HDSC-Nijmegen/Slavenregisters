@@ -955,7 +955,7 @@
                                    "Match_volgende_adaptive"))] <- 0
       y[, which(colnames(y) %in% paste(c("Match_score", "Naam_lv", "Moeder_lv", "Eigenaar_lv", "Naam_vorige_lv", "Naam_volgende_lv",
                                          "Typeregister", "In_event", "Sex", "Naam", "Naam_number", "Moeder", "Moeder_number", "Eigenaar", "Naam_vorige", "Naam_volgende",
-                                         "Source_order", "Year_birth"), NUMMER2, sep="_"))] <- NA
+                                         "Source_order", "Year_birth"), NUMMER1, sep="_"))] <- NA
       #bind
       Serie_unique <- rbind(Serie_unique, x, y) %>% arrange(Order_1, Order_2)
       rm(x, y)
@@ -1110,11 +1110,12 @@
     
   #load program to add grouped matches 
     add_within <- function(df1, df2, source_order){
+      #matched cases
       reconstitution1 <- df2[!is.na(df2[[source_order]]), ]
       reconstitution1 <- merge(reconstitution1, df1, by=source_order, all=T)
       #unmatched cases
       reconstitution2 <- df2[is.na(df2[[source_order]]), ]
-      #bind
+      #add empty columns to reconstitution2
       if(df1[1,1]==Serie44_linked[1,1]){
         reconstitution2$Source_order_44_2 <- reconstitution2$Source_order_44_3 <- reconstitution2$Source_order_44_3 <- reconstitution2$Source_order_44_4 <- reconstitution2$Source_order_44_5 <- reconstitution2$Source_order_44_6 <- reconstitution2$Source_order_44_7 <- NA
       }
@@ -1127,6 +1128,7 @@
       if(df1[1,1]==Serie11_linked[1,1]){
         reconstitution2$Source_order_11_1 <- reconstitution2$Source_order_11_2 <- reconstitution2$Source_order_11_3 <- reconstitution2$Source_order_11_3 <- reconstitution2$Source_order_11_4 <- reconstitution2$Source_order_11_5 <- reconstitution2$Source_order_11_6 <- reconstitution2$Source_order_11_7 <- NA
       }
+      #bind
       df2 <- rbind(reconstitution1, reconstitution2)
       df2
     }
@@ -1155,7 +1157,21 @@
     #add grouped matches to Series 4
     reconstitution <- add_within(Serie33_linked, reconstitution, "Source_order_4")
   #match to start series
-   
+    #1. drop duplicated unmatched within matches
+    reconstitution <- reconstitution[!(reconstitution$Source_order_33_1 %in% reconstitution$Source_order_3 & is.na(reconstitution$Source_order_33_2) & !is.na(reconstitution$Source_order_33_1)),]
+    #2. join to preceding series
+    x <- reconstitution[reconstitution$Source_order_3 %in% reconstitution$Source_order_33_1 & !is.na(reconstitution$Source_order_3),]
+    x <- x[,which(grepl("33", colnames(x))==F)]
+    y <- reconstitution[reconstitution$Source_order_33_1 %in% reconstitution$Source_order_3 & !is.na(reconstitution$Source_order_33_1),]
+    y <- y[,which(grepl("33", colnames(y)))]
+    y$Source_order_3 <- y$Source_order_33_1
+    x <- merge(x, y, by="Source_order_3", all=F)
+    x <- cbind(x[,c("Source_order_4", "Source_order_3", "Source_order_2", "Source_order_1")], x[,5:length(x)])
+    reconstitution <- reconstitution[!(reconstitution$Source_order_33_1 %in% x$Source_order_33_1) &
+                                       !(reconstitution$Source_order_3 %in% x$Source_order_3),]
+    reconstitution <- rbind(reconstitution, x)
+    reconstitution$Source_order_33_1 <- ifelse(reconstitution$Source_order_33_1==reconstitution$Source_order_3, NA, reconstitution$Source_order_33_1)
+    
   #2-2
   #match to next series
     #mark last entry
@@ -1166,6 +1182,20 @@
     #add grouped matches to Series 3
     reconstitution <- add_within(Serie22_linked, reconstitution, "Source_order_3")
   #match to start series
+    #1. drop duplicated unmatched within matches
+    reconstitution <- reconstitution[!(reconstitution$Source_order_22_1 %in% reconstitution$Source_order_2 & is.na(reconstitution$Source_order_22_2) & !is.na(reconstitution$Source_order_22_1)),]
+    #2. join to preceding series
+    x <- reconstitution[reconstitution$Source_order_2 %in% reconstitution$Source_order_22_1 & !is.na(reconstitution$Source_order_2),]
+    x <- x[,which(grepl("22", colnames(x))==F)]
+    y <- reconstitution[reconstitution$Source_order_22_1 %in% reconstitution$Source_order_2 & !is.na(reconstitution$Source_order_22_1),]
+    y <- y[,which(grepl("22", colnames(y)))]
+    y$Source_order_2 <- y$Source_order_22_1
+    x <- merge(x, y, by="Source_order_2", all=F)
+    x <- cbind(x[,c("Source_order_4", "Source_order_3", "Source_order_2", "Source_order_1")], x[,5:length(x)])
+    reconstitution <- reconstitution[!(reconstitution$Source_order_22_1 %in% x$Source_order_22_1) &
+                                       !(reconstitution$Source_order_2 %in% x$Source_order_2),]
+    reconstitution <- rbind(reconstitution, x)
+    reconstitution$Source_order_22_1 <- ifelse(reconstitution$Source_order_22_1==reconstitution$Source_order_2, NA, reconstitution$Source_order_22_1)
     
   #1-1
   #match to next series
@@ -1177,21 +1207,20 @@
     #add grouped matches to Series 2
     reconstitution <- add_within(Serie11_linked, reconstitution, "Source_order_2")
   #match to start series
-    
-    
-   #3-3
-   #internal to 4
-    
-   #internal to 3
-    #drop INTERNAL links without match that also occur in BETWEEN
-    reconstitution <- reconstitution[!(reconstitution$Source_order_3 %in% reconstitution$Source_order_33_1 & !is.na(reconstitution$Source_order_33_1) & is.na(reconstitution$Source_order_33_2)),]
-    #
-    #reconstitution1 <- reconstitution[which(reconstitution$Source_order_3 %in% reconstitution$Source_order_33_1 & !is.na(reconstitution$Source_order_3)),]
-    #reconstitution2 <- reconstitution[which(!(reconstitution$Source_order_3 %in% reconstitution$Source_order_33_1) & !is.na(reconstitution$Source_order_3)),]
-    #reconstitution3 <- reconstitution[is.na(reconstitution$Source_order_3),]
-    
-    
-    
+    #1. drop duplicated unmatched within matches
+    reconstitution <- reconstitution[!(reconstitution$Source_order_11_1 %in% reconstitution$Source_order_1 & is.na(reconstitution$Source_order_11_2) & !is.na(reconstitution$Source_order_11_1)),]
+    #2. join to preceding series
+    x <- reconstitution[reconstitution$Source_order_1 %in% reconstitution$Source_order_11_1 & !is.na(reconstitution$Source_order_1),]
+    x <- x[,which(grepl("11", colnames(x))==F)]
+    y <- reconstitution[reconstitution$Source_order_11_1 %in% reconstitution$Source_order_1 & !is.na(reconstitution$Source_order_11_1),]
+    y <- y[,which(grepl("11", colnames(y)))]
+    y$Source_order_1 <- y$Source_order_11_1
+    x <- merge(x, y, by="Source_order_1", all=F)
+    x <- cbind(x[,c("Source_order_4", "Source_order_3", "Source_order_2", "Source_order_1")], x[,5:length(x)])
+    reconstitution <- reconstitution[!(reconstitution$Source_order_11_1 %in% x$Source_order_11_1) &
+                                       !(reconstitution$Source_order_1 %in% x$Source_order_1),]
+    reconstitution <- rbind(reconstitution, x)
+    reconstitution$Source_order_11_1 <- ifelse(reconstitution$Source_order_11_1==reconstitution$Source_order_1, NA, reconstitution$Source_order_11_1)
     
     
   #################################################################
@@ -1238,7 +1267,7 @@
                       "LastEntryYear", "LastEntryMonth", "LastEntryDay", "LastEntryEvent", "LastEntryEventDetailed", "LastEntryExtraInfo",
                       "B_year", "B_month", "B_day", "B_year_min", "B_year_max")
    #reorder dataset
-    df2 <- df2 %>% arrange(Id_person, Source_series, StartEntryYear)
+    df2 <- df2 %>% arrange(Id_person, Source_series, StartEntryYear, StartEntryMonth, StartEntryDay)
    #write outfiles
     write.table(df2, paste0("Reconstituted registry/", Sys.Date(), "SR life courses.txt"), quote=F, sep ="\t", col.names=T, row.names=F, fileEncoding="UTF-8")
     write.xlsx(df2, paste0("Reconstituted registry/", Sys.Date(), "SR life courses.xlsx"), overwrite=T)
