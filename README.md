@@ -27,6 +27,7 @@ Cleans the names in the slave registers.
 | *Numerical* | 4, 4e, IV, IVe | IV | 
 | *Numerical* | 5, 5e, V, Ve | V |
 | *Numerical* | no, nr, n | |
+| *Stature* | dik, dikke | dik |
 | *Stature* | kl, klein, kleine, kleintje, klijn, klijne, klijntje | klein |
 | *Stature* | korte | korte |
 | *Stature* | littel, little |  little |
@@ -72,7 +73,6 @@ Cleans the names in the slave registers.
 | *Other* | p w, P W | SP |
 | *Other* | SP | SP |
 | *Other* | vz, VZ | VZ |
-| *Other* | NS | NS |
 | *Other* | VCIP, V C I P | VCIP |
 | *Other* | ZB, z b, Z B | ZB |
 
