@@ -28,6 +28,7 @@ Cleans the names in the slave registers.
 | *Numerical* | 5, 5e, V, Ve | V |
 | *Numerical* | no, nr, n | |
 | *Stature* | dik, dikke | dik |
+| *Stature* | mooi | mooi |
 | *Stature* | kl, klein, kleine, kleintje, klijn, klijne, klijntje | klein |
 | *Stature* | korte | korte |
 | *Stature* | littel, little |  little |
