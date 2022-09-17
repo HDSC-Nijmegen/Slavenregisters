@@ -1,7 +1,22 @@
 Updates:
 
-???
+????
  - deal with 27,180 duplicated id_sources. They most likely occur due to different matches in between and within.
+ - fix double names
+
+17-9-2022
+ - Fixed bug that imported only half the unknown mothers
+ - Identical names between series 1 en 2 now serve as a tie-breaker and receive match score 0.5
+ - Matches between series 1-2 and another series now may differ 1 year in year of birth
+
+12-9-2022
+ - Set all names to lower case
+ - Remove " of " from multiple names
+ - Standardise remove accute and grave accents
+ - Standardise ç into c, wk into qu, and ph into f
+ - Removed Match_score_plus_naam210 and Match_score_plus_naam100
+ - Adapted step 5 in BETWEEN to keep 2,380 newborns with known mothers in series 1 and unknown mothers in series 2
+ - Removed out_unended from BETWEEN which caused a bug in match_score
 
 1-8-2022
  - Fixed bug that caused duplicates in filter_unique

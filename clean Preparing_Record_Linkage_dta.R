@@ -26,7 +26,7 @@
   df <- read_dta("Dataset_Standardization.dta")
   
   #import standardized entries Eigenaar
-  write.xlsx(df[,c("source_order", "Eigenaar"),], "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Cleaned Registry/Eigenaren particulier/Eigenaren - input.xlsx", overwrite=T)
+  #write.xlsx(df[,c("source_order", "Eigenaar"),], "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Cleaned Registry/Eigenaren particulier/Eigenaren - input.xlsx", overwrite=T)
   Eigenaren_standardized <- read.xlsx("U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Cleaned Registry/Eigenaren particulier/Eigenaren - standardised.xlsx")
   #cleaned:
   # 1. de weduwe -> weduwe (if not part of surname OR remark)
@@ -87,6 +87,10 @@
    #correct entry
     df$Naam_original[df$source_order=="011062a332"] <- "Laurens"
     df$Naam[df$source_order=="011062a332"] <- "Laurens"
+    df$Naam[df$source_order=="22300287896"] <- "Christiaan NS"
+    df$Naam_original[df$source_order=="22300287896"] <- "Christiaan NS"
+    df$Naam_original[df$source_order=="101807a21022"] <- "Louis of Barend Juriaan Louis"
+    df$Naam[df$source_order=="101807a21022"] <- "Louis of Barend Juriaan Louis"
     
    #correct Inventarisnummer
     df$Inventaris[df$Inventarisnummer=="4 juni 1861"] <- "33"
@@ -592,6 +596,10 @@
     as.data.frame(table(df[grepl(" n ", tolower(df$Naam)), "Naam"]))
     as.data.frame(table(df[grepl(" ni", tolower(df$Naam)), "Naam"]))
   #descriptions
+   #dik
+    as.data.frame(table(df[grepl("dik", tolower(df$Naam)), "Naam"]))
+   #mooi
+    as.data.frame(table(df[grepl("mooi", tolower(df$Naam)), "Naam"]))
    #klein
     as.data.frame(table(df[grepl("klein [a-zA-z]", tolower(df$Naam)), "Naam"]))
     as.data.frame(table(df[grepl(" klein", tolower(df$Naam)), "Naam"]))
@@ -599,6 +607,7 @@
     as.data.frame(table(df[grepl("kl ", tolower(df$Naam)), "Naam"]))
     as.data.frame(table(df[grepl("/kl", tolower(df$Naam)), "Naam"]))
     as.data.frame(table(df[grepl("kl", tolower(df$Naam)), "Naam"]))
+    as.data.frame(table(df[grepl("kn", tolower(df$Naam)), "Naam"]))
    #kort
     as.data.frame(table(df[grepl("kort", tolower(df$Naam)), "Naam"]))
    #groot
@@ -609,6 +618,8 @@
     as.data.frame(table(df[grepl("gt", tolower(df$Naam)), "Naam"]))
    #lange
     as.data.frame(table(df[grepl("lang", tolower(df$Naam)), "Naam"]))
+   #long
+    as.data.frame(table(df[grepl("big", tolower(df$Naam)), "Naam"]))
    #little
     as.data.frame(table(df[grepl("lit", tolower(df$Naam)), "Naam"]))
    #long
@@ -626,6 +637,7 @@
     as.data.frame(table(df[grepl("oud", tolower(df$Naam)), "Naam"]))
    #nieuw
     as.data.frame(table(df[grepl("nieuw", tolower(df$Naam)), "Naam"]))
+    as.data.frame(table(df[grepl("nw", tolower(df$Naam)), "Naam"]))
    #roode
     as.data.frame(table(df[grepl("rood", tolower(df$Naam)), "Naam"]))
    #swart / zwart
@@ -633,6 +645,8 @@
     as.data.frame(table(df[grepl("sw", tolower(df$Naam)), "Naam"]))
     as.data.frame(table(df[grepl("zwart", tolower(df$Naam)), "Naam"]))
     as.data.frame(table(df[grepl("zw", tolower(df$Naam)), "Naam"]))
+   #black
+    as.data.frame(table(df[grepl("black", tolower(df$Naam)), "Naam"]))
    #neger
     as.data.frame(table(df[grepl("neger", tolower(df$Naam)), "Naam"]))
    #mulat
@@ -654,7 +668,7 @@
    #fix /  /
     df$Naam <- ifelse(grepl("[a-zA-Z]/I", df$Naam), gsub("/I", " I", df$Naam), df$Naam) #change Louis/II/ to Louis II/
     df$Naam <- gsub(" /I", " I", df$Naam) #change Louis /II/ to Louis II/
-    df$Naam <- gsub(" / I", " I", df$Naam) #change Louis / II / to Louis II /
+    df$Naam <- ifelse(grepl(" / I[a-z]", df$Naam)==F, gsub( " / I", " I", df$Naam), df$Naam) #change Louis / II / to Louis II /
     df$Naam <- gsub("/ I", " I", df$Naam) #change Louis/ II/ to Louis II
     df$Naam <- gsub("I /", "I", df$Naam)
     df$Naam <- gsub("I/", "I", df$Naam)
@@ -668,6 +682,8 @@
     df$Naam <- gsub("I)", "I", df$Naam)
    #I?
     df$Naam <- gsub("I\\?", "I", df$Naam)
+   #I,
+    df$Naam <- gsub("I,", "I", df$Naam)
    #I.
     df$Naam <- gsub("I\\.", "I", df$Naam)
    #Io
@@ -681,6 +697,9 @@
     df$Naam <- gsub("Vde", "V", df$Naam)
     df$Naam <- ifelse(grepl("Ie", df$Naam) & grepl("Ie[a-zA-Z]", df$Naam)==F, gsub("Ie", "I", df$Naam), df$Naam)
     df$Naam <- ifelse(grepl("Ve", df$Naam) & grepl("Ve[a-zA-Z]", df$Naam)==F, gsub("Ve", "V", df$Naam), df$Naam)
+   #set l to I
+    df$Naam <- ifelse(substr(df$Naam, nchar(df$Naam)-2, nchar(df$Naam))==" ll", gsub(" ll", " II", df$Naam), df$Naam)
+    df$Naam <- ifelse(substr(df$Naam, nchar(df$Naam)-1, nchar(df$Naam))==" l", gsub(" l", " I", df$Naam), df$Naam)
    #remove no
     df$Naam <- ifelse(grepl(" noI", df$Naam), gsub("no", "", df$Naam), df$Naam)
     df$Naam <- ifelse(grepl(" no ", df$Naam), gsub(" no", "", df$Naam), df$Naam)
@@ -704,6 +723,9 @@
    #remove n
     df$Naam <- ifelse(grepl(" n I", df$Naam), gsub(" n", "", df$Naam), df$Naam)
     df$Naam <- ifelse(grepl(" NI", df$Naam), gsub(" N", " ", df$Naam), df$Naam)
+   #standardise dik
+    df$Naam <- gsub(" dikke", " dik", df$Naam)
+    df$Naam <- gsub("Willemdik", "Willem dik", df$Naam)
    #standardise klein
     df$Naam <- gsub("Klijn", "klein", df$Naam)
     df$Naam <- gsub("klijn", "klein", df$Naam)
@@ -730,6 +752,7 @@
     df$Naam <- ifelse(substr(df$Naam, nchar(df$Naam)-2, nchar(df$Naam))=="kl.", gsub("kl\\.", "klein", df$Naam), df$Naam) #blabla kl.
     df$Naam <- ifelse(substr(df$Naam, nchar(df$Naam)-2, nchar(df$Naam))=="Kl/", gsub("Kl/", "klein", df$Naam), df$Naam) #blabla Kl.
     df$Naam <- ifelse(substr(df$Naam, nchar(df$Naam)-2, nchar(df$Naam))=="kl/", gsub("kl/", "klein", df$Naam), df$Naam) #blabla kl.
+    df$Naam <- gsub("Kn ", "klein ", df$Naam)
    #groot
     df$Naam <- gsub("Gr:", "groote ", df$Naam)
     df$Naam <- gsub("gr:", "groote ", df$Naam)
@@ -778,6 +801,8 @@
     df$Naam <- gsub(" / o /", " oude", df$Naam)
     df$Naam <- gsub("/ oud", "oud", df$Naam)
     df$Naam <- gsub("/oud", "oud", df$Naam)
+   #nieuw
+    df$Naam <- gsub("Nw", "nieuw", df$Naam)
    #swart
     df$Naam <- ifelse(grepl("sw[a-zA-Z]", tolower(df$Naam))==F, gsub("sw", "zwart", df$Naam), df$Naam)
     df$Naam <- ifelse(grepl("sw[a-zA-Z]", tolower(df$Naam))==F, gsub("Sw", "zwart", df$Naam), df$Naam)
@@ -807,10 +832,12 @@
     #Zeewijk
     df$Naam <- gsub("Zeew:", "Zeewijk", df$Naam)
     df$Naam <- gsub("Zeew\\.", "Zeewijk", df$Naam)
+    df$Naam <- gsub("Zn", "Zeewijk", df$Naam)
     df$Naam <- gsub("Zu\\.", "Zeewijk", df$Naam)
     df$Naam <- ifelse(substr(df$Naam, nchar(df$Naam)-3, nchar(df$Naam))=="Zeew", gsub("Zeew", "Zeewijk", df$Naam), df$Naam)
     #L en R
-    df$Naam <- gsub("L R", "L en R", df$Naam)
+    df$Naam <- gsub("L R", "LR", df$Naam)
+    df$Naam <- gsub("L en R", "LR", df$Naam)
    #namen
     df$Naam <- gsub("Alex\\.", "Alexander", df$Naam)
     df$Naam <- gsub("Carol:", "Carolina", df$Naam)
@@ -864,15 +891,21 @@
     df$Naam <- gsub("bij den heil doop genmd", "gedoopt", df$Naam)
     df$Naam <- ifelse(grepl(" bij ", df$Naam), gsub(" .*", "", df$Naam), df$Naam)
   #tweede naam
+    df$Naam <- ifelse(grepl("of[A-Z]", df$Naam), gsub("of", "of ", df$Naam), df$Naam)
     df$Naam <- gsub("/ Alias", "of", df$Naam)
     df$Naam <- gsub("/ alias", "of", df$Naam)
     df$Naam <- gsub("Alias ", "of ", df$Naam)
     df$Naam <- gsub("alias", "of", df$Naam)
     df$Naam <- gsub("bijgenaamd", "of", df$Naam)
     df$Naam <- gsub("/ genaamd", "of", df$Naam)
+    df$Naam <- gsub(" n ", "of", df$Naam)
+    df$Naam <- gsub("ofwel", "of", df$Naam)
     df$Naam <- gsub("ook bekend als", "of", df$Naam)
     df$Naam <- gsub("ook genaamd", "of", df$Naam)
     df$Naam <- gsub("ook gend", "of", df$Naam)
+    df$Naam <- gsub(" pf", " of", df$Naam)
+    df$Naam <- ifelse(substr(df$Naam, nchar(df$Naam)-3, nchar(df$Naam))==" of ", gsub(" of ", "", df$Naam), df$Naam)
+    df$Naam <- ifelse(substr(df$Naam, nchar(df$Naam)-2, nchar(df$Naam))==" of", gsub(" of", "", df$Naam), df$Naam)
   #remaining / (
    #/m/
     as.data.frame(table(df[grepl("/m/", tolower(df$Naam)), "Naam"]))
@@ -907,9 +940,11 @@
     df$Naam_number <- ifelse(grepl("FD", df$Naam), "FD", df$Naam_number)
     df$Naam_number <- ifelse(grepl("IB", df$Naam), "IB", df$Naam_number)
     df$Naam_number <- ifelse(grepl("Ns", df$Naam), "NS", df$Naam_number)
+    df$Naam_number <- ifelse(grepl("NS", df$Naam), "NS", df$Naam_number)
+    df$Naam_number <- ifelse(grepl("N S", df$Naam), "NS", df$Naam_number)
+    df$Naam_number <- ifelse(grepl("pe", df$Naam), "pe", df$Naam_number)
     df$Naam_number <- ifelse(grepl(" p w", df$Naam), "PW", df$Naam_number)
     df$Naam_number <- ifelse(grepl(" P W", df$Naam), "PW", df$Naam_number)
-    df$Naam_number <- ifelse(grepl("NS", df$Naam), "NS", df$Naam_number)
     df$Naam_number <- ifelse(grepl("S P", df$Naam), "SP", df$Naam_number)
     df$Naam_number <- ifelse(grepl("SP", df$Naam), "SP", df$Naam_number)
     df$Naam_number <- ifelse(grepl("VCIP", df$Naam), "VCIP", df$Naam_number)
@@ -920,14 +955,17 @@
     df$Naam_number <- ifelse(grepl("z b", df$Naam), "ZB", df$Naam_number)
     df$Naam_number <- ifelse(grepl("Z B", df$Naam), "ZB", df$Naam_number)
     df$Naam_number <- ifelse(grepl("ZB", df$Naam), "ZB", df$Naam_number)
+    #single letter
+    df$Naam_number <- ifelse(substr(df$Naam, nchar(df$Naam)-2, nchar(df$Naam))==" Br" & df$Naam_number=="", "Br", df$Naam_number)
+    df$Naam_number <- ifelse(substr(df$Naam, nchar(df$Naam)-1, nchar(df$Naam))==" b" & df$Naam_number=="", "b", df$Naam_number)
+    df$Naam_number <- ifelse(substr(df$Naam, nchar(df$Naam)-1, nchar(df$Naam))==" D" & df$Naam_number=="", "D", df$Naam_number)
+    df$Naam_number <- ifelse(substr(df$Naam, nchar(df$Naam)-1, nchar(df$Naam))==" P" & df$Naam_number=="", "P", df$Naam_number)
+    df$Naam_number <- ifelse(substr(df$Naam, nchar(df$Naam)-1, nchar(df$Naam))==" R" & df$Naam_number=="", "R", df$Naam_number)
+    df$Naam_number <- ifelse(substr(df$Naam, nchar(df$Naam)-1, nchar(df$Naam))==" s" & df$Naam_number=="", "s", df$Naam_number)
    #remove variations
     df$Naam <- gsub("CSeba", "Seba", df$Naam)
     df$Naam <- gsub("CHarmantje", "Charmantje", df$Naam)
     df$Naam <- gsub("DSimon", "Simon", df$Naam)
-    df$Naam <- gsub("Dorothea P", "Dorothea", df$Naam)
-    df$Naam <- gsub("Dorothea R", "Dorothea", df$Naam)
-    df$Naam <- gsub("Francina P", "Francina", df$Naam)
-    df$Naam <- gsub("Francina R", "Francina", df$Naam)
     df$Naam <- gsub("KCatharina", "Katharina", df$Naam)
     df$Naam <- gsub("KLaas", "Klaas", df$Naam)
     df$Naam <- gsub("LIndor", "Lindor", df$Naam)
@@ -956,9 +994,10 @@
     df$Naam <- gsub(" FB", "", df$Naam)
     df$Naam <- gsub(" FD", "", df$Naam)
     df$Naam <- gsub(" IB", "", df$Naam)
-    df$Naam[df$source_order=="22300287896"] <- "Christiaan NS"
     df$Naam <- gsub(" Ns", "", df$Naam)
     df$Naam <- gsub(" NS", "", df$Naam)
+    df$Naam <- gsub(" N S", "", df$Naam)
+    df$Naam <- gsub(" pe", "", df$Naam)
     df$Naam <- gsub(" p w", "", df$Naam)
     df$Naam <- gsub(" P W", "", df$Naam)
     df$Naam <- gsub(" S P", "", df$Naam)
@@ -971,6 +1010,13 @@
     df$Naam <- gsub(" \\(zne )", "", df$Naam)
     df$Naam <- gsub(" Z B", "", df$Naam)
     df$Naam <- gsub(" ZB", "", df$Naam)
+    #single letter
+    df$Naam <- ifelse(df$Naam_number=="Br", gsub(" Br", "", df$Naam), df$Naam)
+    df$Naam <- ifelse(df$Naam_number=="b", gsub(" b", "", df$Naam), df$Naam)
+    df$Naam <- ifelse(df$Naam_number=="D", gsub(" D", "", df$Naam), df$Naam)
+    df$Naam <- ifelse(df$Naam_number=="P", gsub(" P", "", df$Naam), df$Naam)
+    df$Naam <- ifelse(df$Naam_number=="R", gsub(" R", "", df$Naam), df$Naam)
+    df$Naam <- ifelse(df$Naam_number=="s", gsub(" s", "", df$Naam), df$Naam)
    #fix Johannes /II Winst/I
     df$Naam_number <- ifelse(df$Naam=="Johannes  II Winst I", "II / I", df$Naam_number)
     df$Naam <- gsub("Johannes  II Winst I", "Johannes of Winst", df$Naam)
@@ -1027,6 +1073,16 @@
     df$Naam <- ifelse(grepl("vijfde", tolower(df$Naam)), gsub(" .*", "", df$Naam), df$Naam)
     df$Naam <- gsub("/tweede.*", "", df$Naam)
   #name parts
+   #transfer dik
+    df$Naam_number <- ifelse(grepl(" dik", df$Naam), "dik", df$Naam_number)
+    df$Naam_number <- ifelse(grepl("Dikke ", df$Naam), "dik", df$Naam_number)
+   #remove dik
+    df$Naam <- ifelse(grepl(" dik", tolower(df$Naam)), gsub(" .*", "", df$Naam), df$Naam)
+    df$Naam <- gsub("Dikke ", "", df$Naam)
+   #transfer mooi
+    df$Naam_number <- ifelse(grepl(" mooi", df$Naam), "mooi", df$Naam_number)
+   #remove mooi
+    df$Naam <- gsub(" mooi", "", df$Naam)
    #transfer klein
     df$Naam_number <- ifelse(grepl("klein [a-zA-z]", df$Naam), "klein", df$Naam_number)
     df$Naam_number <- ifelse(grepl("kleine ", df$Naam), "klein", df$Naam_number)
@@ -1058,8 +1114,10 @@
     df$Naam <- ifelse(grepl(" lange", tolower(df$Naam)), gsub(" .*", "", df$Naam), df$Naam)
     df$Naam <- gsub("\\(lange)", "", df$Naam)
    #transfer big
+    df$Naam_number <- ifelse(grepl("Big ", df$Naam), "big", df$Naam_number)
     df$Naam_number <- ifelse(grepl(" \\(big)", df$Naam), "big", df$Naam_number)
    #remove big
+    df$Naam <- gsub("Big ", "", df$Naam)
     df$Naam <- gsub(" \\(big)", "", df$Naam)
    #transfer little
     df$Naam_number <- ifelse(grepl("little [a-zA-z]", df$Naam), "little", df$Naam_number)
@@ -1093,8 +1151,10 @@
     df$Naam <- gsub(" senior", "", df$Naam)
    #transfer nieuw
     df$Naam_number <- ifelse(grepl(" nieuw", tolower(df$Naam)), "nieuw", df$Naam_number)
+    df$Naam_number <- ifelse(grepl("nieuw ", tolower(df$Naam)), "nieuw", df$Naam_number)
    #remove nieuw
     df$Naam <- ifelse(grepl(" nieuw", tolower(df$Naam)), gsub(" .*", "", df$Naam), df$Naam)
+    df$Naam <- gsub("nieuw ", "", df$Naam)
    #transfer roode
     df$Naam_number <- ifelse(grepl("rood", tolower(df$Naam)), "roode", df$Naam_number)
    #remove roode
@@ -1128,6 +1188,10 @@
     df$Naam_number <- ifelse(grepl(" mulat", tolower(df$Naam)), "mulat", df$Naam_number)
    #remove mulat
     df$Naam <- ifelse(grepl(" mulat", tolower(df$Naam)), gsub(" .*", "", df$Naam), df$Naam)
+   #transfer pokdalig
+    df$Naam_number <- ifelse(grepl(" pokdalig", tolower(df$Naam)), "pokdalig", df$Naam_number)
+   #remove mulat
+    df$Naam <- ifelse(grepl(" pokdalig", tolower(df$Naam)), gsub(" .*", "", df$Naam), df$Naam)
    #transfer gedoopt
     df$Naam_number <- ifelse(grepl("gedoopt", tolower(df$Naam)), sub(".*? ", "", df$Naam), df$Naam_number)
     df$Naam <- ifelse(df$Naam_number=="of Fanie gedoopt Gijsbertina", "Tannij of Fanie", df$Naam)
@@ -1138,7 +1202,8 @@
     df$Naam_number <- ifelse(grepl("/Bn/", df$Naam), "Bn", df$Naam_number)
     df$Naam_number <- ifelse(grepl("/Br/", df$Naam), "Br", df$Naam_number)
     df$Naam_number <- ifelse(grepl("Brouwerslust", df$Naam) & df$Naam!="Brouwerslust", "Brouwerslust", df$Naam_number)
-    df$Naam_number <- ifelse(grepl("L en R", df$Naam), "Land en Rust", df$Naam_number)
+    df$Naam_number <- ifelse(grepl(" groningen", df$Naam), "Groningen", df$Naam_number)
+    df$Naam_number <- ifelse(grepl("LR", df$Naam), "Land en Rust", df$Naam_number)
     df$Naam_number <- ifelse(grepl("Resolutie", df$Naam), "Resolutie", df$Naam_number)
     df$Naam_number <- ifelse(grepl("Standvastigheid", df$Naam), "Standvastigheid", df$Naam_number)
     df$Naam_number <- ifelse(grepl("Stolk", df$Naam), "Stolkwijk", df$Naam_number)
@@ -1151,7 +1216,9 @@
     df$Naam <- ifelse(grepl("/Bn/", df$Naam), gsub(" .*", "", df$Naam), df$Naam)
     df$Naam <- ifelse(grepl("/Br/", df$Naam), gsub(" .*", "", df$Naam), df$Naam)
     df$Naam <- ifelse(grepl("Brouwerslust", df$Naam), gsub(" .*", "", df$Naam), df$Naam)
+    df$Naam <- ifelse(grepl(" groningen", df$Naam), gsub(" .*", "", df$Naam), df$Naam)
     df$Naam <- ifelse(grepl("L en R", df$Naam), gsub(" .*", "", df$Naam), df$Naam)
+    df$Naam <- ifelse(grepl("LR", df$Naam), gsub(" .*", "", df$Naam), df$Naam)
     df$Naam <- ifelse(grepl("Resolutie", df$Naam), gsub(" .*", "", df$Naam), df$Naam)
     df$Naam <- ifelse(grepl("Standvastigheid", df$Naam), gsub(" .*", "", df$Naam), df$Naam)
     df$Naam <- ifelse(grepl("Stolk", df$Naam), gsub(" .*", "", df$Naam), df$Naam)
@@ -1176,13 +1243,20 @@
     df$Naam_number <- ifelse(grepl("/ kuiper", df$Naam), "kuiper", df$Naam_number)
     df$Naam_number <- ifelse(grepl("/Kuiper", df$Naam), "kuiper", df$Naam_number)
     df$Naam_number <- ifelse(grepl("Herculeskuiper", df$Naam), "kuiper", df$Naam_number)
+    df$Naam_number <- ifelse(grepl("timmerbaas", df$Naam), "veldwerk", df$Naam_number)
+    df$Naam_number <- ifelse(grepl("timmerknecht ", df$Naam), "veldwerk", df$Naam_number)
+    df$Naam_number <- ifelse(grepl("timmerman", df$Naam), "timmerman", df$Naam_number)
+    df$Naam_number <- ifelse(grepl("veldwerk", df$Naam), "veldwerk", df$Naam_number)
    #remove beroepen
     df$Naam <- gsub("/offikier", "", df$Naam)
     df$Naam <- gsub("/delver", "", df$Naam)
     df$Naam <- gsub("/wees", "", df$Naam)
     df$Naam <- gsub("/ kuiper /", "", df$Naam)
     df$Naam <- gsub("/Kuiper/", "", df$Naam)
-    df$Naam <- gsub("Herculeskuiper", "Hercules", df$Naam)
+    df$Naam <- gsub("timmerbaas", "", df$Naam)
+    df$Naam <- gsub("timmerknecht", "", df$Naam)
+    df$Naam <- gsub("timmerman", "", df$Naam)
+    df$Naam <- gsub("veldwerk", "", df$Naam)
    #replace / with of
     df$Naam <- gsub("/  /", "", df$Naam)
     df$Naam[df$Naam=="William  /"] <- "William"
@@ -1232,6 +1306,10 @@
     df$Naam <- ifelse(grepl("en[A-Z]", substr(df$Naam,1,3)), gsub("en[A-Z]", "", df$Naam), df$Naam)
    #abusief
     df$Naam <- gsub(" abusiefe", "", df$Naam)
+   #blijft
+    df$Naam <- gsub(" blijft", "", df$Naam)
+   #blijft
+    df$Naam <- gsub("root ", "", df$Naam)
     
    #fix white spaces
     df$Naam <- trimws(df$Naam)
@@ -2301,17 +2379,28 @@
                                          ifelse(df$in_event=="Unknown", "Unknown", "Other"))))
     
     
+  
+    ######################################
+    #### section 8: Impute birth year ####
+    ######################################
     
-  ######################################
-  #### section 8: Impute birth year ####
-  ######################################
+    #retrieve years from aanvullende informatie inschrijving
+    #retrieve entries with four consecutive numbers
+    #df$year_birth3 <- ifelse(grepl("[0-9][0-9][0-9][0-9]", df$Aanvullendeinformatieinschrijv) & df$in_event2=="Birth",
+    #                         gsub("([0-9][0-9][0-9][0-9]).*", "\\1", df$Aanvullendeinformatieinschrijv),
+    #                         NA)
+    #df$year_birth3 <- gsub(".*([0-9][0-9][0-9][0-9])", "\\1", df$year_birth3)
+    #filter dates
+    #df$year_birth3 <- as.numeric(df$year_birth3)
+    #df$year_birth3 <- ifelse(df$year_birth3>=1830 & df$year_birth3<=1863, df$year_birth3, NA)
+    
+    
     
     df$year_birth2 <- ifelse(df$year_birth!=-1, df$year_birth,
                              ifelse(df$in_event2=="Birth" & df$year_entry!=-1, df$year_entry, df$year_birth_age_based))
     df$year_birth_flag <- ifelse(df$year_birth!=-1, "year_birth",
                                  ifelse(df$in_event2=="Birth" & df$year_entry!=-1, "in_event", 
                                         ifelse(df$year_birth_age_based!=-1, "year_birth_age_based", "")))
-    
     
     
   #############################################################
