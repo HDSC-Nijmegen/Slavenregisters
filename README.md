@@ -49,9 +49,13 @@ Cleans the names in the slave registers.
 | *Colour* | sw, swart, swarte, zw | zwart |
 | *Occupation* | delver | delver |
 | *Occupation* | kuiper | kuiper |
-| *Occupation* | offikier | officier |
+| *Occupation* | timmerbaas | timmerbaas |
+| *Occupation* | timmerknecht | timmerknecht |
+| *Occupation* | timmerman | timmerman |
+| *Occupation* | veldwerk | veldwerk |
 | *Mother* | over, overl, overled, overleden, overlijden, verl | overleden |
 | *Plantation* | Brouwerslust | Brouwerslust |
+| *Plantation* | groningen | Groningen |
 | *Plantation* | LR, L R, L en R, L R, LsR | Land en Rust |
 | *Plantation* | Res, Resol, Resolutie, Revolutie | Resolutie |
 | *Plantation* | la Simp, la Simplicite, la Simplikite | la Simplicite |
