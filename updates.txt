@@ -4,6 +4,10 @@ Updates:
  - deal with 27,180 duplicated id_sources. They most likely occur due to different matches in between and within.
  - fix double names
 
+22-9-2022
+ - Fixed bug allowed for 0 years distance instead of 1 between birth years
+ - Mother names are now standardized according to the 12-9-2022 rules
+
 17-9-2022
  - Fixed bug that imported only half the unknown mothers
  - Identical names between series 1 en 2 now serve as a tie-breaker and receive match score 0.5

@@ -52,8 +52,8 @@
    #### step 2: select relevant columns in data frames ####
     
    #add preceding and proceeding NAAM to data frames
-    df1 <- df1 %>% filter() %>% arrange(source_order) %>% group_by(Eigenaar) %>% mutate(Naam_vorige=lag(Naam_original),
-                                                                                        Naam_volgende=lead(Naam_original)) %>% ungroup()
+    df1 <- df1 %>% filter() %>% arrange(source_order) %>% group_by(Eigenaar) %>% mutate(Naam_vorige=lag(Naam),
+                                                                                        Naam_volgende=lead(Naam)) %>% ungroup()
     #set NA on NAAM_VORIGE + NAAM_VOLGENDE to ""
     df1$Naam_vorige[is.na(df1$Naam_vorige)] <- ""
     df1$Naam_volgende[is.na(df1$Naam_volgende)] <- ""
@@ -62,7 +62,7 @@
     df1$Eigenaar <- NULL
     colnames(df1) <- paste(c("source_order", 
                              "in_event", "out_event",
-                             "Naam_original", "Naam", "Naam_number", 
+                             "Naam", "Naam_number", 
                              "Moeder", "Moeder_number", 
                              "year_birth",
                              "year_entry", "month_entry", "day_entry",
@@ -76,7 +76,7 @@
    #rename variables df1
     colnames(df1) <- paste(c("source_order", 
                              "in_event", "out_event",
-                             "Naam_original", "Naam", "Naam_number", 
+                             "Naam", "Naam_number", 
                              "Moeder", "Moeder_number", 
                              "year_birth",
                              "year_entry", "month_entry", "day_entry",
@@ -215,7 +215,7 @@
    #out_events
     colnames(df1) <- paste(c("source_order", 
                              "in_event", "out_event",
-                             "Naam_original", "Naam", "Naam_number", 
+                             "Naam", "Naam_number", 
                              "Moeder", "Moeder_number", 
                              "year_birth",
                              "year_entry", "month_entry", "day_entry",
@@ -226,7 +226,7 @@
     colnames(df1)[2:3] <- c("in_event_x", "out_event_x")
     x <- df1[which(df1$out_event_x=="Transferred"),]
     df_full <- merge(x, df_matched, by=paste(c("source_order", 
-                                               "Naam_original", "Naam", "Naam_number", 
+                                               "Naam", "Naam_number", 
                                                "Moeder", "Moeder_number", 
                                                "year_birth",
                                                "year_entry", "month_entry", "day_entry",
@@ -239,7 +239,7 @@
    #in_events
     colnames(df1) <- paste(c("source_order", 
                              "in_event", "out_event",
-                             "Naam_original", "Naam", "Naam_number", 
+                             "Naam", "Naam_number", 
                              "Moeder", "Moeder_number", 
                              "year_birth",
                              "year_entry", "month_entry", "day_entry",
@@ -250,7 +250,7 @@
     colnames(df1)[2:3] <- c("in_event_x", "out_event_x")
     x <- df1[which(df1$in_event_x=="Transferred"),]
     df_full <- merge(x, df_full, by=paste(c("source_order", 
-                                            "Naam_original", "Naam", "Naam_number", 
+                                            "Naam", "Naam_number", 
                                             "Moeder", "Moeder_number", 
                                             "year_birth",
                                             "year_entry", "month_entry", "day_entry",
@@ -324,8 +324,15 @@
     x <- df[,c("source_order", "Typeregister", "Eigenaar", "Aanvullendeinformatieinschrijv", "Aanvullendeinformatieuitschrij")]
     colnames(x) <- c("source_order_1", "Typeregister_1", "Eigenaar_1", "Aanvullendeinformatieinschrijving_1", "Aanvullendeinformatieuitschrijving_1")
     df_full <- merge(df_full, x, by="source_order_1", all.x=T)
-   #source_order_1
+   #source_order_2
     colnames(x) <- c("source_order_2", "Typeregister_2", "Eigenaar_2", "Aanvullendeinformatieinschrijving_2", "Aanvullendeinformatieuitschrijving_2")
+    df_full <- merge(df_full, x, by="source_order_2", all.x=T)
+    
+  #add Naam_original and Moeder_original
+    x <- df[,c("source_order", "Naam_original", "Moeder_original")]
+    colnames(x) <- c("source_order_1", "Naam_original_1", "Moeder_original_1")
+    df_full <- merge(df_full, x, by="source_order_1", all.x=T)
+    colnames(x) <- c("source_order_2", "Naam_original_2", "Moeder_original_2")
     df_full <- merge(df_full, x, by="source_order_2", all.x=T)
     
    #order

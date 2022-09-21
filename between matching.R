@@ -54,10 +54,10 @@
    #### step 2: add metadata and select relevant columns in data frames ####
 
    #add preceding and proceeding NAAM to data frames
-    df1 <- df1 %>% filter() %>% arrange(source_order) %>% group_by(Eigenaar) %>% mutate(Naam_vorige=lag(Naam_original),
+    df1 <- df1 %>% filter() %>% arrange(source_order) %>% group_by(Eigenaar) %>% mutate(Naam_vorige=lag(Naam),
                                                                                  Naam_volgende=lead(Naam)) %>% ungroup()
     df2 <- df2 %>% arrange(source_order) %>% group_by(Eigenaar) %>% mutate(Naam_vorige=lag(Naam),
-                                                                                 Naam_volgende=lead(Naam_original)) %>% ungroup()
+                                                                                 Naam_volgende=lead(Naam)) %>% ungroup()
    #set NA on NAAM_VORIGE + NAAM_VOLGENDE to ""
     df1$Naam_vorige[is.na(df1$Naam_vorige)] <- ""
     df1$Naam_volgende[is.na(df1$Naam_volgende)] <- ""
@@ -68,7 +68,7 @@
     colnames(df1) <- paste(c("source_order", 
                               "Typeregister",
                               "Out_event", 
-                              "Naam_original", "Naam", "Naam_number", 
+                              "Naam", "Naam_number", 
                               "Moeder", "Moeder_number", 
                               "year_birth",
                               "Eigenaar",
@@ -79,7 +79,7 @@
     colnames(df2) <- paste(c("source_order", 
                               "Typeregister",
                               "In_event", 
-                              "Naam_original", "Naam", "Naam_number", 
+                              "Naam", "Naam_number", 
                               "Moeder", "Moeder_number", 
                               "year_birth",
                               "Eigenaar",
@@ -123,8 +123,8 @@
     } else{
       df_matched <- df_matched[which(is.na(df_matched$year_birth_1) | is.na(df_matched$year_birth_2) |
                                        df_matched$year_birth_1=="-1" | df_matched$year_birth_2=="-1" | 
-                                       df_matched$year_birth_1-df_matched$year_birth_2<1 &
-                                       df_matched$year_birth_1-df_matched$year_birth_2> -1 |
+                                       df_matched$year_birth_1-df_matched$year_birth_2<=1 &
+                                       df_matched$year_birth_1-df_matched$year_birth_2>= -1 |
                                        stringdist(df_matched$Naam_vorige_1, df_matched$Naam_vorige_2)<=lev_dist_laglead & 
                                        stringdist(df_matched$Naam_volgende_1, df_matched$Naam_volgende_2)<=lev_dist_laglead |
                                        stringdist(df_matched$Naam_vorige_1, df_matched$Naam_vorige_2)<=lev_dist_laglead & 
@@ -230,12 +230,12 @@
   #add unmatched cases
    #df1
     colnames(df1)[3] <- "Out_event_x"
-    df_full <- merge(df1[,1:11], df_matched, by=paste(c("source_order", "Typeregister", "Naam", "Naam_number", "Moeder", "Moeder_number", "Eigenaar", "year_birth", "sex"), 1, sep="_"), all=T)
+    df_full <- merge(df1[,1:10], df_matched, by=paste(c("source_order", "Typeregister", "Naam", "Naam_number", "Moeder", "Moeder_number", "Eigenaar", "year_birth", "sex"), 1, sep="_"), all=T)
     df_full$Out_event_1 <- ifelse(is.na(df_full$Out_event_1), df_full$Out_event_x, df_full$Out_event_1)
     df_full$Out_event_x <- NULL
    #Series 4
     colnames(df2)[3] <- "In_event_x"
-    df_full <- merge(df2[,1:11], df_full, by=paste(c("source_order", "Typeregister", "Naam", "Naam_number", "Moeder", "Moeder_number", "Eigenaar", "year_birth", "sex"), 2, sep="_"), all=T)
+    df_full <- merge(df2[,1:10], df_full, by=paste(c("source_order", "Typeregister", "Naam", "Naam_number", "Moeder", "Moeder_number", "Eigenaar", "year_birth", "sex"), 2, sep="_"), all=T)
     df_full$In_event_2 <- ifelse(is.na(df_full$In_event_2), df_full$In_event_x, df_full$In_event_2)
     df_full$In_event_x <- NULL
     
@@ -294,6 +294,13 @@
     
    #### step 7: structure and store data frame ####
     
+   #add original names
+    x <- df[,c("source_order", "Naam_original", "Moeder_original")]
+    colnames(x) <- c("source_order_1", "Naam_original_1", "Moeder_original_1")
+    df_full <- merge(df_full, x, by="source_order_1", all.x=T)
+    colnames(x) <- c("source_order_2", "Naam_original_2", "Moeder_original_2")
+    df_full <- merge(df_full, x, by="source_order_2", all.x=T)
+    
    #order
     df_full <- df_full[,c("Typeregister_1", "Typeregister_2",
                           "Match", "Match_adaptive", "Match_naam_number", "Match_moeder_adaptive", "Match_moeder_number", "Match_year", "Match_vorige_adaptive", "Match_volgende_adaptive", "Match_score",
@@ -301,8 +308,8 @@
                           paste(c("Out_event", "In_event"), 1:2, sep="_"), 
                           paste(c("source_order", "source_order"), 1:2, sep="_"), 
                           paste(c("sex", "sex"), 1:2, sep="_"), 
-                          paste(c("Naam", "Naam", "Naam_number", "Naam_number"), 1:2, sep="_"), 
-                          paste(c("Moeder", "Moeder", "Moeder_number", "Moeder_number"), 1:2, sep="_"), 
+                          paste(c("Naam_original", "Naam_original", "Naam", "Naam", "Naam_number", "Naam_number"), 1:2, sep="_"), 
+                          paste(c("Moeder_original", "Moeder_original", "Moeder", "Moeder", "Moeder_number", "Moeder_number"), 1:2, sep="_"), 
                           paste(c("Eigenaar", "Eigenaar"), 1:2, sep="_"), 
                           paste(c("year_birth", "year_birth"), 1:2, sep="_"), 
                           paste(c("Naam_vorige", "Naam_vorige"), 1:2, sep="_"),
@@ -316,8 +323,8 @@
                            paste("Out_event", NUMMER1, sep="_"), paste("In_event", NUMMER2, sep="_"),
                            paste("Source_order", NUMMER1, sep="_"), paste("Source_order", NUMMER2, sep="_"),
                            paste("Sex", NUMMER1, sep="_"), paste("Sex", NUMMER2, sep="_"),
-                           paste("Naam", NUMMER1, sep="_"), paste("Naam", NUMMER2, sep="_"), paste("Naam_number", NUMMER1, sep="_"), paste("Naam_number", NUMMER2, sep="_"),
-                           paste("Moeder", NUMMER1, sep="_"), paste("Moeder", NUMMER2, sep="_"), paste("Moeder_number", NUMMER1, sep="_"), paste("Moeder_number", NUMMER2, sep="_"),
+                           paste("Naam_original", NUMMER1, sep="_"), paste("Naam_original", NUMMER1, sep="_"), paste("Naam", NUMMER1, sep="_"), paste("Naam", NUMMER2, sep="_"), paste("Naam_number", NUMMER1, sep="_"), paste("Naam_number", NUMMER2, sep="_"),
+                           paste("Moeder_original", NUMMER1, sep="_"), paste("Moeder_original", NUMMER1, sep="_"), paste("Moeder", NUMMER1, sep="_"), paste("Moeder", NUMMER2, sep="_"), paste("Moeder_number", NUMMER1, sep="_"), paste("Moeder_number", NUMMER2, sep="_"),
                            paste("Eigenaar", NUMMER1, sep="_"), paste("Eigenaar", NUMMER2, sep="_"),
                            paste("Year_birth", NUMMER1, sep="_"), paste("Year_birth", NUMMER2, sep="_"),
                            paste("Naam_vorige", NUMMER1, sep="_"), paste("Naam_vorige", NUMMER2, sep="_"),
