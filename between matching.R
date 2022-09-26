@@ -90,7 +90,7 @@
    #add df1 and df2 to SLAVE_NAMES_MATCHED
     df_matched <- merge(df1, Slave_names_matched, by="Naam_1", all=F)
     df_matched <- merge(df_matched, df2, by="Naam_2", all=F )
-
+    
     
    #### step 3: rule-based filtering of matches ####
 

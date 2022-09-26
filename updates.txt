@@ -6,7 +6,7 @@ Updates:
 26-9-2022
  - WITHIN now except records where EITHER birth year is missing OR birth year matches OR birth month + day match
  - WITHIN now except records where EITHER event year is missing OR event year matches OR event month + day match
- - Consider multiple names separately through function "split_names"
+ - Consider multiple names of 4 or more characters separately through function "split_names"
 
 22-9-2022
  - Fixed bug allowed for 0 years distance instead of 1 between birth years
