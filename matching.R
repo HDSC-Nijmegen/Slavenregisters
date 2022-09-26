@@ -60,6 +60,7 @@
   #load scripts
   source("U:/Surfdrive/GitHub/Slavenregisters/within matching.R")
   source("U:/Surfdrive/GitHub/Slavenregisters/between matching.R")
+  source("U:/Surfdrive/GitHub/Slavenregisters/split_names.R")
   
   ######################################
   #### section 0: standardise names ####
@@ -88,6 +89,14 @@
     df$Moeder <- gsub("é", "e", df$Moeder)
     df$Moeder <- gsub("kw", "qu", df$Moeder)
     df$Moeder <- gsub("ph", "f", df$Moeder)
+    
+  #split naam
+    df <- split_names(df, "Naam")
+    
+  #remove white spaces
+    df$Naam <- gsub(" ", "", df$Naam)
+    df$Moeder <- gsub(" ", "", df$Moeder)
+    
     
     
   #####################################################

@@ -109,15 +109,20 @@
    #select entries with EITHER: 
      # 1 unknown date OR 
      # 2 corresponding birth years
+     # 2 corresponding birth dates
     df_matched <- df_matched[which(is.na(df_matched$year_birth_1) | is.na(df_matched$year_birth_2) |
                                      df_matched$year_birth_1=="-1" | df_matched$year_birth_2=="-1" | 
-                                     df_matched$year_birth_1==df_matched$year_birth_2), ]
+                                     df_matched$month_birth_1==df_matched$month_birth_2 & df_matched$month_birth_1!="-1" &
+                                     df_matched$day_birth_1==df_matched$day_birth_2 & df_matched$day_birth_1!="-1"), ]
   #select entries with EITHER: 
     # 1 mutation date OR 
-    # 2 corresponding mutation years
+    # 2 corresponding mutation years OR
+    # 2 corresponding mutation dates
     df_matched <- df_matched[which(is.na(df_matched$year_exit_1) | is.na(df_matched$year_entry_2) |
                                      df_matched$year_exit_1=="-1" | df_matched$year_entry_2=="-1" | 
-                                     df_matched$year_exit_1==df_matched$year_entry_2), ]
+                                     df_matched$year_exit_1==df_matched$year_entry_2 | 
+                                     df_matched$month_exit_1==df_matched$month_entry_2 & df_matched$month_exit_1!="-1" &
+                                     df_matched$day_exit_1==df_matched$day_entry_2 & df_matched$day_exit_1=="-1"), ]
     
     
   #### step 4: add metadata ####
