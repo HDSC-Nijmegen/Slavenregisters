@@ -45,6 +45,10 @@
     }
    #rename columns
     colnames(Slave_names_matched)[1:3] <- c("Naam_1", "Naam_2", "Naam_lv")
+   #adaptive Levenshtein distance
+    Slave_names_matched <- Slave_names_matched[nchar(Slave_names_matched$Naam_1)>=2 & nchar(Slave_names_matched$Naam_1)<=3 & stringdist(Slave_names_matched$Naam_1, Slave_names_matched$Naam_2)<=1 |
+                                                 nchar(Slave_names_matched$Naam_1)>=4 & nchar(Slave_names_matched$Naam_1)<=8 & stringdist(Slave_names_matched$Naam_1, Slave_names_matched$Naam_2)<=2 |
+                                                 nchar(Slave_names_matched$Naam_1)>=9 & stringdist(Slave_names_matched$Naam_1, Slave_names_matched$Naam_2), ]
    #clean environment
     rm(l, LV_matrix, Slave_names, x)
     
@@ -137,10 +141,6 @@
                                  is.na(df_matched$Naam_2) | 
                                  df_matched$Naam_1=="" | 
                                  df_matched$Naam_2=="", 0, 1)
-   #match adaptive Levenshtein
-    df_matched$Match_adaptive <- ifelse(is.na(df_matched$Naam_1) | is.na(df_matched$Naam_2) | df_matched$Naam_1=="" | df_matched$Naam_2=="" |
-                                          nchar(df_matched$Naam_1)>=2 & nchar(df_matched$Naam_1)<=3 & stringdist(df_matched$Naam_1, df_matched$Naam_2)>1 |
-                                          nchar(df_matched$Naam_1)>=4 & stringdist(df_matched$Naam_1, df_matched$Naam_2)>2, 0, 1)
    #naam_number
     df_matched$Match_naam_number <- ifelse(is.na(df_matched$Naam_number_1) | is.na(df_matched$Naam_number_2), 0,
                                            ifelse(df_matched$Naam_number_1!=df_matched$Naam_number_2, -1, 1))
@@ -210,8 +210,8 @@
   #### step 5: apply adaptive Levenshtein distance ####
     
    #make maximum Levenshtein distance dependent on length of the name 
-    df_matched <- df_matched[which(df_matched$Match_adaptive==1 & df_matched$Match_moeder_adaptive==1 |
-                                     df_matched$Match_adaptive==1 & df_matched$Moeder_1==""),]
+    df_matched <- df_matched[which(df_matched$Match_moeder_adaptive==1 |
+                                     df_matched$Moeder_1==""),]
     
     
   #### step 6: add unmatched cases ####
@@ -269,10 +269,6 @@
   #add flags
    #matched
     df_full$Match <- ifelse(is.na(df_full$Naam_1) | is.na(df_full$Naam_2) | df_full$Naam_1=="" | df_full$Naam_2=="", 0, 1)
-   #match adaptive Levenshtein
-    df_full$Match_adaptive <- ifelse(is.na(df_full$Naam_1) | is.na(df_full$Naam_2) | df_full$Naam_1=="" | df_full$Naam_2=="" |
-                                       nchar(df_full$Naam_1)>=2 & nchar(df_full$Naam_1)<=3 & stringdist(df_full$Naam_1, df_full$Naam_2)>1 |
-                                       nchar(df_full$Naam_1)>=4 & stringdist(df_full$Naam_1, df_full$Naam_2)>2, 0, 1)
    #naam_number
     df_full$Match_naam_number <- ifelse(is.na(df_full$Naam_number_1) | is.na(df_full$Naam_number_2) | 
                                           df_full$Naam_number_1!=df_full$Naam_number_2, 0, 1)
@@ -342,7 +338,7 @@
     
    #order
     df_full <- df_full[,c("Typeregister_1", "Typeregister_2",
-                          "Match", "Match_adaptive", "Match_naam_number", "Match_moeder_adaptive", "Match_moeder_number", "Match_year", "Match_year_event", "Match_score", "Match_vorige_adaptive", "Match_volgende_adaptive",
+                          "Match", "Match_naam_number", "Match_moeder_adaptive", "Match_moeder_number", "Match_year", "Match_year_event", "Match_score", "Match_vorige_adaptive", "Match_volgende_adaptive",
                           "Naam_lv", "Moeder_lv", 
                           paste(c("source_order", "source_order"), 1:2, sep="_"),
                           paste(c("out_event", "in_event"), 1:2, sep="_"),
@@ -363,7 +359,7 @@
     
    #rename
     colnames(df_full) <- c("Typeregister_1", "Typeregister_2",
-                           "Match", "Match_adaptive", "Match_naam_number", "Match_moeder_adaptive", "Match_moeder_number", "Match_year_birth", "Match_year_transfer", "Match_score", "Match_vorige_adaptive", "Match_volgende_adaptive",
+                           "Match", "Match_naam_number", "Match_moeder_adaptive", "Match_moeder_number", "Match_year_birth", "Match_year_transfer", "Match_score", "Match_vorige_adaptive", "Match_volgende_adaptive",
                            "Naam_lv", "Moeder_lv", 
                            paste(c("Source_order", "Source_order"), 1:2, sep="_"),
                            paste(c("Out_event", "In_event"), 1:2, sep="_"),

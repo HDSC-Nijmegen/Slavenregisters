@@ -11,12 +11,6 @@ split_names <- function(df1, varname){
   df2$Naam <- gsub(" .. ", "", df2$Naam)
   df2$Naam <- ifelse(substr(df2$Naam, 3, 3)==" ", substr(df2$Naam, 4, nchar(df2$Naam)), df2$Naam)
   
-  #drop van
-  df2$Naam <- gsub(" ... ", "", df2$Naam)
-  df2$Naam <- ifelse(substr(df2$Naam, 4, 4)==" ", substr(df2$Naam, 5, nchar(df2$Naam)), df2$Naam)
-  #df2$Naam <- gsub(" van ", "", df2$Naam)
-  #df2$Naam <- ifelse(substr(df2$Naam, 1, 4)=="van ", substr(df2$Naam, 5, nchar(df2$Naam)), df2$Naam)
-  
   #drop variables without whitespace
   df2 <- df2[grepl(" ", df2$Naam),]
   
