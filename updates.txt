@@ -3,6 +3,12 @@ Updates:
 ????
  - deal with 27,180 duplicated id_sources. They most likely occur due to different matches in between and within.
 
+3-10-2022
+ - Fixed bug in naam_vorige and naam_vol that occured as a result of "split_names"
+ - Fixed bug that duplicated entries in output that occured as a result of "split_names"
+ - Fixed bug in adaptive name filtering that was introduced while speeding up the matching
+ - Sped up matching by adding allow.cartesian=T when compiling candidate matches based on names of enslaved
+
 30-9-2022
  - Made adaptive Levenshtein on names enslaved compulsory to speed up the matching process
  - Consider multiple names of 3 or more characters rather than 4 or more separately through function "split_names"

@@ -50,7 +50,7 @@
    #adaptive Levenshtein distance
     Slave_names_matched <- Slave_names_matched[nchar(Slave_names_matched$Naam_1)>=2 & nchar(Slave_names_matched$Naam_1)<=3 & stringdist(Slave_names_matched$Naam_1, Slave_names_matched$Naam_2)<=1 |
                                                  nchar(Slave_names_matched$Naam_1)>=4 & nchar(Slave_names_matched$Naam_1)<=8 & stringdist(Slave_names_matched$Naam_1, Slave_names_matched$Naam_2)<=2 |
-                                                 nchar(Slave_names_matched$Naam_1)>=9 & stringdist(Slave_names_matched$Naam_1, Slave_names_matched$Naam_2), ]
+                                                 nchar(Slave_names_matched$Naam_1)>=9 & stringdist(Slave_names_matched$Naam_1, Slave_names_matched$Naam_2)<=lev_dist_naam, ]
    #clean environment
     rm(l, LV_matrix, Slave_names_1, Slave_names_2, x)
     
@@ -58,10 +58,14 @@
    #### step 2: add metadata and select relevant columns in data frames ####
 
    #add preceding and proceeding NAAM to data frames
-    df1 <- df1 %>% filter() %>% arrange(source_order) %>% group_by(Eigenaar) %>% mutate(Naam_vorige=lag(Naam),
-                                                                                 Naam_volgende=lead(Naam)) %>% ungroup()
-    df2 <- df2 %>% arrange(source_order) %>% group_by(Eigenaar) %>% mutate(Naam_vorige=lag(Naam),
-                                                                                 Naam_volgende=lead(Naam)) %>% ungroup()
+    #filter unique rows as source_order is repeated for split names (e.g. jan plezier returns as janplezier, jan, and plezier)
+    laglead <- df1 %>% filter(!duplicated(source_order)) %>% arrange(source_order) %>% group_by(Eigenaar) %>% mutate(Naam_vorige=lag(Naam),
+                                                                                                                     Naam_volgende=lead(Naam)) %>% ungroup() %>% select(source_order, Naam_vorige, Naam_volgende)
+    df1 <- merge(df1, laglead, by="source_order", all=F)
+    laglead <- df2 %>% filter(!duplicated(source_order)) %>% arrange(source_order) %>% group_by(Eigenaar) %>% mutate(Naam_vorige=lag(Naam),
+                                                                                                                     Naam_volgende=lead(Naam)) %>% ungroup() %>% select(source_order, Naam_vorige, Naam_volgende)
+    df2 <- merge(df2, laglead, by="source_order", all=F)
+    rm(laglead)
    #set NA on NAAM_VORIGE + NAAM_VOLGENDE to ""
     df1$Naam_vorige[is.na(df1$Naam_vorige)] <- ""
     df1$Naam_volgende[is.na(df1$Naam_volgende)] <- ""
@@ -92,8 +96,8 @@
                             2, sep="_")
     
    #add df1 and df2 to SLAVE_NAMES_MATCHED
-    df_matched <- merge(df1, Slave_names_matched, by="Naam_1", all=F)
-    df_matched <- merge(df_matched, df2, by="Naam_2", all=F )
+    df_matched <- merge(df1, Slave_names_matched, by="Naam_1", all.x=T, allow.cartesian=T)
+    df_matched <- merge(df_matched, df2, by="Naam_2", all=F, allow.cartesian=T)
     
     
    #### step 3: rule-based filtering of matches ####
@@ -289,7 +293,7 @@
    #### step 7: structure and store data frame ####
     
    #add original names
-    x <- df[,c("source_order", "Naam_original", "Moeder_original")]
+    x <- df[!duplicated(df$source_order),c("source_order", "Naam_original", "Moeder_original")]
     colnames(x) <- c("source_order_1", "Naam_original_1", "Moeder_original_1")
     df_full <- merge(df_full, x, by="source_order_1", all.x=T)
     colnames(x) <- c("source_order_2", "Naam_original_2", "Moeder_original_2")

@@ -48,7 +48,7 @@
    #adaptive Levenshtein distance
     Slave_names_matched <- Slave_names_matched[nchar(Slave_names_matched$Naam_1)>=2 & nchar(Slave_names_matched$Naam_1)<=3 & stringdist(Slave_names_matched$Naam_1, Slave_names_matched$Naam_2)<=1 |
                                                  nchar(Slave_names_matched$Naam_1)>=4 & nchar(Slave_names_matched$Naam_1)<=8 & stringdist(Slave_names_matched$Naam_1, Slave_names_matched$Naam_2)<=2 |
-                                                 nchar(Slave_names_matched$Naam_1)>=9 & stringdist(Slave_names_matched$Naam_1, Slave_names_matched$Naam_2), ]
+                                                 nchar(Slave_names_matched$Naam_1)>=9 & stringdist(Slave_names_matched$Naam_1, Slave_names_matched$Naam_2)<=lev_dist_naam, ]
    #clean environment
     rm(l, LV_matrix, Slave_names, x)
     
@@ -56,8 +56,10 @@
    #### step 2: select relevant columns in data frames ####
     
    #add preceding and proceeding NAAM to data frames
-    df1 <- df1 %>% filter() %>% arrange(source_order) %>% group_by(Eigenaar) %>% mutate(Naam_vorige=lag(Naam),
-                                                                                        Naam_volgende=lead(Naam)) %>% ungroup()
+    laglead <- df1 %>% filter(!duplicated(source_order)) %>% arrange(source_order) %>% group_by(Eigenaar) %>% mutate(Naam_vorige=lag(Naam),
+                                                                                                                     Naam_volgende=lead(Naam)) %>% ungroup() %>% select(source_order, Naam_vorige, Naam_volgende)
+    df1 <- merge(df1, laglead, by="source_order", all=F)
+    rm(laglead)
     #set NA on NAAM_VORIGE + NAAM_VOLGENDE to ""
     df1$Naam_vorige[is.na(df1$Naam_vorige)] <- ""
     df1$Naam_volgende[is.na(df1$Naam_volgende)] <- ""
@@ -322,7 +324,7 @@
     
   #add type register
    #source_order_1
-    x <- df[,c("source_order", "Typeregister", "Eigenaar", "Aanvullendeinformatieinschrijv", "Aanvullendeinformatieuitschrij")]
+    x <- df[!duplicated(df$source_order),c("source_order", "Typeregister", "Eigenaar", "Aanvullendeinformatieinschrijv", "Aanvullendeinformatieuitschrij")]
     colnames(x) <- c("source_order_1", "Typeregister_1", "Eigenaar_1", "Aanvullendeinformatieinschrijving_1", "Aanvullendeinformatieuitschrijving_1")
     df_full <- merge(df_full, x, by="source_order_1", all.x=T)
    #source_order_2
@@ -330,7 +332,7 @@
     df_full <- merge(df_full, x, by="source_order_2", all.x=T)
     
   #add Naam_original and Moeder_original
-    x <- df[,c("source_order", "Naam_original", "Moeder_original")]
+    x <- df[!duplicated(df$source_order),c("source_order", "Naam_original", "Moeder_original")]
     colnames(x) <- c("source_order_1", "Naam_original_1", "Moeder_original_1")
     df_full <- merge(df_full, x, by="source_order_1", all.x=T)
     colnames(x) <- c("source_order_2", "Naam_original_2", "Moeder_original_2")
