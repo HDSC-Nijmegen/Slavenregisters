@@ -3,6 +3,12 @@ Updates:
 ????
  - deal with 27,180 duplicated id_sources. They most likely occur due to different matches in between and within.
 
+10-10-2022
+ - Fixed bug in WITHIN that resulted in 0 matches, birth month + day match were not loaded
+ - Fixed bug in split_names that didn't estimate Levenshtein distances for vectors containing missings
+ - Fixed bug in split_names that assigned names from part 3 to part 2 of the name
+ - Made split_names except names other than "Naam"
+
 3-10-2022
  - Fixed bug in naam_vorige and naam_vol that occured as a result of "split_names"
  - Fixed bug that duplicated entries in output that occured as a result of "split_names"

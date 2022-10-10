@@ -92,6 +92,7 @@
     
   #split naam
     df <- split_names(df, "Naam")
+    df <- split_names(df, "Moeder")
     
   #remove white spaces
     df$Naam <- gsub(" ", "", df$Naam)
@@ -162,7 +163,7 @@
                                            "Naam", "Naam_number", 
                                            "Moeder", "Moeder_number", 
                                            "Eigenaar",
-                                           "year_birth",
+                                           "year_birth", "month_birth", "day_birth",
                                            "year_entry", "month_entry", "day_entry",
                                            "year_exit", "month_exit", "day_exit",
                                            "sex")]
@@ -172,7 +173,7 @@
                                            "Naam", "Naam_number", 
                                            "Moeder", "Moeder_number", 
                                            "Eigenaar",
-                                           "year_birth",
+                                           "year_birth", "month_birth", "day_birth",
                                            "year_entry", "month_entry", "day_entry",
                                            "year_exit", "month_exit", "day_exit",
                                            "sex")]
