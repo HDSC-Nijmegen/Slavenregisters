@@ -1963,6 +1963,7 @@
     
    #change Avondrust into Arendrust
     df$Eigenaar <- gsub("Avondrust", "Arendrust", df$Eigenaar)
+    df$plantation_name <- gsub("Avondrust", "Arendrust", df$plantation_name)
     
    #filter privé-eigenaren
     Index <- df[df$Typeregister=="Particulieren", c("Eigenaar", "source_order")]
