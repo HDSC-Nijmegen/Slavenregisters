@@ -15,7 +15,7 @@
   #load packages
   library("haven")
   library("dplyr")
-  library("readxl")
+  library("openxlsx")
   library("stringdist")
   
   #clean environment
@@ -23,6 +23,7 @@
   
   #open dataset
   setwd("U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Voorwerk HDS/Most Important Files/Stata")
+  df <- read_dta("Dataset_Standardization.dta")
   
   #import standardized entries Eigenaar
   write.xlsx(df[,c("source_order", "Eigenaar"),], "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Cleaned Registry/Eigenaren particulier/Eigenaren - input.xlsx", overwrite=T)
@@ -145,7 +146,7 @@
     x3 <- x3[c("Rol", "Naam", "Eigenaar", "Source_order")]
     #bind and save
     x <- rbind(x1, x2, x3) %>% arrange(Source_order)
-    write_xlsx(x, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Unintelligible.xlsx")
+    write.xlsx(x, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Unintelligible.xlsx")
     #clean environment
     rm(x, x1, x2, x3)
     
@@ -1324,11 +1325,11 @@
     
    #save look-up tables
     #unique Naam_original variants + standardisation
-    write_xlsx(df[!duplicated(df$Naam_original),c("Naam_original", "Naam", "Naam_number", "source_order")] %>% arrange(trimws(Naam_original)), "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Slaafgemaakten - Conversietabel.xlsx")
+    write.xlsx(df[!duplicated(df$Naam_original),c("Naam_original", "Naam", "Naam_number", "source_order")] %>% arrange(trimws(Naam_original)), "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Slaafgemaakten - Conversietabel.xlsx")
     #frequency table of Naam
     x <- as.data.frame(table(df$Naam)) %>% arrange(Var1)
     colnames(x) <- c("Naam", "Frequentie")
-    write_xlsx(x, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Slaafgemaakten.xlsx")
+    write.xlsx(x, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Slaafgemaakten.xlsx")
     rm(x)
     
     
@@ -1359,7 +1360,7 @@
                             Sex$n_female+Sex$n_unknown )
     Sex <- Sex %>% arrange(-error_margin)
     #save outfile
-    write_xlsx(Sex, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Correctie sekse - slaafgemaakten.xlsx")
+    write.xlsx(Sex, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Correctie sekse - slaafgemaakten.xlsx")
     rm(female, male, unknown)
     
    #standardise names if error_margin <= 0.25
@@ -1382,7 +1383,7 @@
     Sex <- Sex %>% group_by(Naam) %>% mutate(n=n()) %>% ungroup()
     Sex$sex <- ifelse(Sex$n>1,"unknown", Sex$sex)
     Sex <- Sex[!duplicated(Sex$Naam), c("Naam", "sex")]
-    write_xlsx(Sex, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Sekse naar naam - slaafgemaakten.xlsx")
+    write.xlsx(Sex, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Sekse naar naam - slaafgemaakten.xlsx")
     
     
     
@@ -1948,11 +1949,11 @@
     
    #save look-up table
     #unique Naam_original variants + standardisation
-    write_xlsx(df[!duplicated(df$Moeder_original),c("Moeder_original", "Moeder", "Moeder_number", "Moeder_birthyear", "Moeder_reference", "Moeder_overleden", "Moeder_1_Entry", "Moeder_2_Naam", "Moeder_incongruence", "source_order")] %>% arrange(trimws(Moeder_original)), "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Moeders - Conversietabel.xlsx")
+    write.xlsx(df[!duplicated(df$Moeder_original),c("Moeder_original", "Moeder", "Moeder_number", "Moeder_birthyear", "Moeder_reference", "Moeder_overleden", "Moeder_1_Entry", "Moeder_2_Naam", "Moeder_incongruence", "source_order")] %>% arrange(trimws(Moeder_original)), "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Moeders - Conversietabel.xlsx")
     #frequency table of Naam
     x <- as.data.frame(table(df$Moeder)) %>% arrange(Var1)
     colnames(x) <- c("Naam", "Frequentie")
-    write_xlsx(x, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Moeders.xlsx")
+    write.xlsx(x, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Moeders.xlsx")
     rm(x)
     
     
@@ -2314,8 +2315,8 @@
                          "Eigenaar_Straatvoogd",
                          "Eigenaar_qq")
    #save look-up table
-    write_xlsx(Index %>% arrange(trimws(Eigenaar)), "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Eigenaren - particulieren.xlsx")
-    write_xlsx(df[!duplicated(df$Eigenaar) & df$Typeregister=="Plantages", c("Eigenaar", "plantation_name", "plantation_district")], "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Eigenaren - plantages.xlsx")
+    write.xlsx(Index %>% arrange(trimws(Eigenaar)), "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Eigenaren - particulieren.xlsx")
+    write.xlsx(df[!duplicated(df$Eigenaar) & df$Typeregister=="Plantages", c("Eigenaar", "plantation_name", "plantation_district")], "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Eigenaren - plantages.xlsx")
    #add to df
     df <- merge(df, Index[,c("Eigenaar", "Eigenaar_Prefix", "Eigenaar_Last_name", "Eigenaar_First_name", "Eigenaar_Straatvoogd", "Eigenaar_qq")], by="Eigenaar", all=T)
     
@@ -2340,7 +2341,7 @@
     x <- rbind(x,y)
     x <- x[,c("role", "sex", "Naam", "Naam_number", "Eigenaar", "year_birth", "source_order")] %>% arrange(Naam)
     #export
-    write_xlsx(x, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Overzicht niet-courante namen.xlsx")
+    write.xlsx(x, "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten/Overzicht niet-courante namen.xlsx")
     rm(x,y)
     
     
@@ -2410,7 +2411,7 @@
                         Moeder = replace(Moeder, source_order == "122729b46132_Y", "Fanny"),
                         Moeder = replace(Moeder, source_order == "122729b46132_Z", "Fanny"))
     #Inlezen  
-    df_recon <- read_excel("U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Cleaned Registry/Reconstructie Serie 4/Controlelijst_aanwezige_folios_serie 4_final.xlsx") %>%
+    df_recon <- read.xlsx("U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Cleaned Registry/Reconstructie Serie 4/Controlelijst_aanwezige_folios_serie 4_final.xlsx") %>%
       filter(!(is.na(Betrouwbaarheid)))
     
     #Set to character to enable appending
@@ -2458,7 +2459,7 @@
     
    #write outfiles
     write.table(df, paste0("U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Cleaned Registry/cleaned slave register ", Sys.Date(), ".txt"), quote=F, sep ="\t", col.names=T, row.names=F, fileEncoding = 'UTF-8')
-    write_xlsx(df, paste0("U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Cleaned Registry/cleaned slave register ", Sys.Date(), ".xlsx"))
+    write.xlsx(df, paste0("U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Cleaned Registry/cleaned slave register ", Sys.Date(), ".xlsx"))
     
     
    
