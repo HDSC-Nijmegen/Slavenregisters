@@ -5,6 +5,7 @@
   library("stringdist")
   library("openxlsx")
   library("tidyr")
+  library("stringr")
   
   #clean environment
   rm(list=ls())
@@ -38,12 +39,17 @@
   #### !!!! SET PARAMETERS !!!! ####
   ##################################
   
-  #open dataset
-  setwd("U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching")
-  df <- fread("Cleaned Registry/cleaned slave register 2022-09-17.txt", encoding="UTF-8")
-
+  #set working directory for data
+  wd_ER <- "U:/Surfdrive/Shared/shared map slavenregisters/Suriname Emancipatieregister/Emancipatieregisters - Cleaning and Matching"
+  wd_namenlijst <- "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Namenlijsten"
+  wd_SR <- "U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/"
+  #set working directory for scripts
+  wd_scripts <- "U:/Surfdrive/GitHub/Slavenregisters/"
+  
   #set max lev dist for matching procedure
   set_lv_dist <- 3
+  lev_dist_naam_ER <- 2
+  lev_dist_eigenaar_ER <- 3
   
   #set threshold for filtering during reconstitution
   threshold34 <- 1
@@ -58,127 +64,271 @@
   threshold11 <- 8
   
   #load scripts
-  source("U:/Surfdrive/GitHub/Slavenregisters/within matching.R")
-  source("U:/Surfdrive/GitHub/Slavenregisters/between matching.R")
-  source("U:/Surfdrive/GitHub/Slavenregisters/split_names.R")
+  source(paste(wd_scripts, "within matching.R", sep=""))
+  source(paste(wd_scripts, "between matching.R", sep=""))
+  source(paste(wd_scripts, "between_matching_emancipation.R", sep=""))
+  source(paste(wd_scripts, "split_names.R", sep=""))
   
+  
+  ######################
+  #### open dataset ####
+  ######################
+  
+  #open Emancipation Register
+    setwd(wd_ER)
+    ER <- fread("Emancipatieregister_cleaned.csv", encoding="UTF-8") %>% rename(Naam = Name) %>% arrange(Naam)
+    #add sex
+    sex <- read.xlsx(paste(wd_namenlijst, "Sekse naar naam - slaafgemaakten.xlsx", sep="/") ) #File with sex according to first name originally derived from slave registers
+    ER <- left_join(ER, sex, by = "Naam") %>%
+      mutate(sex = replace(sex, is.na(sex), "unknown")) %>%
+      rename(sex_emanc = sex,
+             Eigenaar_1 = Eigenaar_Lastname) %>%
+      mutate(Eigenaar_1 = tolower(Eigenaar_1)) %>%
+      rename(source_order = Id_person)
+    
+  #open Slave Register
+    setwd(wd_SR)
+    SR <- fread("Cleaned Registry/cleaned slave register 2022-09-17.txt", encoding="UTF-8")
+    
+    
   ######################################
   #### section 0: standardise names ####
   ######################################
   
-  #select name owner & year of birth
-    df$Eigenaar_original <- df$Eigenaar
-    df$Eigenaar <- ifelse(df$Typeregister=="Plantages", df$plantation_name, df$Eigenaar_Last_name)
-    df$year_birth_original <- df$year_birth
-    df$year_birth <- df$year_birth2
+  #select name owner & year of birth SR
+    SR$Eigenaar_original <- SR$Eigenaar
+    SR$Eigenaar <- ifelse(SR$Typeregister=="Plantages", SR$plantation_name, SR$Eigenaar_Last_name)
+    SR$year_birth_original <- SR$year_birth
+    SR$year_birth <- SR$year_birth2
     
-  #standardise names
-    df$Naam_original <- df$Naam
-    df$Naam <- tolower(df$Naam)
-    df$Naam <- gsub(" of ", " ", df$Naam)
-    df$Naam <- gsub("ç", "c", df$Naam)
-    df$Naam <- gsub("é", "e", df$Naam)
-    df$Naam <- gsub("kw", "qu", df$Naam)
-    df$Naam <- gsub("ph", "f", df$Naam)
+  #standardise names ER
+    ER$Naam_original <- ER$Naam
+    ER$Naam <- tolower(ER$Naam)
+    ER$Naam <- gsub(" of ", " ", ER$Naam)
+    ER$Naam <- gsub("ç", "c", ER$Naam)
+    ER$Naam <- gsub("é", "e", ER$Naam)
+    ER$Naam <- gsub("kw", "qu", ER$Naam)
+    ER$Naam <- gsub("ph", "f", ER$Naam)
     
-  #standardise moeder
-    df$Moeder_original <- df$Moeder
-    df$Moeder <- tolower(df$Moeder)
-    df$Moeder <- gsub(" of ", " ", df$Moeder)
-    df$Moeder <- gsub("ç", "c", df$Moeder)
-    df$Moeder <- gsub("é", "e", df$Moeder)
-    df$Moeder <- gsub("kw", "qu", df$Moeder)
-    df$Moeder <- gsub("ph", "f", df$Moeder)
+  #standardise names SR
+    SR$Naam_original <- SR$Naam
+    SR$Naam <- tolower(SR$Naam)
+    SR$Naam <- gsub(" of ", " ", SR$Naam)
+    SR$Naam <- gsub("ç", "c", SR$Naam)
+    SR$Naam <- gsub("é", "e", SR$Naam)
+    SR$Naam <- gsub("kw", "qu", SR$Naam)
+    SR$Naam <- gsub("ph", "f", SR$Naam)
+    
+  #standardise moeder SR
+    SR$Moeder_original <- SR$Moeder
+    SR$Moeder <- tolower(SR$Moeder)
+    SR$Moeder <- gsub(" of ", " ", SR$Moeder)
+    SR$Moeder <- gsub("ç", "c", SR$Moeder)
+    SR$Moeder <- gsub("é", "e", SR$Moeder)
+    SR$Moeder <- gsub("kw", "qu", SR$Moeder)
+    SR$Moeder <- gsub("ph", "f", SR$Moeder)
     
   #split naam
-    df <- split_names(df, "Naam")
-    df <- split_names(df, "Moeder")
+    ER <- split_names(ER, "Naam")
+    SR <- split_names(SR, "Naam")
+    SR <- split_names(SR, "Moeder")
     
   #remove white spaces
-    df$Naam <- gsub(" ", "", df$Naam)
-    df$Moeder <- gsub(" ", "", df$Moeder)
+    ER$Naam <- gsub(" ", "", ER$Naam)
+    SR$Naam <- gsub(" ", "", SR$Naam)
+    SR$Moeder <- gsub(" ", "", SR$Moeder)
     
     
+  ###################################################
+  #### section 1a: retrieve matches SR-ER series ####
+  ###################################################
+  
+  #matches serie 4 & ER
+    #select serie 4, corrigeer voor afwijkende planta
+    Serie4 <- SR %>% filter (Serieregister == "1851-1863" & out_event == "End Series/Freedom")
+    #edit known shifts in plantation names
+    Serie4 <- Serie4 %>% mutate(plantation_name = replace(plantation_name, plantation_name =="De Eendragt", "Eendragt"),
+                                plantation_name = replace(plantation_name, plantation_name =="Alkmaar ( voor het 1/2 aandeel aankomende den Boedel A. Ferrier )", "Alkmaar"),
+                                plantation_name = replace(plantation_name, plantation_name =="Concordia en Kwart Lot", "Concordia"),
+                                plantation_name = replace(plantation_name, plantation_name =="Johanna Charlotte (1/2 aandeel mevrouw G. C. Henkel geboren Vogt)", "Rustenburg"),
+                                plantation_name = replace(plantation_name, plantation_name =="Waterwijk", "Hazard boven Commewijne"),
+                                plantation_name = replace(plantation_name, plantation_name =="Harmonie", "l'Aventure"),
+                                plantation_name = replace(plantation_name, plantation_name =="Lotland No 34", "Crappahoek nr. 34"),
+                                plantation_name = replace(plantation_name, plantation_name =="Concordia en Kwart Lot L. L.", "Concordia"))
     
+  #mark whether plantation names from ER to Serie 4 match  
+    #make Place_name1_match
+    emanc <- ER %>% 
+      select(Place_name1) %>% 
+      distinct() %>%
+      filter(Place_name1 != "") %>%
+      mutate(Place_name1_match = 1)
+    #add information to Serie4
+    Serie4 <- left_join(Serie4, emanc, by = c("plantation_name" = "Place_name1")) %>% 
+      mutate(Place_name1_match = ifelse(is.na(Place_name1_match), 0, 1))
+    
+  #match SR to ER
+    Serie4 <- Serie4 %>% arrange(Naam)  %>%
+      rename(Eigenaar_2 = Eigenaar_Last_name) %>%
+      select(source_order, Naam, Naam_number, year_birth, plantation_name, Place_name1_match, Eigenaar_2, sex) 
+    #rename ER source_order to id_person
+    ER <- ER %>%
+      rename(Id_person = source_order)
+    #match
+    list1 <- match_between_emancipation(ER, Serie4, lev_dist_naam=lev_dist_naam_ER, lev_dist_eigenaar=lev_dist_eigenaar_ER)
+    
+  #Run the same algorithm but now replace plantation names for specific slave groups that were apparently rented to other plantations
+    #???
+    df_not_matched_ER <- list1[[2]] %>%
+      mutate(plantation_match = replace(plantation_match, plantation_match ==1, 0)) %>%
+      rename(Naam = Naam_1,
+             Naam_number = Naam_number_1) %>%
+      select(Id_person, Naam, Naam_number, B_year, B_year2, Place_name1, plantation_match, Eigenaar_1, sex_emanc)
+    #???
+    df_not_matched_SR <- list1[[3]] %>%
+      rename(Naam = Naam_2,
+             Naam_number = Naam_number_2) %>%
+      select(source_order, Naam, Naam_number, year_birth, plantation_name, Place_name1_match, Eigenaar_2, sex)
+    #match
+    list2 <- match_between_emancipation(df_not_matched_ER, df_not_matched_SR, lev_dist_naam=set_lv_dist, lev_dist_eigenaar=lev_dist_eigenaar_ER)
+    
+    
+    #Append unique matches
+    unique1 <- list1[[4]] %>%
+      select(source_order, Id_person, Naam_lv, Match_score)
+    unique2 <- list2[[4]]  %>%
+      select(source_order, Id_person, Naam_lv, Match_score)
+    unique_bind <- bind_rows(unique1, unique2)
+    rm(unique1, unique2)
+    
+    #Append identical matches
+    ident1 <- list1[[5]] %>%
+      select(source_order, Id_person, Naam_lv, Match_score)
+    ident2 <- list2[[5]]  %>%
+      select(source_order, Id_person, Naam_lv, Match_score)
+    ident_bind <- bind_rows(ident1, ident2) %>%
+      distinct(source_order, Id_person, .keep_all = TRUE)
+    rm(ident1, ident2)
+    
+    #Remove duplicates from non-matched entries
+    df_not_matched_ER <- list2[[2]] %>%
+      distinct(source_order, Id_person, Naam_lv, Match_score)
+    df_not_matched_SR <- list2[[3]] %>%
+      distinct(source_order, Id_person, Naam_lv, Match_score)
+    
+    
+    final_data <- function(df1){
+      df_final <- left_join(df1, ER) %>%
+        select(Id_person, source_order, Voornamen, Naam_Family, "Naam voor 1863", Naam_number, Extrainformatiebijnaam, Doopnaam, B_day, B_month, B_year, B_year2, "Verwantschap en Erkenning", occupation, general_remarks,
+               Place_name1, Eigenaar, Naam_lv, Match_score) %>%
+        arrange(Id_person) %>%
+        mutate(Naam_Family = str_to_title(Naam_Family),
+               StartEntryYear = 1863,
+               StartEntryMonth = 7,
+               StartEntryDay = 1) %>%
+        rename(source_order_SR = source_order,
+               Plantation = Place_name1,
+               Owner = Eigenaar)
+      df_final
+    }
+    
+    df_unique_final <- final_data(unique_bind)
+    
+    df_ident_final <- final_data(ident_bind) %>% 
+      mutate (identity_flag =1)
+    
+    df_unmatched_final <- final_data(df_not_matched_ER) %>%
+      mutate(unmatched_flag =1)
+    
+    df_final <- bind_rows(df_unique_final, df_ident_final, df_unmatched_final) %>%
+      mutate(identity_flag = replace(identity_flag, is.na(identity_flag), 0),
+             unmatched_flag = replace(unmatched_flag, is.na(unmatched_flag), 0)) %>%
+      arrange(Id_person) %>%
+      select(-StartEntryYear, -StartEntryMonth, -StartEntryDay) %>%
+      rename (Slave_name = "Naam voor 1863",
+              First_name = Voornamen,
+              Family_name = Naam_Family,
+              Baptized_name = Doopnaam,
+              Family_relations = "Verwantschap en Erkenning") %>%
+      distinct(Id_person, source_order_SR, .keep_all = TRUE) %>%
+      group_by(Id_person) %>%
+      mutate(volgnr = row_number()) %>%
+      mutate(volgnr = replace(volgnr, volgnr ==1, "source_order_SR_1"),
+             volgnr = replace(volgnr, volgnr ==2, "source_order_SR_2"),
+             volgnr = replace(volgnr, volgnr ==3, "source_order_SR_3")) %>%
+      pivot_wider(names_from = volgnr, values_from = source_order_SR) %>%
+      relocate(source_order_SR_1, source_order_SR_2, source_order_SR_3, .after = Id_person)
+    
+      
   #####################################################
-  #### section 1a: retrieve matches BETWEEN series ####
+  #### section 1b: retrieve matches BETWEEN series ####
   #####################################################
     
   #match serie 3 & 4
    #select series
-    Serie3 <- df[which(df$Serieregister_nr==3), c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
-    Serie4 <- df[df$Serieregister_nr==4, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie3 <- SR[which(SR$Serieregister_nr==3), c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie4 <- SR[SR$Serieregister_nr==4, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
    #match series
     Serie34 <- match_between(Serie3, Serie4, lev_dist_naam=set_lv_dist, lev_dist_moeder=set_lv_dist, lev_dist_eigenaar=set_lv_dist, lev_dist_laglead=set_lv_dist, NUMMER1=3, NUMMER2=4)
     
   #match serie 2 & 3
    #select series
-    Serie2 <- df[which(df$Serieregister_nr==2 & df$out_event2=="Ended" |
-                         df$Serieregister_nr==2 & df$year_entry>=1848) , c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
-    Serie3 <- df[df$Serieregister_nr==3 & df$in_event2=="Beginning" |
-                   df$Serieregister_nr==3 & df$year_entry==1848, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie2 <- SR[which(SR$Serieregister_nr==2 & SR$out_event2=="Ended" |
+                         SR$Serieregister_nr==2 & SR$year_entry>=1848) , c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie3 <- SR[SR$Serieregister_nr==3 & SR$in_event2=="Beginning" |
+                   SR$Serieregister_nr==3 & SR$year_entry==1848, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
    #match series
     Serie23 <- match_between(Serie2, Serie3, lev_dist_naam=set_lv_dist, lev_dist_moeder=set_lv_dist, lev_dist_eigenaar=set_lv_dist, lev_dist_laglead=set_lv_dist, NUMMER1=2, NUMMER2=3)
     
   #match serie 1 & 2
    #select series
-    Serie1 <- df[which(df$Serieregister_nr==1 & df$out_event2=="Ended" |
-                         df$Serieregister_nr==1 & df$year_entry>=1838), c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
-    Serie2 <- df[df$Serieregister_nr==2 & df$in_event2=="Beginning" |
-                   df$Serieregister_nr==2 & df$year_entry==1838, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie1 <- SR[which(SR$Serieregister_nr==1 & SR$out_event2=="Ended" |
+                         SR$Serieregister_nr==1 & SR$year_entry>=1838), c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie2 <- SR[SR$Serieregister_nr==2 & SR$in_event2=="Beginning" |
+                   SR$Serieregister_nr==2 & SR$year_entry==1838, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
    #match series
     Serie12 <- match_between(Serie1, Serie2, lev_dist_naam=set_lv_dist, lev_dist_moeder=set_lv_dist, lev_dist_eigenaar=set_lv_dist, lev_dist_laglead=set_lv_dist, NUMMER1=1, NUMMER2=2)
     
   #match serie 2 & 4
    #select series
-    Serie2 <- df[df$Serieregister_nr==2 & df$out_event2=="Ended", c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
-    Serie4 <- df[df$Serieregister_nr==4 & df$in_event2=="Beginning" & df$year_birth<=1848 |
-                   df$Serieregister_nr==4 & df$in_event2=="Beginning" & df$year_birth==-1, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie2 <- SR[SR$Serieregister_nr==2 & SR$out_event2=="Ended", c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie4 <- SR[SR$Serieregister_nr==4 & SR$in_event2=="Beginning" & SR$year_birth<=1848 |
+                   SR$Serieregister_nr==4 & SR$in_event2=="Beginning" & SR$year_birth==-1, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
    #match series
     Serie24 <- match_between(Serie2, Serie4, lev_dist_naam=set_lv_dist, lev_dist_moeder=set_lv_dist, lev_dist_eigenaar=set_lv_dist, lev_dist_laglead=set_lv_dist, NUMMER1=2, NUMMER2=4)
     
   #match serie 1 & 4
    #select series
-    Serie1 <- df[df$Serieregister_nr==1 & df$out_event2=="Ended", c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
-    Serie4 <- df[df$Serieregister_nr==4 & df$in_event2=="Beginning" & df$year_birth<=1838 |
-                   df$Serieregister_nr==4 & df$in_event2=="Beginning" & df$year_birth<=-1, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie1 <- SR[SR$Serieregister_nr==1 & SR$out_event2=="Ended", c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie4 <- SR[SR$Serieregister_nr==4 & SR$in_event2=="Beginning" & SR$year_birth<=1838 |
+                   SR$Serieregister_nr==4 & SR$in_event2=="Beginning" & SR$year_birth<=-1, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
    #match series
     Serie14 <- match_between(Serie1, Serie4, lev_dist_naam=set_lv_dist, lev_dist_moeder=set_lv_dist, lev_dist_eigenaar=set_lv_dist, lev_dist_laglead=set_lv_dist, NUMMER1=1, NUMMER2=4)
     
   #match serie 1 & 3
    #select series
-    Serie1 <- df[df$Serieregister_nr==1 & df$out_event2=="Ended", c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
-    Serie3 <- df[df$Serieregister_nr==3 & df$in_event2=="Beginning" & df$year_birth<=1838 |
-                   df$Serieregister_nr==3 & df$in_event2=="Beginning" & df$year_birth<=-1, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie1 <- SR[SR$Serieregister_nr==1 & SR$out_event2=="Ended", c("source_order", "Typeregister", "out_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
+    Serie3 <- SR[SR$Serieregister_nr==3 & SR$in_event2=="Beginning" & SR$year_birth<=1838 |
+                   SR$Serieregister_nr==3 & SR$in_event2=="Beginning" & SR$year_birth<=-1, c("source_order", "Typeregister", "in_event2", "Naam", "Naam_number", "Moeder", "Moeder_number", "year_birth", "Eigenaar", "sex")]
    #match series
     Serie13 <- match_between(Serie1, Serie3, lev_dist_naam=set_lv_dist, lev_dist_moeder=set_lv_dist, lev_dist_eigenaar=set_lv_dist, lev_dist_laglead=set_lv_dist, NUMMER1=1, NUMMER2=3)
     
     
   ####################################################
-  #### section 1b: retrieve matches WITHIN series ####
+  #### section 1c: retrieve matches WITHIN series ####
   ####################################################
     
-    Serie4 <- df[df$Serieregister_nr==4, c("source_order", 
-                                           "in_event2", "out_event2",
-                                           "Naam", "Naam_number", 
-                                           "Moeder", "Moeder_number", 
-                                           "Eigenaar",
-                                           "year_birth", "month_birth", "day_birth",
-                                           "year_entry", "month_entry", "day_entry",
-                                           "year_exit", "month_exit", "day_exit",
-                                           "sex")]
+    Serie4 <- SR[which(SR$Serieregister_nr==3 | SR$Serieregister_nr==4), c("source_order", 
+                                                                           "in_event2", "out_event2",
+                                                                           "Naam", "Naam_number", 
+                                                                           "Moeder", "Moeder_number", 
+                                                                           "Eigenaar",
+                                                                           "year_birth", "month_birth", "day_birth",
+                                                                           "year_entry", "month_entry", "day_entry",
+                                                                           "year_exit", "month_exit", "day_exit",
+                                                                           "sex")]
     Serie4 <- Serie4[which(Serie4$out_event2=="Transferred" | Serie4$in_event2=="Transferred"),]
-    Serie3 <- df[df$Serieregister_nr==3, c("source_order", 
-                                           "in_event2", "out_event2",
-                                           "Naam", "Naam_number", 
-                                           "Moeder", "Moeder_number", 
-                                           "Eigenaar",
-                                           "year_birth", "month_birth", "day_birth",
-                                           "year_entry", "month_entry", "day_entry",
-                                           "year_exit", "month_exit", "day_exit",
-                                           "sex")]
-    Serie3 <- Serie3[which(Serie3$out_event2=="Transferred" | Serie3$in_event2=="Transferred"),]
-    Serie2 <- df[df$Serieregister_nr==2, c("source_order", 
+    Serie2 <- SR[SR$Serieregister_nr==2, c("source_order", 
                                            "in_event2", "out_event2",
                                            "Naam", "Naam_number", 
                                            "Moeder", "Moeder_number", 
@@ -188,7 +338,7 @@
                                            "year_exit", "month_exit", "day_exit",
                                            "sex")]
     Serie2 <- Serie2[which(Serie2$out_event2=="Transferred" | Serie2$in_event2=="Transferred"),]
-    Serie1 <- df[df$Serieregister_nr==1, c("source_order", 
+    Serie1 <- SR[SR$Serieregister_nr==1, c("source_order", 
                                            "in_event2", "out_event2",
                                            "Naam", "Naam_number", 
                                            "Moeder", "Moeder_number", 
@@ -199,8 +349,7 @@
                                            "sex")]
     Serie1 <- Serie1[which(Serie1$out_event2=="Transferred" | Serie1$in_event2=="Transferred"),]
     
-    Serie44 <- match_within(Serie4, lev_dist_naam=set_lv_dist, lev_dist_moeder=set_lv_dist, lev_dist_laglead=set_lv_dist, NUMMER1=4)
-    Serie33 <- match_within(Serie3, lev_dist_naam=set_lv_dist, lev_dist_moeder=set_lv_dist, lev_dist_laglead=set_lv_dist, NUMMER1=3)
+    Serie44 <- match_within(Serie4, lev_dist_naam=set_lv_dist, lev_dist_moeder=set_lv_dist, lev_dist_laglead=set_lv_dist, NUMMER1=34)
     Serie22 <- match_within(Serie2, lev_dist_naam=set_lv_dist, lev_dist_moeder=set_lv_dist, lev_dist_laglead=set_lv_dist, NUMMER1=2)
     Serie11 <- match_within(Serie1, lev_dist_naam=set_lv_dist, lev_dist_moeder=set_lv_dist, lev_dist_laglead=set_lv_dist, NUMMER1=1)
     
@@ -208,10 +357,6 @@
   ###############################
   #### section 2: store info ####
   ###############################
-    
-  #select Alkmaar & Barbados
-    Alkmaar <- Serie34[grepl("Alkmaar", Serie34$Eigenaar_3) | grepl("Alkmaar", Serie34$Eigenaar_4),]
-    Barbados <- Serie34[grepl("Barbados", Serie34$Eigenaar_3) | grepl("Barbados", Serie34$Eigenaar_4),]
     
   #make directories
     if (file.exists(paste0("Between/", Sys.Date()))){
@@ -223,6 +368,8 @@
       dir.create(paste0(getwd(), "/Within/", Sys.Date()))
     }
     
+  #write outfile ER
+    write.table(df_final, paste0(wd_ER, "/", Sys.Date(), "Emancipation_Register_Linked.txt", sep="/"), quote=F, sep ="\t", col.names=T, row.names=F, fileEncoding="UTF-8")
     
   #write outfiles BETWEEN
    #csv
@@ -263,318 +410,21 @@
   #write outfiles WITHIN
     #csv
     write.table(Serie44, paste0("Within/", Sys.Date(), "/4-4 matches.txt"), quote=F, sep ="\t", col.names=T, row.names=F, fileEncoding="UTF-8")
-    write.table(Serie33, paste0("Within/", Sys.Date(), "/3-3 matches.txt"), quote=F, sep ="\t", col.names=T, row.names=F, fileEncoding="UTF-8")
     write.table(Serie22, paste0("Within/", Sys.Date(), "/2-2 matches.txt"), quote=F, sep ="\t", col.names=T, row.names=F, fileEncoding="UTF-8")
     write.table(Serie11, paste0("Within/", Sys.Date(), "/1-1 matches.txt"), quote=F, sep ="\t", col.names=T, row.names=F, fileEncoding="UTF-8")
    #excel
     write.xlsx(Serie44, paste0("Within/", Sys.Date(), "/4-4 matches.xlsx"), overwrite=T)
-    write.xlsx(Serie33, paste0("Within/", Sys.Date(), "/3-3 matches.xlsx"), overwrite=T)
     write.xlsx(Serie22, paste0("Within/", Sys.Date(), "/2-2 matches.xlsx"), overwrite=T)
     write.xlsx(Serie11, paste0("Within/", Sys.Date(), "/1-1 matches.xlsx"), overwrite=T)
     
     
     
   ##########################################################
-  #### section 2: load program to filter unique matches ####
+  #### section 3: load program to filter unique matches ####
   ##########################################################
     
-    filter_unique <- function(df1, threshold, NUMMER1, NUMMER2){
-      
-      #make temporary variable to replace source_order in series 1 and 2
-      df1$Order_1 <- df1[[paste("Source_order", NUMMER1, sep="_")]]
-      df1$Order_2 <- df1[[paste("Source_order", NUMMER2, sep="_")]]
-      #filter unreliable matches
-      Serie_unique <- df1[df1$Match_score>=threshold,]
-      #filter best match from serie 1
-      Serie_unique <- Serie_unique %>% group_by(Order_1) %>% filter(is.na(Match_score) | Match_score==max(Match_score)) %>% arrange(Order_1) %>% ungroup()
-      #filter best match from serie 2
-      Serie_unique <- Serie_unique %>% group_by(Order_2) %>% filter(is.na(Match_score) | Match_score==max(Match_score)) %>% arrange(Order_1) %>% ungroup()
-      #filter unclear matches
-      Serie_unique <- Serie_unique %>% group_by(Order_1) %>% filter(is.na(Match_score) | n()==1) %>% ungroup() %>% arrange(Order_1)
-      Serie_unique <- Serie_unique %>% group_by(Order_2) %>% filter(is.na(Match_score) | n()==1) %>% ungroup() %>% arrange(Order_1)
-      #restore deleted entries cases
-      #from serie3
-      x <- df1[!(df1$Order_1 %in% Serie_unique$Order_1),]
-      x <- x[!duplicated(x$Order_1), ]
-      x[, which(colnames(x) %in% c("Match", "Match_adaptive", "Match_naam_number", "Match_moeder_adaptive", "Match_moeder_number", "Match_year", "Match_vorige_adaptive", 
-                                   "Match_volgende_adaptive"))] <- 0
-      x[, which(colnames(x) %in% paste(c("Match_score", "Naam_lv", "Moeder_lv", "Eigenaar_lv", "Naam_vorige_lv", "Naam_volgende_lv",
-                                         "Typeregister", "In_event", "Sex", "Naam", "Naam_number", "Moeder", "Moeder_number", "Eigenaar", "Naam_vorige", "Naam_volgende",
-                                         "Source_order", "Year_birth"), NUMMER2, sep="_"))] <- NA
-      #from serie4
-      y <- df1[!(df1$Order_2 %in% Serie_unique$Order_2),]
-      y <- y[!duplicated(y$Order_2), ]
-      y[, which(colnames(y) %in% c("Match", "Match_adaptive", "Match_naam_number", "Match_moeder_adaptive", "Match_moeder_number", "Match_year", "Match_vorige_adaptive", 
-                                   "Match_volgende_adaptive"))] <- 0
-      y[, which(colnames(y) %in% paste(c("Match_score", "Naam_lv", "Moeder_lv", "Eigenaar_lv", "Naam_vorige_lv", "Naam_volgende_lv",
-                                         "Typeregister", "In_event", "Sex", "Naam", "Naam_number", "Moeder", "Moeder_number", "Eigenaar", "Naam_vorige", "Naam_volgende",
-                                         "Source_order", "Year_birth"), NUMMER1, sep="_"))] <- NA
-      #bind
-      Serie_unique <- rbind(Serie_unique, x, y) %>% arrange(Order_1, Order_2)
-      rm(x, y)
-      Serie_unique[,which(colnames(Serie_unique)!=c("Order_1", "Order_2"))]
-    }
-    
-    
-  ##############################################################
-  #### section 3a: group matches between consecutive series ####
-  ##############################################################
-    
-   #filter unique matches
-    Serie34 <- filter_unique(Serie34, threshold34, 3, 4)
-    Serie23 <- filter_unique(Serie23, threshold23, 2, 3)
-    Serie12 <- filter_unique(Serie12, threshold12, 1, 2)
-    
-   #set Source_order_3 to character
-    Serie34$Source_order_3 <- as.character(Serie34$Source_order_3) 
-    Serie23$Source_order_3 <- as.character(Serie23$Source_order_3) 
-    
-   #merge consecutive series
-   #3-4
-    reconstitution <- Serie34[, c("Source_order_3", "Source_order_4")]
-   #2-3
-    #matched cases
-    reconstitution1 <- Serie23[!is.na(Serie23$Source_order_3), c("Source_order_2", "Source_order_3")]
-    reconstitution1 <- merge(reconstitution, reconstitution1, by="Source_order_3", all=T)
-    #unmatched cases
-    reconstitution2 <- Serie23[is.na(Serie23$Source_order_3),  c("Source_order_2", "Source_order_3")]
-    reconstitution2 <- merge(reconstitution[!is.na(reconstitution$Source_order_3),], reconstitution2, by="Source_order_3", all.y=T)
-    #bind
-    reconstitution <- rbind(reconstitution1, reconstitution2)
-   #1-2
-    #matched cases
-    reconstitution1 <- Serie12[!is.na(Serie12$Source_order_2), c("Source_order_1", "Source_order_2")]
-    reconstitution1 <- merge(reconstitution, reconstitution1, by="Source_order_2", all=T)
-    #unmatched cases
-    reconstitution2 <- Serie12[is.na(Serie12$Source_order_2),  c("Source_order_1", "Source_order_2")]
-    reconstitution2 <- merge(reconstitution[!is.na(reconstitution$Source_order_2),], reconstitution2, by="Source_order_2", all.y=T)
-    #bind
-    reconstitution <- rbind(reconstitution1, reconstitution2)
-   
-   #clean environment
-    rm(reconstitution1, reconstitution2)
-    
-    
-  ##################################################################
-  #### section 3b: group matches between non-consecutive series ####
-  ##################################################################
-    
-   #filter unique matches
-    Serie24 <- filter_unique(Serie24, threshold24, 2, 4)
-    Serie14 <- filter_unique(Serie14, threshold14, 1, 4)
-    Serie13 <- filter_unique(Serie13, threshold13, 1, 3)
-    
-   #set Source_order_3 to character
-    Serie13$Source_order_3 <- as.character(Serie13$Source_order_3) 
-    
-  #add info from non-consecutive series to consecutive matches
-   #2-4
-    reconstitution1 <- Serie24[!is.na(Serie24$Source_order_2) & !is.na(Serie24$Source_order_4), c("Source_order_2", "Source_order_4")]
-    colnames(reconstitution1) <- c("Source_order_24", "Source_order_4")
-    reconstitution <- merge(reconstitution, reconstitution1, by="Source_order_4", all.x=T)
-   #1-4
-    reconstitution1 <- Serie14[!is.na(Serie14$Source_order_1) & !is.na(Serie14$Source_order_4), c("Source_order_1", "Source_order_4")]
-    colnames(reconstitution1) <- c("Source_order_14", "Source_order_4")
-    reconstitution <- merge(reconstitution, reconstitution1, by="Source_order_4", all.x=T)
-   #1-3
-    reconstitution1 <- Serie13[!is.na(Serie13$Source_order_1) & !is.na(Serie13$Source_order_3), c("Source_order_1", "Source_order_3")]
-    colnames(reconstitution1) <- c("Source_order_13", "Source_order_3")
-    reconstitution <- merge(reconstitution, reconstitution1, by="Source_order_3", all.x=T)
-    #clean environment
-    rm(reconstitution1, reconstitution2)
-   #check for incongruencies
-    length(which(reconstitution$Source_order_2==reconstitution$Source_order_24)); length(which(reconstitution$Source_order_2!=reconstitution$Source_order_24)) #8763 / 12 | 99.9% / 0.01%
-    length(which(reconstitution$Source_order_1==reconstitution$Source_order_14)); length(which(reconstitution$Source_order_1!=reconstitution$Source_order_14)) #344 / 16 | 95.6% / 4.4% 
-    length(which(reconstitution$Source_order_1==reconstitution$Source_order_13)); length(which(reconstitution$Source_order_1!=reconstitution$Source_order_13)) #439 / 16 | 96.5% / 3.5%
-  #drop inconsistencies
-    reconstitution$Source_order_24 <- ifelse(reconstitution$Source_order_2!=reconstitution$Source_order_24, NA, reconstitution$Source_order_24) #12 (0.01%)
-    reconstitution$Source_order_14 <- ifelse(reconstitution$Source_order_1!=reconstitution$Source_order_14, NA, reconstitution$Source_order_14) #16 (4.4%)
-    reconstitution$Source_order_13 <- ifelse(reconstitution$Source_order_1!=reconstitution$Source_order_13, NA, reconstitution$Source_order_13) #16 (3.5%)
-    
-    
-  #################################################
-  #### section 3c: group matches WITHIN series ####
-  #################################################
-    
-  #filter unique matches
-    Serie44 <- filter_unique(Serie44, threshold44, 1, 2)
-    Serie33 <- filter_unique(Serie33, threshold33, 1, 2)
-    Serie22 <- filter_unique(Serie22, threshold22, 1, 2)
-    Serie11 <- filter_unique(Serie11, threshold11, 1, 2)
-    
-   #set Source_order_3 to character
-    Serie33$Source_order_1 <- as.character(Serie33$Source_order_1) 
-    Serie33$Source_order_2 <- as.character(Serie33$Source_order_2) 
-    
-  #load program to merge consecutive matches into a chain (1-2 to 2-3, 2-3 to 3-4, etc)
-    chain_within <- function(df1, df2, NUMMER1, NUMMER2){
-      df2 <- df2[!is.na(df2$Source_order_1) & !is.na(df2$Source_order_2), c("Source_order_1", "Source_order_2")]
-      colnames(df2) <- c(paste("Source_order", NUMMER1, sep="_"), paste("Source_order", NUMMER2, sep="_"))
-      df1 <- merge(df1, df2, by=paste("Source_order", NUMMER1, sep="_"), all.x=T)
-      df1
-    }
-    
-  #load program to chain matches and remove redundant rows 
-    group_within <- function(df1){
-      #matched cases
-      df1_linked <- df1[!is.na(df1$Source_order_1) & !is.na(df1$Source_order_2), c("Source_order_1", "Source_order_2")]
-      #compile matches
-      df1_linked <- chain_within(df1_linked, df1, 2, 3)
-      df1_linked$Source_order_3 <- ifelse(df1_linked$Source_order_1==df1_linked$Source_order_3, NA, df1_linked$Source_order_3) #prevents loops
-      df1_linked <- chain_within(df1_linked, df1, 3, 4)
-      df1_linked <- chain_within(df1_linked, df1, 4, 5)
-      df1_linked <- chain_within(df1_linked, df1, 5, 6)
-      df1_linked <- chain_within(df1_linked, df1, 6, 7)
-      #remove overlap
-      df1_linked <- df1_linked[!(df1_linked$Source_order_2 %in% df1_linked$Source_order_7 |
-                                           df1_linked$Source_order_2 %in% df1_linked$Source_order_6 |
-                                           df1_linked$Source_order_2 %in% df1_linked$Source_order_5 |
-                                           df1_linked$Source_order_2 %in% df1_linked$Source_order_4 |
-                                           df1_linked$Source_order_2 %in% df1_linked$Source_order_3), c("Source_order_1", "Source_order_2", "Source_order_3", "Source_order_4", "Source_order_5", "Source_order_6", "Source_order_7")]
-      #unmatched cases
-      df1_unlinked <- df1[is.na(df1$Source_order_1) | is.na(df1$Source_order_2), c("Source_order_1", "Source_order_2")]
-      df1_unlinked$Source_order_7 <- df1_unlinked$Source_order_6 <- df1_unlinked$Source_order_5 <- df1_unlinked$Source_order_4 <- df1_unlinked$Source_order_3 <- NA
-      #bind
-      df1_linked <- rbind(df1_linked, df1_unlinked)
-      #print
-      df1_linked
-    }
-    
-    Serie44_linked <- group_within(Serie44)
-    Serie33_linked <- group_within(Serie33)
-    Serie22_linked <- group_within(Serie22)
-    Serie11_linked <- group_within(Serie11)
-    
-  
-  ##########################################################################
-  #### section 3d: add grouped WITHIN matches to BETWEEN reconstitution ####
-  ##########################################################################
-    
-  #load program to mark last entry WITHIN series
-    mark_lastentry <- function(df1){
-      df1$LastEntry <- ifelse(is.na(df1$Source_order_2), NA,
-                                         ifelse(is.na(df1$Source_order_3), df1$Source_order_2,
-                                                ifelse(is.na(df1$Source_order_4), df1$Source_order_3,
-                                                       ifelse(is.na(df1$Source_order_5), df1$Source_order_4,
-                                                              ifelse(is.na(df1$Source_order_6), df1$Source_order_5,
-                                                                     ifelse(is.na(df1$Source_order_7), df1$Source_order_6, df1$Source_order_7))))))
-      df1$LastEntry
-    }
-    
-  #load program to add grouped matches 
-    add_within <- function(df1, df2, source_order){
-      #matched cases
-      reconstitution1 <- df2[!is.na(df2[[source_order]]), ]
-      reconstitution1 <- merge(reconstitution1, df1, by=source_order, all=T)
-      #unmatched cases
-      reconstitution2 <- df2[is.na(df2[[source_order]]), ]
-      #add empty columns to reconstitution2
-      if(df1[1,1]==Serie44_linked[1,1]){
-        reconstitution2$Source_order_44_2 <- reconstitution2$Source_order_44_3 <- reconstitution2$Source_order_44_3 <- reconstitution2$Source_order_44_4 <- reconstitution2$Source_order_44_5 <- reconstitution2$Source_order_44_6 <- reconstitution2$Source_order_44_7 <- NA
-      }
-      if(df1[1,1]==Serie33_linked[1,1]){
-        reconstitution2$Source_order_33_1 <- reconstitution2$Source_order_33_2 <- reconstitution2$Source_order_33_3 <- reconstitution2$Source_order_33_3 <- reconstitution2$Source_order_33_4 <- reconstitution2$Source_order_33_5 <- reconstitution2$Source_order_33_6 <- reconstitution2$Source_order_33_7 <- NA
-      }
-      if(df1[1,1]==Serie22_linked[1,1]){
-        reconstitution2$Source_order_22_1 <- reconstitution2$Source_order_22_2 <- reconstitution2$Source_order_22_3 <- reconstitution2$Source_order_22_3 <- reconstitution2$Source_order_22_4 <- reconstitution2$Source_order_22_5 <- reconstitution2$Source_order_22_6 <- reconstitution2$Source_order_22_7 <- NA
-      }
-      if(df1[1,1]==Serie11_linked[1,1]){
-        reconstitution2$Source_order_11_1 <- reconstitution2$Source_order_11_2 <- reconstitution2$Source_order_11_3 <- reconstitution2$Source_order_11_3 <- reconstitution2$Source_order_11_4 <- reconstitution2$Source_order_11_5 <- reconstitution2$Source_order_11_6 <- reconstitution2$Source_order_11_7 <- NA
-      }
-      #bind
-      df2 <- rbind(reconstitution1, reconstitution2)
-      df2
-    }
-    
-    
-  #1. mark last entry WITHIN series
-   #Serie 44 not necessary, as end is manumission
-    
-  #4-4
-  #match to next series
-    #not possible, as end is manumission 
-  #match to start series
-    #rename grouped matches
-    colnames(Serie44_linked) <- c("Source_order_4", "Source_order_44_2", "Source_order_44_3", "Source_order_44_4", "Source_order_44_5", 
-                                  "Source_order_44_6", "Source_order_44_7")
-    #add grouped matches to Series 4
-    reconstitution <- add_within(Serie44_linked, reconstitution, "Source_order_4")
-   
-  #3-3
-  #match to next series
-    #mark last entry
-    Serie33_linked$LastEntry <- mark_lastentry(Serie33_linked)
-    #rename grouped matches
-    colnames(Serie33_linked) <- c("Source_order_33_1", "Source_order_33_2", "Source_order_33_3", "Source_order_33_4", "Source_order_33_5", 
-                                  "Source_order_33_6", "Source_order_33_7", "Source_order_4")
-    #add grouped matches to Series 4
-    reconstitution <- add_within(Serie33_linked, reconstitution, "Source_order_4")
-  #match to start series
-    #1. drop duplicated unmatched within matches
-    reconstitution <- reconstitution[!(reconstitution$Source_order_33_1 %in% reconstitution$Source_order_3 & is.na(reconstitution$Source_order_33_2) & !is.na(reconstitution$Source_order_33_1)),]
-    #2. join to preceding series
-    x <- reconstitution[reconstitution$Source_order_3 %in% reconstitution$Source_order_33_1 & !is.na(reconstitution$Source_order_3),]
-    x <- x[,which(grepl("33", colnames(x))==F)]
-    y <- reconstitution[reconstitution$Source_order_33_1 %in% reconstitution$Source_order_3 & !is.na(reconstitution$Source_order_33_1),]
-    y <- y[,which(grepl("33", colnames(y)))]
-    y$Source_order_3 <- y$Source_order_33_1
-    x <- merge(x, y, by="Source_order_3", all=F)
-    x <- cbind(x[,c("Source_order_4", "Source_order_3", "Source_order_2", "Source_order_1")], x[,5:length(x)])
-    reconstitution <- reconstitution[!(reconstitution$Source_order_33_1 %in% x$Source_order_33_1) &
-                                       !(reconstitution$Source_order_3 %in% x$Source_order_3),]
-    reconstitution <- rbind(reconstitution, x)
-    reconstitution$Source_order_33_1 <- ifelse(reconstitution$Source_order_33_1==reconstitution$Source_order_3, NA, reconstitution$Source_order_33_1)
-    
-  #2-2
-  #match to next series
-    #mark last entry
-    Serie22_linked$LastEntry <- mark_lastentry(Serie22_linked)
-    #rename grouped matches
-    colnames(Serie22_linked) <- c("Source_order_22_1", "Source_order_22_2", "Source_order_22_3", "Source_order_22_4", "Source_order_22_5", 
-                                  "Source_order_22_6", "Source_order_22_7", "Source_order_3")
-    #add grouped matches to Series 3
-    reconstitution <- add_within(Serie22_linked, reconstitution, "Source_order_3")
-  #match to start series
-    #1. drop duplicated unmatched within matches
-    reconstitution <- reconstitution[!(reconstitution$Source_order_22_1 %in% reconstitution$Source_order_2 & is.na(reconstitution$Source_order_22_2) & !is.na(reconstitution$Source_order_22_1)),]
-    #2. join to preceding series
-    x <- reconstitution[reconstitution$Source_order_2 %in% reconstitution$Source_order_22_1 & !is.na(reconstitution$Source_order_2),]
-    x <- x[,which(grepl("22", colnames(x))==F)]
-    y <- reconstitution[reconstitution$Source_order_22_1 %in% reconstitution$Source_order_2 & !is.na(reconstitution$Source_order_22_1),]
-    y <- y[,which(grepl("22", colnames(y)))]
-    y$Source_order_2 <- y$Source_order_22_1
-    x <- merge(x, y, by="Source_order_2", all=F)
-    x <- cbind(x[,c("Source_order_4", "Source_order_3", "Source_order_2", "Source_order_1")], x[,5:length(x)])
-    reconstitution <- reconstitution[!(reconstitution$Source_order_22_1 %in% x$Source_order_22_1) &
-                                       !(reconstitution$Source_order_2 %in% x$Source_order_2),]
-    reconstitution <- rbind(reconstitution, x)
-    reconstitution$Source_order_22_1 <- ifelse(reconstitution$Source_order_22_1==reconstitution$Source_order_2, NA, reconstitution$Source_order_22_1)
-    
-  #1-1
-  #match to next series
-    #mark last entry
-    Serie11_linked$LastEntry <- mark_lastentry(Serie11_linked)
-    #rename grouped matches
-    colnames(Serie11_linked) <- c("Source_order_11_1", "Source_order_11_2", "Source_order_11_3", "Source_order_11_4", "Source_order_11_5", 
-                                  "Source_order_11_6", "Source_order_11_7", "Source_order_2")
-    #add grouped matches to Series 2
-    reconstitution <- add_within(Serie11_linked, reconstitution, "Source_order_2")
-  #match to start series
-    #1. drop duplicated unmatched within matches
-    reconstitution <- reconstitution[!(reconstitution$Source_order_11_1 %in% reconstitution$Source_order_1 & is.na(reconstitution$Source_order_11_2) & !is.na(reconstitution$Source_order_11_1)),]
-    #2. join to preceding series
-    x <- reconstitution[reconstitution$Source_order_1 %in% reconstitution$Source_order_11_1 & !is.na(reconstitution$Source_order_1),]
-    x <- x[,which(grepl("11", colnames(x))==F)]
-    y <- reconstitution[reconstitution$Source_order_11_1 %in% reconstitution$Source_order_1 & !is.na(reconstitution$Source_order_11_1),]
-    y <- y[,which(grepl("11", colnames(y)))]
-    y$Source_order_1 <- y$Source_order_11_1
-    x <- merge(x, y, by="Source_order_1", all=F)
-    x <- cbind(x[,c("Source_order_4", "Source_order_3", "Source_order_2", "Source_order_1")], x[,5:length(x)])
-    reconstitution <- reconstitution[!(reconstitution$Source_order_11_1 %in% x$Source_order_11_1) &
-                                       !(reconstitution$Source_order_1 %in% x$Source_order_1),]
-    reconstitution <- rbind(reconstitution, x)
-    reconstitution$Source_order_11_1 <- ifelse(reconstitution$Source_order_11_1==reconstitution$Source_order_1, NA, reconstitution$Source_order_11_1)
-    
+    source(paste(wd_scripts, "filtering + closure.R", sep=""))
+    #MATCH SERIE4 EMANCIPATION TOEVOEGEN!!!!!!
     
   #################################################################
   ### section 4: assign grouped certificates same id_person ####
@@ -590,47 +440,52 @@
   #### section 5: store file in long format series ####
   #####################################################
     
-   #select relevant variables from df
-    df2 <- df[, c("source_order", "Inventarisnummer", "Folionummer",
+   #select relevant variables from SR
+    SR2 <- SR[, c("source_order", "Inventarisnummer", "Folionummer",
                  "sex", "Serieregister", "Typeregister",
                  "Naam", "Naam_number", "Moeder", "Moeder_number", "Eigenaar_original",
                  "year_entry", "month_entry", "day_entry", "in_event2", "in_event", "Aanvullendeinformatieinschrijv",
                  "year_exit", "month_exit", "day_exit", "out_event2", "out_event", "Aanvullendeinformatieuitschrij",
                  "year_birth", "month_birth", "day_birth", "year_birth_age_based")]
    #set -1 to NA
-    df2[df2=="-1"] <- NA
+    SR2[SR2=="-1"] <- NA
    #generate B_year_min and B_year_max
-    df2$B_year_min <- df2$year_birth_age_based-1
-    df2$B_year_max <- df2$year_birth_age_based
+    SR2$B_year_min <- SR2$year_birth_age_based-1
+    SR2$B_year_max <- SR2$year_birth_age_based
    #add Id_person
-    df2 <- merge(reconstitution, df2, by="source_order")
-    df2 <- df2[!duplicated(df2[,c("Id_person", "source_order")])]
+    SR2 <- merge(reconstitution, SR2, by="source_order")
+    SR2 <- SR2[!duplicated(SR2[,c("Id_person", "source_order")])]
    #reallign dataset
-    df2 <- df2[, c("Id_person", "source_order", "Inventarisnummer", "Folionummer",
+    SR2 <- SR2[, c("Id_person", "source_order", "Inventarisnummer", "Folionummer",
                  "sex", "Serieregister", "Typeregister",
                  "Naam", "Naam_number", "Moeder", "Moeder_number", "Eigenaar_original",
                  "year_entry", "month_entry", "day_entry", "in_event2", "in_event", "Aanvullendeinformatieinschrijv",
                  "year_exit", "month_exit", "day_exit", "out_event2", "out_event", "Aanvullendeinformatieuitschrij",
                  "year_birth", "month_birth", "day_birth", "B_year_min", "B_year_min")]
    #rename variables
-    colnames(df2) <- c("Id_person", "Id_source", "Inventarisnummer", "Folionummer",
+    colnames(SR2) <- c("Id_person", "Id_source", "Inventarisnummer", "Folionummer",
                       "Sex", "Source_series", "Source_type",
                       "Name_enslaved", "Name_enslaved_extra", "Name_mother", "Name_mother_extra", "Name_owner",
-                      "StartEntryYear", "StartEntryMonth", "StartEntryDay", "StartEntryEvent", "StartEntryEventDetailed", "StartEntryExtraInfo",
+                      "StartEntryYear", 
                       "LastEntryYear", "LastEntryMonth", "LastEntryDay", "LastEntryEvent", "LastEntryEventDetailed", "LastEntryExtraInfo",
                       "B_year", "B_month", "B_day", "B_year_min", "B_year_max")
    #reorder dataset
-    df2 <- df2 %>% arrange(Id_person, Source_series, StartEntryYear, StartEntryMonth, StartEntryDay)
+    SR2 <- SR2 %>% arrange(Id_person, Source_series, StartEntryYear, StartEntryMonth, StartEntryDay)
    #write outfiles
-    write.table(df2, paste0("Reconstituted registry/", Sys.Date(), "SR life courses.txt"), quote=F, sep ="\t", col.names=T, row.names=F, fileEncoding="UTF-8")
-    write.xlsx(df2, paste0("Reconstituted registry/", Sys.Date(), "SR life courses.xlsx"), overwrite=T)
+    write.table(SR2, paste0("Reconstituted registry/", Sys.Date(), "SR life courses.txt"), quote=F, sep ="\t", col.names=T, row.names=F, fileEncoding="UTF-8")
+    write.xlsx(SR2, paste0("Reconstituted registry/", Sys.Date(), "SR life courses.xlsx"), overwrite=T)
     
     
   #################################
   #### check length long table ####
   #################################
     
-    length(df[,1])==length(df2[,1])
+    length(SR[,1])==length(SR2[,1])
+    
+    
+    
+    
+    
     
     
   #######################################################
@@ -669,6 +524,48 @@
     
     
     
+    
+    
+    
+    
+    
+    ###############################################
+    # 7 Append to Reconstituted slave registers   #
+    ###############################################
+    
+    ### REWORK THIS SECTION LATER
+    
+    sl_recon <-  read.xlsx("//cnas.ru.nl/U709207/Documents/HDS and Curacao/Emancipatieregisters/2022-08-01SR life courses.xlsx") %>%
+      rename(Name = Name_enslaved,
+             Name_extra = Name_enslaved_extra) %>%
+      group_by(Id_person) %>%
+      mutate(Id_match = cur_group_id()) %>%
+      mutate(Owner = NA,
+             Plantation = NA) %>%
+      mutate(Owner = replace(Owner, Source_type == "Particulieren", Name_owner),
+             Plantation = replace(Plantation, Source_type == "Plantages", Name_owner))
+    
+    
+    df_bjoern <- bind_rows(sl_recon, df_unique_final) %>%
+      group_by(Id_source) %>% 
+      mutate(Id_match = min(Id_match, na.rm = TRUE)) %>%
+      arrange(Id_match, StartEntryYear, StartEntryMonth, StartEntryDay) %>%
+      group_by(Id_match) %>% ##Remove following rows once Rick solved the bug
+      mutate(Id_match2 = cur_group_id()) %>%
+      ungroup() %>%
+      select(-Id_match, -Name_owner, -B_month, -B_day, -B_year_min, -B_year_max) %>%
+      rename(Id_match = Id_match2) %>%
+      relocate (Id_match, Id_person, Id_source, Id_match, Name, Naam_number, Name_extra, Sex, B_year, B_year2, Plantation, Owner, Name_mother, Name_mother_extra) %>%
+      mutate(Id_source = replace(Id_source, StartEntryYear == 1863 , NA)) %>%
+      distinct(Id_source, Id_match, .keep_all = TRUE) %>%
+      rename(Name_baptized_ER = Doopnaam,
+             First_name_ER = Voornamen,
+             Family_name_ER = Naam_Family,
+             Relation_ER = Verwantschap.en.Erkenning,
+             Name_number= Naam_number)
+    
+    
+    write.csv(df_bjoern, file = "File_for_Bjoern.csv", row.names = FALSE)
     
     
     
