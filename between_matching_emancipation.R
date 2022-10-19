@@ -13,7 +13,7 @@
 ####  Matches are scored probabilistically (higher match score indicates that match is more likley to be correct) ####
 ######################################################################################################################
 
-match_between_emancipation <- function(df1, df2, lev_dist_naam){
+match_between_emancipation <- function(df1, df2, lev_dist_naam, lev_dist_eigenaar){
   
   #### step 1: determine Levenshtein distance for all NAAM combinations ####
   
@@ -47,22 +47,23 @@ match_between_emancipation <- function(df1, df2, lev_dist_naam){
   }
   #rename columns
   colnames(Slave_names_matched)[1:3] <- c("Naam_1", "Naam_2", "Naam_lv")
+  #adaptive Levenshtein distance
+  Slave_names_matched <- Slave_names_matched[nchar(Slave_names_matched$Naam_1)>=2 & nchar(Slave_names_matched$Naam_1)<=3 & stringdist(Slave_names_matched$Naam_1, Slave_names_matched$Naam_2)<=1 |
+                                               nchar(Slave_names_matched$Naam_1)>=4 & nchar(Slave_names_matched$Naam_1)<=8 & stringdist(Slave_names_matched$Naam_1, Slave_names_matched$Naam_2)<=2 |
+                                               nchar(Slave_names_matched$Naam_1)>=9 & stringdist(Slave_names_matched$Naam_1, Slave_names_matched$Naam_2)<=lev_dist_naam, ]
   #clean environment
   rm(l, LV_matrix, Slave_names_1, Slave_names_2, x)
   
   
   #### step 2: add metadata and select relevant columns in data frames ####
   
-  
   df1 <- df1 %>% rename(Naam_1 = Naam,
                         Naam_number_1 = Naam_number ) 
   df2 <- df2 %>% rename(Naam_2 = Naam,
                         Naam_number_2 = Naam_number) 
-  
-  
   #add df1 and df2 to SLAVE_NAMES_MATCHED
-  df_matched <- merge(df1, Slave_names_matched, by="Naam_1", all=F)
-  df_matched <- merge(df_matched, df2, by="Naam_2", all=F )
+  df_matched <- merge(df1, Slave_names_matched, by="Naam_1", all=F, allow.cartesian=T)
+  df_matched <- merge(df_matched, df2, by="Naam_2", all=F, allow.cartesian=T)
   
   
   #### step 3: rule-based filtering of matches ####
