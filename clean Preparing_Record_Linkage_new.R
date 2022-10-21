@@ -2377,6 +2377,8 @@
                                     df$in_event=="Verpand", "Transferred",
                                   ifelse(df$in_event=="Birth", "Birth",
                                          ifelse(df$in_event=="Unknown", "Unknown", "Other"))))
+    df$in_event2 <- ifelse(df$in_event=="Verpand" & df$year_entry==1830 & df$month_entry==-1 |
+                             df$in_event=="Verpand" & df$year_entry==1838 & df$month_entry==-1, "Beginning", df$in_event2)
     
     
   
@@ -2437,9 +2439,9 @@
       mutate(primary_key = row_number())
       
     
-  #############################################################
+  ##############################################################
   #### section 10: save cleaned outfile, ready for matching ####
-  #############################################################
+  ##############################################################
     
     colnames(df)
     df <- df[, c("source_order", "primary_key", 
