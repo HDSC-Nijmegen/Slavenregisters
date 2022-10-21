@@ -6,6 +6,7 @@
   library("openxlsx")
   library("tidyr")
   library("stringr")
+  library("readxl")
   
   #clean environment
   rm(list=ls())
@@ -48,7 +49,7 @@
   
   #set max lev dist for matching procedure
   set_lv_dist <- 3
-  lev_dist_naam_ER <- 2
+  lev_dist_naam_ER <- 3
   lev_dist_eigenaar_ER <- 3
   
   #set threshold for filtering during reconstitution
@@ -77,8 +78,9 @@
   #open Emancipation Register
     setwd(wd_ER)
     ER <- fread("Emancipatieregister_cleaned.csv", encoding="UTF-8") %>% rename(Naam = Name) %>% arrange(Naam)
-    #add sex
-    sex <- read.xlsx(paste(wd_namenlijst, "Sekse naar naam - slaafgemaakten.xlsx", sep="/") ) #File with sex according to first name originally derived from slave registers
+  #add sex
+  sex <- read.xlsx(paste(wd_namenlijst, "Sekse naar naam - slaafgemaakten.xlsx", sep="/") ) #File with sex according to first name originally derived from slave registers
+
     ER <- left_join(ER, sex, by = "Naam") %>%
       mutate(sex = replace(sex, is.na(sex), "unknown")) %>%
       rename(sex_emanc = sex,
@@ -88,7 +90,7 @@
     
   #open Slave Register
     setwd(wd_SR)
-    SR <- fread("Cleaned Registry/cleaned slave register 2022-09-17.txt", encoding="UTF-8")
+    SR <- fread("cleaned slave register 2022-10-18.txt", encoding="UTF-8")
     
     
   ######################################
@@ -105,8 +107,8 @@
     ER$Naam_original <- ER$Naam
     ER$Naam <- tolower(ER$Naam)
     ER$Naam <- gsub(" of ", " ", ER$Naam)
-    ER$Naam <- gsub("ç", "c", ER$Naam)
-    ER$Naam <- gsub("é", "e", ER$Naam)
+    ER$Naam <- gsub("Ã§", "c", ER$Naam)
+    ER$Naam <- gsub("Ã©", "e", ER$Naam)
     ER$Naam <- gsub("kw", "qu", ER$Naam)
     ER$Naam <- gsub("ph", "f", ER$Naam)
     
@@ -114,8 +116,8 @@
     SR$Naam_original <- SR$Naam
     SR$Naam <- tolower(SR$Naam)
     SR$Naam <- gsub(" of ", " ", SR$Naam)
-    SR$Naam <- gsub("ç", "c", SR$Naam)
-    SR$Naam <- gsub("é", "e", SR$Naam)
+    SR$Naam <- gsub("Ã§", "c", SR$Naam)
+    SR$Naam <- gsub("Ã©", "e", SR$Naam)
     SR$Naam <- gsub("kw", "qu", SR$Naam)
     SR$Naam <- gsub("ph", "f", SR$Naam)
     
@@ -123,8 +125,8 @@
     SR$Moeder_original <- SR$Moeder
     SR$Moeder <- tolower(SR$Moeder)
     SR$Moeder <- gsub(" of ", " ", SR$Moeder)
-    SR$Moeder <- gsub("ç", "c", SR$Moeder)
-    SR$Moeder <- gsub("é", "e", SR$Moeder)
+    SR$Moeder <- gsub("Ã§", "c", SR$Moeder)
+    SR$Moeder <- gsub("Ã©", "e", SR$Moeder)
     SR$Moeder <- gsub("kw", "qu", SR$Moeder)
     SR$Moeder <- gsub("ph", "f", SR$Moeder)
     
@@ -139,14 +141,14 @@
     SR$Moeder <- gsub(" ", "", SR$Moeder)
     
     
-  ###################################################
-  #### section 1a: retrieve matches SR-ER series ####
-  ###################################################
-  
-  #matches serie 4 & ER
-    #select serie 4, corrigeer voor afwijkende planta
+    #########################################################################################################
+    #### section 1a: retrieve matches Between Emancipation register (ER) and Slave register (SR) serie 4 ####
+    #########################################################################################################
+    
+    #matches serie 4 & ER
+    #select SR serie 4
     Serie4 <- SR %>% filter (Serieregister == "1851-1863" & out_event == "End Series/Freedom")
-    #edit known shifts in plantation names
+    #edit reconstructed shifts in plantation names/plantation owners
     Serie4 <- Serie4 %>% mutate(plantation_name = replace(plantation_name, plantation_name =="De Eendragt", "Eendragt"),
                                 plantation_name = replace(plantation_name, plantation_name =="Alkmaar ( voor het 1/2 aandeel aankomende den Boedel A. Ferrier )", "Alkmaar"),
                                 plantation_name = replace(plantation_name, plantation_name =="Concordia en Kwart Lot", "Concordia"),
@@ -156,7 +158,7 @@
                                 plantation_name = replace(plantation_name, plantation_name =="Lotland No 34", "Crappahoek nr. 34"),
                                 plantation_name = replace(plantation_name, plantation_name =="Concordia en Kwart Lot L. L.", "Concordia"))
     
-  #mark whether plantation names from ER to Serie 4 match  
+    #make a dummy for matching plantation names between ER and SR Serie 4  
     #make Place_name1_match
     emanc <- ER %>% 
       select(Place_name1) %>% 
@@ -167,57 +169,51 @@
     Serie4 <- left_join(Serie4, emanc, by = c("plantation_name" = "Place_name1")) %>% 
       mutate(Place_name1_match = ifelse(is.na(Place_name1_match), 0, 1))
     
-  #match SR to ER
+    #match SR to ER
     Serie4 <- Serie4 %>% arrange(Naam)  %>%
       rename(Eigenaar_2 = Eigenaar_Last_name) %>%
       select(source_order, Naam, Naam_number, year_birth, plantation_name, Place_name1_match, Eigenaar_2, sex) 
     #rename ER source_order to id_person
     ER <- ER %>%
       rename(Id_person = source_order)
-    #match
+    #match using the match_between_emancipation function loaded earlier
     list1 <- match_between_emancipation(ER, Serie4, lev_dist_naam=lev_dist_naam_ER, lev_dist_eigenaar=lev_dist_eigenaar_ER)
     
-  #Run the same algorithm but now replace plantation names for specific slave groups that were apparently rented to other plantations
-    #???
+    #run the same function for the so far unmatched records but now also allow for potential matches between
+    #plantations and private owners
+    
+    #prepare the so far unmatched ER-records for the re-run and select relevant variables
     df_not_matched_ER <- list1[[2]] %>%
       mutate(plantation_match = replace(plantation_match, plantation_match ==1, 0)) %>%
       rename(Naam = Naam_1,
              Naam_number = Naam_number_1) %>%
       select(Id_person, Naam, Naam_number, B_year, B_year2, Place_name1, plantation_match, Eigenaar_1, sex_emanc)
-    #???
+    #prepare the so far unmatched SR-Serie4-records for the re-run and select relevant variables
     df_not_matched_SR <- list1[[3]] %>%
       rename(Naam = Naam_2,
              Naam_number = Naam_number_2) %>%
       select(source_order, Naam, Naam_number, year_birth, plantation_name, Place_name1_match, Eigenaar_2, sex)
-    #match
+    #match the so far unmatched records 
     list2 <- match_between_emancipation(df_not_matched_ER, df_not_matched_SR, lev_dist_naam=set_lv_dist, lev_dist_eigenaar=lev_dist_eigenaar_ER)
     
     
-    #Append unique matches
-    unique1 <- list1[[4]] %>%
+    #retrieve reliable matches from list1 and list2
+    matches <- bind_rows(list1[[4]], list2[[4]]) %>%
       select(source_order, Id_person, Naam_lv, Match_score)
-    unique2 <- list2[[4]]  %>%
-      select(source_order, Id_person, Naam_lv, Match_score)
-    unique_bind <- bind_rows(unique1, unique2)
-    rm(unique1, unique2)
     
-    #Append identical matches
-    ident1 <- list1[[5]] %>%
-      select(source_order, Id_person, Naam_lv, Match_score)
-    ident2 <- list2[[5]]  %>%
-      select(source_order, Id_person, Naam_lv, Match_score)
-    ident_bind <- bind_rows(ident1, ident2) %>%
+    #retrieve identical matches from list1 and list2 (matches that have more than one possible match)
+    ident_matches <- bind_rows(list1[[5]], list2[[5]]) %>%
+      select(source_order, Id_person, Naam_lv, Match_score) %>%
       distinct(source_order, Id_person, .keep_all = TRUE)
-    rm(ident1, ident2)
     
-    #Remove duplicates from non-matched entries
-    df_not_matched_ER <- list2[[2]] %>%
+    #retrieve non-matched entries from list1 and list2, by ER and SR
+    unmatched_ER <- list2[[2]] %>%
       distinct(source_order, Id_person, Naam_lv, Match_score)
-    df_not_matched_SR <- list2[[3]] %>%
+    unmatched_SR <- list2[[3]] %>%
       distinct(source_order, Id_person, Naam_lv, Match_score)
     
-    
-    final_data <- function(df1){
+    #run a function that prepares the retrieved datasets for final output and for linkage with the SR
+    prepare_final_data <- function(df1){
       df_final <- left_join(df1, ER) %>%
         select(Id_person, source_order, Voornamen, Naam_Family, "Naam voor 1863", Naam_number, Extrainformatiebijnaam, Doopnaam, B_day, B_month, B_year, B_year2, "Verwantschap en Erkenning", occupation, general_remarks,
                Place_name1, Eigenaar, Naam_lv, Match_score) %>%
@@ -231,20 +227,22 @@
                Owner = Eigenaar)
       df_final
     }
-    
-    df_unique_final <- final_data(unique_bind)
-    
-    df_ident_final <- final_data(ident_bind) %>% 
+    #reliably matched records
+    df_matches <- prepare_final_data(matches)
+    #identical records; add dummy indicating identical match record
+    df_identical <- prepare_final_data(ident_matches) %>% 
       mutate (identity_flag =1)
-    
-    df_unmatched_final <- final_data(df_not_matched_ER) %>%
+    #unmatched records (ER); add dummy indicating unmatched record
+    df_unmatched <- prepare_final_data(unmatched_ER) %>%
       mutate(unmatched_flag =1)
     
-    df_final <- bind_rows(df_unique_final, df_ident_final, df_unmatched_final) %>%
+    #generate final dataset by binding the three retrieved datasets together, by arranging the data according to identifier
+    #by preparing the variables and their names, by making a long format for each record in ER, and by creating an variable
+    #about the matching status ("matching_status_ER")
+    ER_final <- bind_rows(df_matches, df_identical, df_unmatched) %>%
       mutate(identity_flag = replace(identity_flag, is.na(identity_flag), 0),
              unmatched_flag = replace(unmatched_flag, is.na(unmatched_flag), 0)) %>%
       arrange(Id_person) %>%
-      select(-StartEntryYear, -StartEntryMonth, -StartEntryDay) %>%
       rename (Slave_name = "Naam voor 1863",
               First_name = Voornamen,
               Family_name = Naam_Family,
@@ -257,7 +255,15 @@
              volgnr = replace(volgnr, volgnr ==2, "source_order_SR_2"),
              volgnr = replace(volgnr, volgnr ==3, "source_order_SR_3")) %>%
       pivot_wider(names_from = volgnr, values_from = source_order_SR) %>%
-      relocate(source_order_SR_1, source_order_SR_2, source_order_SR_3, .after = Id_person)
+      relocate(source_order_SR_1, source_order_SR_2, source_order_SR_3, .after = Id_person) %>%
+      mutate(matching_status_ER = "matched") %>%
+      mutate(matching_status_ER = replace(matching_status_ER, unmatched_flag==1, "unmatched"),
+             matching_status_ER = replace(matching_status_ER, identity_flag==1, "more than one match")) %>%
+      select(-identity_flag, -unmatched_flag)
+    
+    #remove unnecessary data frames
+    rm(list1, list2, df_identical, df_matches, df_not_matched_ER, df_not_matched_SR, 
+       df_unmatched, ident_matches, unmatched_ER, unmatched_SR, matches, emanc)
     
       
   #####################################################
