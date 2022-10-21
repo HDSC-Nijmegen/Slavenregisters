@@ -2405,13 +2405,10 @@
                                         ifelse(df$year_birth_age_based!=-1, "year_birth_age_based", "")))
 
     ####################################################################################
-    #### section 9: Append Pages From Serie 4 Reconstructed by Coen in 2022 ####
+    #### section 9: Append Pages From Serie 4 Reconstructed by Coen in 2022         ####
     ####################################################################################    
     
-    df <- df %>% mutate(Naam = replace(Naam, source_order == "122729b46132_Y", "Adriaan"),
-                        Naam = replace(Naam, source_order == "122729b46132_Z", "Zemire"),
-                        Moeder = replace(Moeder, source_order == "122729b46132_Y", "Fanny"),
-                        Moeder = replace(Moeder, source_order == "122729b46132_Z", "Fanny"))
+
     #Inlezen  
     df_recon <- read.xlsx("U:/Surfdrive/Shared/shared map slavenregisters/Suriname slavenregisters/Matching/Cleaned Registry/Reconstructie Serie 4/Controlelijst_aanwezige_folios_serie 4_final.xlsx") %>%
       filter(!(is.na(Betrouwbaarheid)))
@@ -2437,10 +2434,34 @@
       ungroup() %>%
       select(-primary_key) %>%
       mutate(primary_key = row_number())
-      
+   
+  ##########################################################################
+  #### section 10: Clean some additional stuff that we came across      ####
+  ##########################################################################  
+  
+  #Fanny en haar kinderen Adriaan en Zemire  
+  df <- df %>% mutate(Naam = replace(Naam, source_order == "122729b46132_Y", "Adriaan"),
+                        Naam = replace(Naam, source_order == "122729b46132_Z", "Zemire"),
+                        Moeder = replace(Moeder, source_order == "122729b46132_Y", "Fanny"),
+                        Moeder = replace(Moeder, source_order == "122729b46132_Z", "Fanny"))  
+    
+  #Edit two Plantation names
+  df<- df %>% 
+    filter(source_order != "364003136047") %>% # Unknown plantation
+    mutate(plantation_name = replace(plantation_name, plantation_name == "Lot", "Lot Litt. K"),
+           Eigenaar = replace(Eigenaar, Eigenaar == "Lot Nickerie", "Lot Litt. K Nickerie")) # Rename "Lot" as "Lot Litt. K"
+    
+    
+  # Wrong Aanvullendeinformatie inschrijving for plantation Visserszorg  
+  df <- df %>%
+    mutate(month_entry = replace(month_entry, Aanvullendeinformatieinschrijv == "Afgeschreven van den naam van den Uitlandigen F. Taunaij ingevolg aangifte d.d. 28 November 1848 No. 8 (Zie daar 1848. Journaal Numero No 8)." & plantation_name == "Visserszorg", 4),
+           Aanvullendeinformatieinschrijv = replace(Aanvullendeinformatieinschrijv, Aanvullendeinformatieinschrijv == "Afgeschreven van den naam van den Uitlandigen F. Taunaij ingevolg aangifte d.d. 28 November 1848 No. 8 (Zie daar 1848. Journaal Numero No 8)." & plantation_name == "Visserszorg",
+                                                    "Afgeschreven van de plantage Hamburg in boven Cottica volgend Gouvernments Resolutie 28 April 1848 No 850"))
+           
+  
     
   ##############################################################
-  #### section 10: save cleaned outfile, ready for matching ####
+  #### section 11: save cleaned outfile, ready for matching ####
   ##############################################################
     
     colnames(df)
