@@ -1,0 +1,152 @@
+Updates:
+
+24-10-2022
+ - Fixed bug in filtering + closure section 3 that caused missings as unmatched cases were not correctly filtered
+ - Removed redundant code in filtering + closure section 5 that introduced errors
+ - Fixed bug in filtering + closure section 5 that caused missings due to incomplete ifelse statement
+ - Added records to reconstitution that couldn't be matched, because they started and finished within the same series
+
+22-10-2022
+ - Added ER matching to script
+ 
+17-10-2022
+ - Fixed bug in WITHIN matching that prevented filtering on day+month
+
+14-10-2022
+ - Renamed df to SR in matching, BETWEEN, and WITHIN
+ - Fixed bug in WITHIN section 3 that dropped year birth year matches
+ - Fixed bug in filtering + closure section 2 and removed rows with only missing values
+ - Reworked the closure of indirect matches in filtering + closure section 3:
+	* Fixed bug that dropped indirect matches
+	* Indirect matches to series 3 and/or 4 are now included for otherwise unmatched certificates from series 1
+	* Indirect matches to series 4 are now included for otherwise unmatched certificates from series 2
+	* Indirect matches to series 4 are now included for matched certificates between series 1 and 2
+ - Fixed bug in filtering + closure section 4 that introduced duplicates as unmatched cases were not correctly filtered
+ - Fixed bug in filtering + closure section 5 that introduced duplicates as unmatched cases from series 4 were not correctly filtered
+ 
+
+11-10-2022
+ - Fixed bug in BETWEEN where naam_original output from the second dataset was named after the first dataset
+ - Fixed bug in BETWEEN where moeder_original output from the second dataset was named after the first dataset
+ - Removed subsampling of plantations Alkmaar & Barbados from the code
+
+10-10-2022
+ - Fixed bug in WITHIN that resulted in 0 matches, birth month + day match were not loaded
+ - Fixed bug in split_names that didn't estimate Levenshtein distances for vectors containing missings
+ - Fixed bug in split_names that assigned names from part 3 to part 2 of the name
+ - Made split_names except names other than "Naam"
+
+3-10-2022
+ - Fixed bug in naam_vorige and naam_vol that occured as a result of "split_names"
+ - Fixed bug that duplicated entries in output that occured as a result of "split_names"
+ - Fixed bug in adaptive name filtering that was introduced while speeding up the matching
+ - Sped up matching by adding allow.cartesian=T when compiling candidate matches based on names of enslaved
+
+30-9-2022
+ - Made adaptive Levenshtein on names enslaved compulsory to speed up the matching process
+ - Consider multiple names of 3 or more characters rather than 4 or more separately through function "split_names"
+
+26-9-2022
+ - WITHIN now except records where EITHER birth year is missing OR birth year matches OR birth month + day match
+ - WITHIN now except records where EITHER event year is missing OR event year matches OR event month + day match
+ - Consider multiple names of 4 or more characters separately through function "split_names"
+
+22-9-2022
+ - Fixed bug allowed for 0 years distance instead of 1 between birth years
+ - Mother names are now standardized according to the 12-9-2022 rules
+
+17-9-2022
+ - Fixed bug that imported only half the unknown mothers
+ - Identical names between series 1 en 2 now serve as a tie-breaker and receive match score 0.5
+ - Matches between series 1-2 and another series now may differ 1 year in year of birth
+
+12-9-2022
+ - Set all names to lower case
+ - Remove " of " from multiple names
+ - Standardise remove accute and grave accents
+ - Standardise ç into c, wk into qu, and ph into f
+ - Removed Match_score_plus_naam210 and Match_score_plus_naam100
+ - Adapted step 5 in BETWEEN to keep 2,380 newborns with known mothers in series 1 and unknown mothers in series 2
+ - Removed out_unended from BETWEEN which caused a bug in match_score
+
+1-8-2022
+ - Fixed bug that caused duplicates in filter_unique
+ - Sort long table by series + ymd rather than series + y
+ - All matched cases in series 1-4 are assigned the same person identifier
+
+26-7-2022
+ - Added functions to reconstitution / transitive closure to make the script easier to read
+
+12-7-2022
+ - Parameters to change script now moved to top of the script
+ - Integrated benchmarks R
+ - Added export to wide format
+ - Updated description
+
+30-6-2022
+ - Fixed headers WITHIN variables, first character is now always in upper case
+ - Added function to filter best unique matches using the highest max match_score, ties are seen as ambiguous and dropped
+ - Matched cases in series 1-4 are assigned the same person identifier
+     - all between matches
+	 - within to next series
+	 - within 4 to start series 4
+	 - NOT within to start series
+ - Matches are grouped by Id_person and exported with standardised variable names
+
+21-6-2022
+ - Fixed bug in out_unended
+ - Give 1 point in out_unended if Out_event_1 ENDED and In_event_2 BEGINNING, rather than just looking at Out_event_1
+
+20-6-2022
+ - Updated cleaning script
+
+10-6-2022
+ - Fixed bug naam_vorige and naam_volgende: Missing entries incorrectly received points
+ - Fixed bug in match score that used Naam_moeder instead of Naam_moeder_adaptive
+ - Added filter in WITHIN that prevents that entries match themselves
+ - Updated match score to use adaptive Levensthein for naam_vorige and naam_volgende
+
+8-6-2022
+- Fixed bug that attached match score to unmatched mother names in series 1 and 2
+- Added match scores that take Levenshtein distance on name into account
+
+2-6-2022
+- Fixed bug in WITHIN that dropped naam_vorige_2 and naam_volgende_1 from output
+- Implemented new year_birth variable that combines information from year_birth, year_event (of births), and year_birth_age_based
+- Added eigenaar, inschrijving to metadata WITHIN matching
+- Added alternative match score that considers Levenshtein distance of name matching
+- Particulieren and plantages cannot match BETWEEN series
+- 2 mothers without a name now only receive a match score of 2.5 WITHIN and BETWEEN series 3 and 4
+- When matching BETWEEN non-consecutive series now requires individuals to be alive at the end of the previous series
+- Output from WITHIN matching is now stored in 1 xlsx table
+- Output from BETWEEN matching now includes words plantages and particulieren.
+
+30-5-2022
+- Implemented adaptive Levenshtein
+	- Made maximum Levenshtein distance of naam dependent on the length of the enslaved person's name
+	- Made maximum Levenshtein distance of moeder names dependent on the length of the mother's name
+	- Made maximum Levenshtein distance of PARTICULIERE eigenaren dependent on the length of the PRIVATE owners's name
+	- Set maximum Levenshtein matching of PLANTAGE eigenaren to 0
+- BETWEEN matches for series 3 and 4 again contain all entries
+- removed match_lv from output files
+
+24-5-2022
+- Automatically makes folders to store matches
+- Fixed bug in date matching
+- Fixed bug in exporting WITHIN series
+- Fixed bug in CLEANING of eigenaren
+- Added adaptive matching indicators for moeder and eigenaar
+- Added flags for month + day to WITHIN
+- Added month + day to matching score in WITHIN
+- 2 mothers without a name now also receive a match score of 2.5, as it is unlikely that mothers are only named in 1 entry
+- addendums to names can now receive a -1 if they don't overlap, 0 for twice nothing, and +1 for identical addendums
+- Previous and next enslaved are now also scored in WITHIN for group transfers
+- BETWEEN now matches end/begin combinations or events that occured in overlapping years (1838, 1848, 1851-3), rather than all entries. As a result,
+	- We now only check the previous entry - rather than the previous next entry - for the last-listed entry on a folio
+	- Only look for duplicates that occured in in overlapping years (1 year in series 1-2, 2-3), (3 years in series 3-4)
+
+18-5-2022
+- Added adaptive Levenshtein
+- Introduced within matching
+- Cleaned sex based on name
+- Matching sex is no longer optional for matching
