@@ -1,7 +1,34 @@
 Updates:
 
-????
- - deal with 27,180 duplicated id_sources. They most likely occur due to different matches in between and within.
+24-10-2022
+ - Fixed bug in filtering + closure section 3 that caused missings as unmatched cases were not correctly filtered
+ - Removed redundant code in filtering + closure section 5 that introduced errors
+ - Fixed bug in filtering + closure section 5 that caused missings due to incomplete ifelse statement
+ - Added records to reconstitution that couldn't be matched, because they started and finished within the same series
+
+22-10-2022
+ - Added ER matching to script
+ 
+17-10-2022
+ - Fixed bug in WITHIN matching that prevented filtering on day+month
+
+14-10-2022
+ - Renamed df to SR in matching, BETWEEN, and WITHIN
+ - Fixed bug in WITHIN section 3 that dropped year birth year matches
+ - Fixed bug in filtering + closure section 2 and removed rows with only missing values
+ - Reworked the closure of indirect matches in filtering + closure section 3:
+	* Fixed bug that dropped indirect matches
+	* Indirect matches to series 3 and/or 4 are now included for otherwise unmatched certificates from series 1
+	* Indirect matches to series 4 are now included for otherwise unmatched certificates from series 2
+	* Indirect matches to series 4 are now included for matched certificates between series 1 and 2
+ - Fixed bug in filtering + closure section 4 that introduced duplicates as unmatched cases were not correctly filtered
+ - Fixed bug in filtering + closure section 5 that introduced duplicates as unmatched cases from series 4 were not correctly filtered
+ 
+
+11-10-2022
+ - Fixed bug in BETWEEN where naam_original output from the second dataset was named after the first dataset
+ - Fixed bug in BETWEEN where moeder_original output from the second dataset was named after the first dataset
+ - Removed subsampling of plantations Alkmaar & Barbados from the code
 
 10-10-2022
  - Fixed bug in WITHIN that resulted in 0 matches, birth month + day match were not loaded
