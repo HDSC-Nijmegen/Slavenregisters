@@ -526,42 +526,216 @@
     # 6 Append to Reconstituted slave registers   #
     ###############################################
     
-    ### REWORK THIS SECTION LATER
-    
-    sl_recon <-  SR2 %>%
-      rename(Name = Name_enslaved,
-             Name_extra = Name_enslaved_extra) %>%
+    #######################################################################
+    ### Prepare Slave register for appending with Emancipation register ###
+    #######################################################################
+    sr2 <- sr %>%
+      #add a unique identifier called Id_person
       group_by(Id_person) %>%
       mutate(Id_match = cur_group_id()) %>%
-      mutate(Owner = NA,
-             Plantation = NA) %>%
-      mutate(Owner = replace(Owner, Source_type == "Particulieren", Name_owner),
-             Plantation = replace(Plantation, Source_type == "Plantages", Name_owner))
+      #generate variables Owner and Plantation for appending with emancipation register
+      mutate(Owner = replace(Name_owner, Source_type != "Particulieren", NA),
+             Plantation = replace(Name_owner, Source_type != "Plantages", NA)) %>%
+      #rename categories for appending with emancipation register
+      mutate(Source_type = replace(Source_type, Source_type == "Particulieren", "Slave register private owner"),
+             Source_type = replace(Source_type, Source_type == "Plantages", "Slave register plantation")) %>%
+      #remove unnecessary variables
+      select(-StartEntryEventDetailed, -LastEntryEventDetailed, -Name_owner, -B_year_min, -B_year_max)
+    
+    #######################################################################
+    ### Prepare Emancipation register for appending with Slave register ###
+    #######################################################################
+    emanc2 <- emanc %>%
+      #rename variables for appending with emancipation register
+      rename(Id_source= source_order_SR_1,
+             Name_enslaved = Slave_name,
+             Name_enslaved_extra = Extrainformatiebijnaam,
+             B_year2_ER = B_year2,
+             Occupation = occupation,
+             Remarks_ER = general_remarks,
+             Name_enslaved_number = Naam_number) %>%
+      #generate variables for appending with slave register
+      mutate(Source_series = "1863",
+             Source_type = "Emancipation Register") %>%
+      #remove unmatched cases and those with identical match scores
+      filter(matching_status_ER == "matched") %>%
+      #remove unnecessary variables
+      select(-Naam_lv, - Match_score, -matching_status_ER, -source_order_SR_2, -source_order_SR_3)
     
     
-    df_bjoern <- bind_rows(sl_recon, df_unique_final) %>%
-      group_by(Id_source) %>% 
+    #######################################################
+    ### Append Emancipation register and Slave register ###
+    #######################################################
+    combined <- bind_rows(sr2, emanc2) %>%
+      #add unique identifier to matched records in emancipation register
+      group_by(Id_source) %>%
       mutate(Id_match = min(Id_match, na.rm = TRUE)) %>%
+      #arrange according to identifier and start date for correct row order
       arrange(Id_match, StartEntryYear, StartEntryMonth, StartEntryDay) %>%
-      group_by(Id_match) %>% ##Remove following rows once Rick solved the bug
-      mutate(Id_match2 = cur_group_id()) %>%
-      ungroup() %>%
-      select(-Id_match, -Name_owner, -B_month, -B_day, -B_year_min, -B_year_max) %>%
-      rename(Id_match = Id_match2) %>%
-      relocate (Id_match, Id_person, Id_source, Id_match, Name, Naam_number, Name_extra, Sex, B_year, B_year2, Plantation, Owner, Name_mother, Name_mother_extra) %>%
+      #relocate
+      relocate (Id_match, Id_person, Id_source, Name_enslaved, Name_enslaved_extra, Name_enslaved_number, Sex, B_day, B_month, B_year, B_year2_ER, Name_mother, Name_mother_extra, Plantation, Owner) %>%
       mutate(Id_source = replace(Id_source, StartEntryYear == 1863 , NA)) %>%
-      distinct(Id_source, Id_match, .keep_all = TRUE) %>%
-      rename(Name_baptized_ER = Doopnaam,
-             First_name_ER = Voornamen,
-             Family_name_ER = Naam_Family,
-             Relation_ER = Verwantschap.en.Erkenning,
-             Name_number= Naam_number)
+      ungroup()
+    
+    setwd("//cnas.ru.nl/U709207/Documents/Suriname/Matching")
+    write.xlsx(combined, file = "SR ER life courses.xlsx", overwrite=T)
     
     
-    write.csv(df_bjoern, file = "File_for_Bjoern.csv", row.names = FALSE)
+    #################################################
+    ## Make wide format for selected variables   ####
+    #################################################
+    
+    # Only keep variables that we want to include in wide data set and create wide format with pivot_wider
+    df_wide_sel <- combined %>% select(Id_match, B_year, StartEntryYear, LastEntryYear) %>%
+      group_by(Id_match) %>% mutate(id = row_number()) %>% pivot_wider(names_from = id, values_from = c(B_year, StartEntryYear, LastEntryYear)) 
+    
+    # Create separate file to create the flags for the four series
+    df_wide_flags <- combined %>% select(Id_match, Source_series, StartEntryYear) %>% 
+      group_by(Id_match, Source_series) %>% 
+      mutate(id = row_number()) %>% 
+      filter(id == 1) %>% 
+      select(-id) %>%
+      pivot_wider(names_from = c(Source_series), values_from = StartEntryYear) %>% 
+      rename("Serie1" ="1830-1838",
+             "Serie2" ="1838-1848",
+             "Serie3" ="1848-1851",
+             "Serie4" ="1851-1863",
+             "ER" = "1863") %>%
+      group_by(Id_match) %>%
+      summarise(Serie1 = ifelse(is.na(Serie1), 0, 1),
+                Serie2 = ifelse(is.na(Serie2), 0, 1),
+                Serie3 = ifelse(is.na(Serie3), 0, 1),
+                Serie4 = ifelse(is.na(Serie4), 0, 1),
+                ER = ifelse(is.na(ER), 0, 1)) %>%
+      select(-Source_series)
+    
+    # Merge both files and re-arrange columns
+    df_wide <- left_join(df_wide_sel, df_wide_flags) %>%
+      relocate(c(Serie1, Serie2, Serie3, Serie4, ER, ends_with("1"), ends_with("2"), ends_with("3"), ends_with("4"),
+                 ends_with("5"), ends_with("6"), ends_with("7"),ends_with("8")), .after = Id_match) %>%
+      rowwise() %>%
+      mutate(B_year = round(mean(c_across(starts_with("B_year")), na.rm = TRUE)),
+             Start_year = min(c_across(starts_with("StartEntryYear")), na.rm = TRUE),
+             Last_year = max(c_across(starts_with("LastEntryYear")), na.rm = TRUE))
     
     
     
+    
+    
+    #load data
+    #sr <- fread("//cnas.ru.nl/U709207/Documents/Suriname/Matching/2022-10-24SR life courses.txt", encoding="UTF-8")
+    #emanc <- fread("//cnas.ru.nl/U709207/Documents/Suriname/Emancipatieregisters/2022-10-24Emancipation_Register_Linked.txt", encoding="UTF-8")
+    sr <- fread("~/HDS/Matching/2022-10-24SR life courses.txt", encoding="UTF-8")
+    emanc <- fread("~/HDS/Matching/2022-10-24Emancipation_Register_Linked.txt", encoding="UTF-8")
+    #load cleaned registry to add year of death to dataset; prepare year of death
+    cleaned <- fread("~/HDS/Matching/cleaned slave register 2022-10-21.txt", encoding="UTF-8") %>%
+      select(source_order, year_death, year_exit, out_event2) %>%
+      group_by(source_order) %>%
+      mutate(year_death = replace(year_death, is.na(year_death) & out_event2 == "Death" & !(is.na(year_exit)), year_exit)) %>%
+      select(source_order, year_death) %>%
+      rename(D_year = year_death) %>%
+      ungroup()
+    #######################################################################
+    ### Prepare Slave register for appending with Emancipation register ###
+    #######################################################################
+    sr2 <- sr %>%
+      #add a unique identifier called Id_person
+      group_by(Id_person) %>%
+      mutate(Id_match = cur_group_id()) %>%
+      #generate variables Owner and Plantation for appending with emancipation register
+      mutate(Owner = replace(Name_owner, Source_type != "Particulieren", NA),
+             Plantation = replace(Name_owner, Source_type != "Plantages", NA)) %>%
+      #rename categories for appending with emancipation register
+      mutate(Source_type = replace(Source_type, Source_type == "Particulieren", "Slave register private owner"),
+             Source_type = replace(Source_type, Source_type == "Plantages", "Slave register plantation")) %>%
+      #remove unnecessary variables
+      select(-StartEntryEventDetailed, -LastEntryEventDetailed, -Name_owner, -B_year_min, -B_year_max)
+    #add date of death from cleaned registry
+    sr2 <- left_join(sr2, cleaned, by = c("Id_source" = "source_order"))
+    
+    
+    #######################################################################
+    ### Prepare Emancipation register for appending with Slave register ###
+    #######################################################################
+    emanc2 <- emanc %>%
+      #rename variables for appending with emancipation register
+      rename(Id_source= source_order_SR_1,
+             Name_enslaved = Slave_name,
+             Name_enslaved_extra = Extrainformatiebijnaam,
+             B_year2_ER = B_year2,
+             Occupation = occupation,
+             Remarks_ER = general_remarks,
+             Name_enslaved_number = Naam_number) %>%
+      #generate variables for appending with slave register
+      mutate(Source_series = "1863",
+             Source_type = "Emancipation Register") %>%
+      #remove unmatched cases and those with identical match scores
+      filter(matching_status_ER == "matched") %>%
+      #remove unnecessary variables
+      select(-Naam_lv, - Match_score, -matching_status_ER, -source_order_SR_2, -source_order_SR_3)
+    
+    
+    #######################################################
+    ### Append Emancipation register and Slave register ###
+    #######################################################
+    combined <- bind_rows(sr2, emanc2) %>%
+      #add unique identifier to matched records in emancipation register
+      group_by(Id_source) %>%
+      mutate(Id_match = min(Id_match, na.rm = TRUE)) %>%
+      #arrange according to identifier and start date for correct row order
+      arrange(Id_match, StartEntryYear, StartEntryMonth, StartEntryDay) %>%
+      #relocate
+      relocate (Id_match, Id_person, Id_source, Name_enslaved, Name_enslaved_extra, Name_enslaved_number, Sex, B_day, B_month, B_year, B_year2_ER, D_year, Name_mother, Name_mother_extra, Plantation, Owner) %>%
+      mutate(Id_source = replace(Id_source, StartEntryYear == 1863 , NA)) %>%
+      ungroup()
+    
+    #write data
+    write_xlsx(combined,"~/HDS/Matching/SR ER life courses.xlsx")
+    
+    
+    #################################################
+    ## Make wide format for selected variables   ####
+    #################################################
+    
+    # Only keep variables that we want to include in wide data set and create wide format with pivot_wider
+    df_wide_sel <- combined %>% select(Id_match, B_year, D_year, StartEntryYear, LastEntryYear) %>%
+      group_by(Id_match) %>% mutate(id = row_number()) %>% pivot_wider(names_from = id, values_from = c(B_year, D_year, StartEntryYear, LastEntryYear)) 
+    
+    # Create separate file to create the flags for the four series
+    df_wide_flags <- combined %>% select(Id_match, Source_series, StartEntryYear) %>% 
+      group_by(Id_match, Source_series) %>% 
+      mutate(id = row_number()) %>% 
+      filter(id == 1) %>% 
+      select(-id) %>%
+      pivot_wider(names_from = c(Source_series), values_from = StartEntryYear) %>% 
+      rename("Serie1" ="1830-1838",
+             "Serie2" ="1838-1848",
+             "Serie3" ="1848-1851",
+             "Serie4" ="1851-1863",
+             "ER" = "1863") %>%
+      group_by(Id_match) %>%
+      summarise(Serie1 = ifelse(is.na(Serie1), 0, 1),
+                Serie2 = ifelse(is.na(Serie2), 0, 1),
+                Serie3 = ifelse(is.na(Serie3), 0, 1),
+                Serie4 = ifelse(is.na(Serie4), 0, 1),
+                ER = ifelse(is.na(ER), 0, 1)) 
+    
+    # Merge both files and create relevant variables
+    df_wide <- left_join(df_wide_sel, df_wide_flags) %>%
+      relocate(c(Serie1, Serie2, Serie3, Serie4, ER, ends_with("1"), ends_with("2"), ends_with("3"), ends_with("4"),
+                 ends_with("5"), ends_with("6"), ends_with("7"),ends_with("8")), .after = Id_match) %>%
+      rowwise() %>%
+      mutate(B_year = round(mean(c_across(starts_with("B_year")), na.rm = TRUE)),
+             Start_year = min(c_across(starts_with("StartEntryYear")), na.rm = TRUE),
+             D_year = min(c_across(starts_with("D_year")), na.rm = TRUE),
+             Last_year = max(c_across(starts_with("LastEntryYear")), na.rm = TRUE)) %>%
+      ungroup() %>% 
+      mutate_all(~ifelse(is.nan(.), NA, .)) %>%
+      mutate_if(is.numeric, list(~na_if(., Inf))) %>%
+      select(Id_match, Serie1, Serie2, Serie3, Serie4, ER, B_year, Start_year, Last_year, D_year)
+    
+    #write data
+    write_xlsx(df_wide, "~/HDS/Matching/SR ER life courses wide.xlsx")
     
     
     
