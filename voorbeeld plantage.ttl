@@ -1,0 +1,377 @@
+#namespaces
+@prefix ed:                 <http://lod.enslaved.org/entity/> .
+@prefix hdsc:               <https://www.ru.nl/hdsc/example/> .
+@prefix pico:               <https://personsincontext.org/model#> .
+@prefix picot:              <https://terms.personsincontext.org/> .
+@prefix pnv:                <https://w3id.org/pnv#> .
+@prefix prov:               <http://www.w3.org/ns/prov#> .
+@prefix rdf:		            <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sdo:                <https://www.schema.org/> .
+@prefix xsd:                <http://www.w3.org/2001/XMLSchema#> .
+
+
+#sources
+hdsc:1830-1838_1_820
+	a                         sdo:ArchiveComponent ; 
+	sdo:name                  "Slave register private owner 1830-1838 inv 1 folio 820" ;
+	sdo:locationCreated       "Paramaribo" ;
+	sdo:dateCreated           "1830-1838"^^xsd:duration ;
+	sdo:image                 ??? ;
+	sdo:holdingArchive        <https://nationaalarchief.sr> .
+
+hdsc:1838-1848_6_278
+	a                         sdo:ArchiveComponent ; 
+	sdo:name                  "Slave register private owner 1838-1848 inv 6 folio 278" ;
+	sdo:locationCreated       "Paramaribo" ;
+	sdo:dateCreated           "1838-1848"^^xsd:duration ;
+	sdo:image                 ??? ;
+	sdo:holdingArchive        <https://nationaalarchief.sr> .
+
+hdsc:1838-1848_6_87
+	a                         sdo:ArchiveComponent ; 
+	sdo:name                  "Slave register private owner 1838-1848 inv 6 folio 87" ;
+	sdo:locationCreated       "Paramaribo" ;
+	sdo:dateCreated           "1838-1848"^^xsd:duration ;
+	sdo:image                 ??? ;
+	sdo:holdingArchive        <https://nationaalarchief.sr> .
+
+hdsc:1838-1838-1848_12_2747
+	a                         sdo:ArchiveComponent ; 
+	sdo:name                  "Slave register private owner 1830-1838 inv 12 folio 2747" ;
+	sdo:locationCreated       "Paramaribo" ;
+	sdo:dateCreated           "1838-1848"^^xsd:duration ;
+	sdo:image                 ??? ;
+	sdo:holdingArchive        <https://nationaalarchief.sr> .
+
+hdsc:1848-1851_37_735
+	a                         sdo:ArchiveComponent ; 
+	sdo:name                  "Slave register private owner 1848-1851 inv 37 folio 735" ;
+	sdo:locationCreated       "Paramaribo" ;
+	sdo:dateCreated           "1848-1851"^^xsd:duration ;
+	sdo:image                 ??? ;
+	sdo:holdingArchive        <https://nationaalarchief.sr> .
+
+hdsc:1851-1863_25_555
+	a                         sdo:ArchiveComponent ; 
+	sdo:name                  "Slave register private owner 1851-1863 inv 25 folio 555" ;
+	sdo:locationCreated       "Paramaribo" ;
+	sdo:dateCreated           "1851-1863"^^xsd:duration ;
+	sdo:image                 ??? ;
+	sdo:holdingArchive        <https://nationaalarchief.sr> .
+
+hdsc:1851-1863_28_306
+	a                         sdo:ArchiveComponent ; 
+	sdo:name                  "Slave register plantation 1851-1863 inv 28 folio 306" ;
+	sdo:locationCreated       "Paramaribo" ;
+	sdo:dateCreated           "1851-1863"^^xsd:duration ;
+	sdo:image                 ??? ;
+	sdo:holdingArchive        <https://nationaalarchief.sr> .
+
+hdsc:ER4447
+	a                         sdo:ArchiveComponent ; 
+	sdo:name                  "Emancipation register Humphrey Lamur pp 188-189" ;
+	sdo:locationCreated       "Amsterdam" ;
+	sdo:dateCreated           "2004"^^xsd:gYear ;
+	sdo:image                 ??? ;
+	sdo:holdingArchive        ??? .
+
+
+#person observations
+hdsc:010820b1983
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:1830-1838_1_820 ;
+  pico:hasRole              picot:roles/522 ;  #geregistreerde
+  hdsc:lag                  hdsc:010820b1982 ;
+  hdsc:lead                 hdsc:010820b1984 ;
+  sdo:gender                sdo:Female ;
+  sdo:name                  "Frederica"^^xsd:string ;
+  sdo:givenName             "Frederica"^^xsd:string ;
+  sdo:additionalName        [
+    a                       pnv:PersonName ;
+    pnv:literalName         "Frederica"^^xsd:string ;
+    pnv:givenName           "Frederica"^^xsd:string ; ] ;
+  ed:P33                    enslaved:Q109 ;  #hasPersonStatus  Enslaved
+  hdsc:isEnslavedBy         [ 
+    rdf:value               hdsc:owner1 ;
+    sdo:startDate           "1837-08-15"^^xsd:date ;
+    sdo:endDate             "1838"^^xsd:gYear ; ] ;
+  sdo:startDate             [ 
+    rdf:value               "1837-08-15"^^xsd:date ; 
+    ed:P30                  ed:153 ; ] ;  #hasEventType  Sale or Transfer
+  sdo:endDate               [
+    rdf:value               "1838"^^xsd:gYear ;
+    ed:P30                  ed:Q250 ; ] .  #hasEventType Registration 
+
+hdsc:060278a12348
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:1838-1848_6_278 ;
+  pico:hasRole              picot:roles/522 ;  #geregistreerde
+  hdsc:lag                  hdsc:060278a12347 ;
+  hdsc:lead                 hdsc:060278a12349 ;
+  sdo:gender                sdo:Female ;
+  sdo:name                  "Frederica"^^xsd:string ;
+  sdo:givenName             "Frederica"^^xsd:string ;
+  sdo:additionalName        [
+    a                       pnv:PersonName ;
+    pnv:literalName         "Frederica"^^xsd:string ;
+    pnv:givenName           "Frederica"^^xsd:string ; ] ;
+  ed:P33                    enslaved:Q109 ;  #hasPersonStatus  Enslaved
+  hdsc:isEnslavedBy         [ 
+    rdf:value               hdsc:owner2 ;
+    sdo:startDate           "1838"^^xsd:gYear ;
+    sdo:endDate             "1839-02-06"^^xsd:date ; ] ;
+  sdo:startDate             [ 
+    rdf:value               "1838"^^xsd:gYear ; 
+    ed:P30                  ed:Q153 ; ] ;  #hasEventType  Sale or Transfer
+  sdo:endDate               [
+    rdf:value               "1839-02-06"^^xsd:date ;
+    ed:P30                  ed:Q153 ; ] .  #hasEventType  Sale or Transfer
+
+hdsc:060087b13988
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:1838-1848_6_87 ;
+  pico:hasRole              picot:roles/522 ;  #geregistreerde
+  hdsc:lag                  hdsc:060278a12347 ;
+  hdsc:lead                 hdsc:060278a12349 ;
+  sdo:gender                sdo:Female ;
+  sdo:name                  "Frederica"^^xsd:string ;
+  sdo:givenName             "Frederica"^^xsd:string ;
+  sdo:additionalName        [
+    a                       pnv:PersonName ;
+    pnv:literalName         "Frederica"^^xsd:string ;
+    pnv:givenName           "Frederica"^^xsd:string ; ] ;
+  ed:P33                    enslaved:Q109 ;  #hasPersonStatus  Enslaved
+  hdsc:isEnslavedBy         [ 
+    rdf:value               hdsc:owner3 ;
+    sdo:startDate           "1839-02-06"^^xsd:date ;
+    sdo:endDate             "1843-12-27"^^xsd:date ; ] ;
+  sdo:startDate             [ 
+    rdf:value               "1839-02-06"^^xsd:date ; 
+    ed:P30                  ed:Q153 ; ] ;  #hasEventType  Sale or Transfer
+  sdo:endDate               [
+    rdf:value               "1843-12-27"^^xsd:date ;
+    ed:P30                  ed:Q153 ; ] .  #hasEventType  Sale or Transfer
+
+hdsc:122747a33311
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:1838-1848_12_2747 ;
+  pico:hasRole              picot:roles/522 ;  #geregistreerde
+  hdsc:lag                  hdsc:122747a33310 ;
+  hdsc:lead                 hdsc:122747a33312 ;
+  sdo:gender                sdo:Female ;
+  sdo:name                  "Frederika"^^xsd:string ;
+  sdo:givenName             "Frederika"^^xsd:string ;
+  sdo:additionalName        [
+    a                       pnv:PersonName ;
+    pnv:literalName         "Frederika"^^xsd:string ;
+    pnv:givenName           "Frederika"^^xsd:string ; ] ;
+  ed:P33                    enslaved:Q109 ;  #hasPersonStatus  Enslaved
+  hdsc:isEnslavedBy         [ 
+    rdf:value               hdsc:owner4 ;
+    sdo:startDate           "1843-12-27"^^xsd:date ;
+    sdo:endDate             "1848"^^xsd:gYear ; ] ;
+  sdo:startDate             [ 
+    rdf:value               "1848"^^xsd:gYear ; 
+    ed:P30                  ed:Q153 ; ] ;  #hasEventType  Sale or Transfer
+  sdo:endDate               [
+    rdf:value               "1838-10-02"^^xsd:date ;
+    ed:P30                  ed:Q250 ; ] .  #hasEventType  Registration
+
+hdsc:370735138226
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:1848-1851_37_735 ;
+  pico:hasRole              picot:roles/522 ;  #geregistreerde
+  hdsc:lag                  hdsc:370735138225 ;
+  hdsc:lead                 hdsc:370735138227 ;
+  sdo:gender                sdo:Female ;
+  sdo:name                  "Frederica"^^xsd:string ;
+  sdo:givenName             "Frederica"^^xsd:string ;
+  sdo:additionalName        [
+    a                       pnv:PersonName ;
+    pnv:literalName         "Frederica"^^xsd:string ;
+    pnv:givenName           "Frederica"^^xsd:string ; ] ;
+  ed:P33                    enslaved:Q109 ;  #hasPersonStatus  Enslaved
+  hdsc:isEnslavedBy         [ 
+    rdf:value               hdsc:owner5 ;
+    sdo:startDate           "1848"^^xsd:gYear ;
+    sdo:endDate             "1851"^^xsd:gYear ; ] ;
+  sdo:startDate             [ 
+    rdf:value               "1848"^^xsd:gYear ; 
+    ed:P30                  ed:Q250 ; ] ;  #hasEventType  Registration
+  sdo:endDate               [
+    rdf:value               "1851"^^xsd:gYear ;
+    ed:P30                  ed:Q250 ; ] .  #hasEventType  Registration
+
+hdsc:25055575262
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:1851-1863_25_555 ;
+  pico:hasRole              picot:roles/522 ;  #geregistreerde
+  hdsc:lag                  hdsc:25055575261 ;
+  hdsc:lead                 hdsc:25055575263 ;
+  sdo:gender                sdo:Female ;
+  sdo:name                  "Frederica"^^xsd:string ;
+  sdo:givenName             "Frederica"^^xsd:string ;
+  sdo:additionalName        [
+    a                       pnv:PersonName ;
+    pnv:literalName         "Frederica"^^xsd:string ;
+    pnv:givenName           "Frederica"^^xsd:string ; ] ;
+  ed:P33                    enslaved:Q109 ;  #hasPersonStatus  Enslaved
+  hdsc:isEnslavedBy         [ 
+    rdf:value               hdsc:owner6 ;
+    sdo:startDate           "1851"^^xsd:gYear ;
+    sdo:endDate             "1853-11-04"^^xsd:date ; ] ;
+  sdo:startDate             [ 
+    rdf:value               "1851"^^xsd:gYear ; 
+    ed:P30                  ed:Q250 ; ] ;  #hasEventType  Registration
+  sdo:endDate               [
+    rdf:value               "1853-11-04"^^xsd:date ;
+    ed:P30                  ed:Q153 ; ] .  #hasEventType  Sale or Transfer
+
+hdsc:280306159201
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:1851-1863_28_306 ;
+  pico:hasRole              picot:roles/522 ;  #geregistreerde
+  hdsc:lag                  hdsc:280306159200 ;
+  hdsc:lead                 hdsc:280306159202 ;
+  sdo:gender                sdo:Female ;
+  sdo:name                  "Frederica"^^xsd:string ;
+  sdo:givenName             "Frederica"^^xsd:string ;
+  sdo:additionalName        [
+    a                       pnv:PersonName ;
+    pnv:literalName         "Frederica"^^xsd:string ;
+    pnv:givenName           "Frederica"^^xsd:string ; ] ;
+  ed:P33                    enslaved:Q109 ;  #hasPersonStatus  Enslaved
+  hdsc:isEnslavedBy         [ 
+    rdf:value               hdsc:PSUR0041 ;
+    sdo:startDate           "1853-11-04"^^xsd:date ;
+    sdo:endDate             "1863-07-01"^^xsd:date ; ] ;
+  sdo:startDate             [ 
+    rdf:value               "1853-11-04"^^xsd:date ; 
+    ed:P30                  ed:Q153 ; ] ;  #hasEventType  Transfer
+  sdo:endDate               [
+    rdf:value               "1863-06-30"^^xsd:date ;
+    ed:P30                  ed:Q250 ; ] .  #hasEventType  Registration
+
+hdsc:ER52a
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:ER4447 ;
+  pico:hasRole              picot:roles/522 ;  #geregistreerde
+  sdo:gender                sdo:Female ;
+  sdo:name                  "Frederika"^^xsd:string ;
+  sdo:givenName             "Frederika"^^xsd:string ;
+  sdo:additionalName        [
+    a                       pnv:PersonName ;
+    pnv:literalName         "Frederika"^^xsd:string ;
+    pnv:givenName           "Frederika"^^xsd:string ; ] ;
+  ed:P33                    enslaved:Q109 ;  #hasPersonStatus  Enslaved
+  hdsc:isEnslavedBy         [ 
+    rdf:value               hdsc:PSUR0041, hdsc:owner7 ;
+    sdo:endDate             "1863-06-30"^^xsd:date ; ] ;
+  sdo:endDate               [
+    rdf:value               "1863-06-30"^^xsd:date ;
+    ed:P30                  ed:Q281 ; ] .  #hasEventType  Emancipation or Manumission
+
+hdsc:ER52b
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:ER4447 ;
+  pico:hasRole              picot:roles/522 ;  #geregistreerde
+  sdo:gender                sdo:Female ;
+  sdo:name                  "Frederika Bronstein"^^xsd:string ;
+  sdo:givenName             "Frederika"^^xsd:string ;
+  sdo:familyName            "Bronstein"^^xsd:string ;
+  sdo:occupation            "Waschmeid"^^xsd:string ;
+  sdo:additionalName        [
+    a                       pnv:PersonName ;
+    pnv:literalName         "Frederika Bronstein"^^xsd:string ;
+    pnv:givenName           "Frederika"^^xsd:string ;
+    pnv:baseSurname         "Bronstein"^^xsd:string ; ] ;
+  ed:P33                    enslaved:Q117 ;  #hasPersonStatus  Free Person
+  sdo:startDate             [ 
+    rdf:value               "1863-07-01"^^xsd:date ; 
+    ed:P30                  ed:Q281 ; ] .  #hasEventType  Emancipation or Manumission
+
+
+#mothers
+
+
+#owners
+hdsc:owner1
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:1830-1838_1_820 ;
+  sdo:name                  "Buhk Hendrik Adolph"^^xsd:string ;
+  hdsc:isEnslaverOf         [ 
+    rdf:value               hdsc:010820b1983
+    sdo:startDate           "1837-08-19"^^xsd:date ;
+    sdo:endDate             "1838"^^xsd:gYear ; ] .  
+
+hdsc:owner2
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:1838-1848_6_278 ;
+  sdo:name                  "Buhk H. A."^^xsd:string ;
+  hdsc:isEnslaverOf         [ 
+    rdf:value               hdsc:060278a12348
+    sdo:startDate           "1838"^^xsd:gYear ;
+    sdo:endDate             "1839-02-06"^^xsd:date ; ] .  
+
+hdsc:owner3
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:1838-1848_6_87 ;
+  sdo:name                  "Aulorius Anna Petronella"^^xsd:string ;
+  hdsc:isEnslaverOf         [ 
+    rdf:value               hdsc:060087b13988
+    sdo:startDate           "1839-02-06"^^xsd:date ;
+    sdo:endDate             "1843-12-27"^^xsd:date ; ] .  
+
+hdsc:owner4
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:1838-1848_12_2747 ;
+  sdo:name                  "Jackson Wm"^^xsd:string ;
+  hdsc:isEnslaverOf         [ 
+    rdf:value               hdsc:122747a33311
+    sdo:startDate           "1843-12-27"^^xsd:date ;
+    sdo:endDate             "1848"^^xsd:gYear ; ] .  
+
+hdsc:owner5
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:1848-1851_37_735 ;
+  sdo:name                  "Jackson William"^^xsd:string ;
+  hdsc:isEnslaverOf         [ 
+    rdf:value               hdsc:370735138226
+    sdo:startDate           "1848"^^xsd:gYear ;
+    sdo:endDate             "1851"^^xsd:gYear ; ] .  
+
+hdsc:owner6
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:1851-1863_25_555 ;
+  sdo:name                  "Jackson William"^^xsd:string ;
+  hdsc:isEnslaverOf         [ 
+    rdf:value               hdsc:25055575262
+    sdo:startDate           "1851"^^xsd:gYear ;
+    sdo:endDate             "1851-11-04"^^xsd:date ; ] .  
+
+hdsc:PSUR0041
+  a                         hdsc:Plantation ;
+  prov:hadPrimarySource     hdsc:1851-1863_28_306 ;
+  sdo:name                  "plantage Breedevoort divisie beneden Commewijne"^^xsd:string ;
+  hdsc:isEnslaverOf         [ 
+    rdf:value               hdsc:280306159201
+    sdo:startDate           "1853-11-04"^^xsd:date ;
+    sdo:endDate             "1863-06-30"^^xsd:date ; ] .  
+
+hdsc:owner7
+  a                         pico:PersonObservation ;
+  prov:hadPrimarySource     hdsc:ER4447 ;
+  sdo:name                  "O'Ferrall. D. J"^^xsd:string ;
+  hdsc:isEnslaverOf         [ 
+    rdf:value               hdsc:ER52a
+    sdo:endDate             "1863-06-30"^^xsd:date ; ] .  
+
+
+#person reconstruction
+hdsc:reconstruction/52
+	a                         pico:PersonReconstruction ;
+	prov:wasDerivedFrom       hdsc:010820b1983, hdsc:060278a12348, hdsc:060087b13988, hdsc:122747a33311, hdsc:370735138226, hdsc:25055575262, hdsc:280306159201, hdsc:ER52a ;
+	prov:wasGeneratedBy       <https://hdl.handle.net/10622/CSPBHO> .
+
+
+
