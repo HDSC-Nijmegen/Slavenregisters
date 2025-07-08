@@ -97,7 +97,7 @@ hdsc:010820b1983
     sdo:endDate             "1838"^^xsd:gYear ; ] ;
   sdo:startDate             [ 
     rdf:value               "1837-08-15"^^xsd:date ; 
-    ed:P30                  ed:153 ; ] ;  #hasEventType  Sale or Transfer
+    ed:P30                  ed:Q153 ; ] ;  #hasEventType  Sale or Transfer
   sdo:endDate               [
     rdf:value               "1838"^^xsd:gYear ;
     ed:P30                  ed:Q250 ; ] .  #hasEventType Registration 
